@@ -1,0 +1,39 @@
+# Python environments and build outputs
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Generated datasets, recordings, model files, and run artifacts
+data/
+dataset/
+datasets/
+outputs/
+runs/
+checkpoints/
+*.sigmf-data
+*.sigmf-meta
+*.npy
+*.npz
+*.pt
+*.pth
+*.onnx
+*.engine
+*.tflite
+*.h5
+*.ckpt
+*.log
+
+# Scratch and editor files
+work/
+.DS_Store
+Thumbs.db
+/yolov5_pinned/

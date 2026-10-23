@@ -1,0 +1,23 @@
+# Decisions
+
+- Use the GNU AGPL version three for this project because the reproducible detector dependency is distributed under the same copyleft license.
+- Pin YOLOv5 to full commit `f9578796b8a64889aa9e66dc06914d19f40d338e` because its source license and the required train, detect, and AutoAnchor interfaces were verified at that exact revision.
+- Use YOLOv5n at the agreed image size because a small detector is more appropriate for a free T4 session; the measured detector metrics, not the architecture name, decide whether it is adequate.
+- Keep the energy detector as a geometry baseline and fallback because it cannot supply modulation labels and must not gate class predictions.
+- Keep labels derived only from generator parameters because raster-derived labels would bake image-processing errors into the ground truth.
+- Save spectrograms, YOLO labels, and replay metadata, then regenerate I/Q from the seed because retaining all recordings would waste storage.
+- Store normalized-frequency boxes because the synthetic sample rate is one sample per second; convert to hertz only when a real input supplies its sample rate.
+- Use synthetic-only training because DeepSig access is unconfirmed and the Zenodo record's size and license remain for the owner to verify.
+- Train the detector from scratch because no verified real-data source is available for a meaningful synthetic-pretrain/real-finetune phase.
+- Keep the primary synthetic test recording-disjoint and add a shifted parameter-range test because both leakage control and distribution shift matter for a portfolio claim.
+- Use recording-level bootstrap intervals because signals from one parent recording must not be treated as independent samples.
+- Keep the PAM classifier compact and include Others for the specified non-PAM signals because the extraction stage needs a rejection option.
+- Keep the minimum signal dimensions and 640-pixel resize because they pass the agreed visibility check; the small raster boxes remain a localization risk to measure.
+- Save outputs to Drive early and train from Colab local storage where possible because session loss should not erase the generated dataset or reports.
+- Do not put measured values in README or RESULTS until the owner pastes the final notebook summary.
+- Make the Milestone 3 CLI read a real IQ/SigMF input and never call the generator or depend on a seed; deterministic extraction keeps deployment aligned with evaluation framing.
+- Process spectrograms in bounded 1,000,000-sample chunks and report covered and omitted sample counts because 512-sample non-overlap windows can leave a tail outside the image.
+- Support a documented SigMF datatype subset and fail explicitly on unsupported layouts so the CLI cannot silently misread multi-channel or discontinuous recordings.
+- Use 0.25 only as a runnable CLI confidence default; measured deployment must pass the threshold calibrated on validation, never select it from test results.
+- Keep README and RESULTS measurements unfilled because the Milestone 2 Colab run has not happened.
+- Label the saved synthetic CLI example as a reduced CPU energy-geometry demonstration because no trained checkpoints or CUDA GPU are available in this environment.

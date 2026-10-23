@@ -1,0 +1,29 @@
+sampling_rate_normalized: 1.0
+segment_samples: 1000000
+stft:
+  window_samples: 512
+  overlap_samples: 0
+  fft_bins: 4096
+  resize_width: 640
+  resize_height: 640
+  resize_filter: bilinear
+signal:
+  min_bandwidth: 0.008
+  min_duration_samples: 8192
+  main_time_frequency_overlap: false
+  minimum_guard_fraction_of_larger_bandwidth: 0.5625
+snr:
+  definition: "10*log10(total clean signal power / total added noise power over the full I/Q segment)"
+  visibility_check_db: -5
+  visibility_seeds: 50
+  minimum_local_contrast_sd: 1.0
+
+profiles:
+  train_bandwidth_cycles_per_sample: [0.008, 0.08]
+  train_bandwidth_distribution: log_uniform
+  train_global_snr_db: [-5, 20]
+  shifted_test_bandwidth_cycles_per_sample: [0.02, 0.12]
+  shifted_test_bandwidth_distribution: uniform
+  shifted_test_global_snr_db: [-5, 5]
+comparison:
+  matched_precision: 0.80

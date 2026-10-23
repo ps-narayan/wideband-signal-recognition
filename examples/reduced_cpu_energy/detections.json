@@ -1,0 +1,969 @@
+{
+  "schema_version": 1,
+  "run_notice": "reduced run: CPU, small data, not comparable to target",
+  "input": {
+    "input_path": "synthetic_cli_sample.npy",
+    "format": "npy",
+    "samples": 8192
+  },
+  "sample_rate_hz": null,
+  "time_convention": "Sample ranges use indices relative to the input file; seconds are elapsed from the start of that file.",
+  "frequency_convention": "Normalized baseband cycles/sample is in [-0.5, 0.5]. Hz values are offsets from baseband center; absolute_hz requires SigMF core:frequency.",
+  "detector": {
+    "backend": "energy",
+    "architecture": "Energy geometry baseline",
+    "source_commit": null,
+    "weights": null,
+    "confidence_threshold": null,
+    "energy_mask_threshold": 1.0
+  },
+  "pam_classifier": {
+    "enabled": false,
+    "weights": null,
+    "labels": []
+  },
+  "segment_samples": 8192,
+  "segments_processed": 1,
+  "covered_samples_per_segment": [
+    8192
+  ],
+  "samples_processed": 8192,
+  "samples_not_processed": 0,
+  "annotated_images": [
+    "annotated_segment_00000.png"
+  ],
+  "detections": [
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        4288.0,
+        4428.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.49375,
+          0.4984375
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1882352828979492,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        1126.4,
+        1408.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.478125,
+          0.48125
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.2823529243469238,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        3251.2,
+        3379.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.478125,
+          0.48125
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0941176414489746,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        12.8,
+        332.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.46875,
+          0.471875
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.141176700592041,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        7308.8,
+        7577.6
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.4578125,
+          0.4609375
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.2823529243469238,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        3264.0,
+        3392.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.4515625,
+          0.459375
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0941176414489746,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        7910.4,
+        8179.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.4390625,
+          0.4421875
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0470590591430664,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        2777.6,
+        2841.6
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.4046875,
+          0.4078125
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0705881118774414,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        1177.6,
+        1420.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.39375,
+          0.4
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.2588233947753906,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        3814.4,
+        3891.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.3953125,
+          0.3984375
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0705881118774414,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        6848.0,
+        6988.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.3953125,
+          0.3984375
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0941176414489746,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        3251.2,
+        3379.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.384375,
+          0.3875
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1647062301635742,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        6835.2,
+        7526.4
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.3671875,
+          0.375
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.305882453918457,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        5875.2,
+        6412.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.3625,
+          0.365625
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0705881118774414,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        665.6,
+        870.4
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.3421875,
+          0.3453125
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1647062301635742,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        12.8,
+        268.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.3140625,
+          0.3171875
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0235295295715332,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        6387.2,
+        6412.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.309375,
+          0.3125
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0235295295715332,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        12.8,
+        512.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.2875,
+          0.29375
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.5647058486938477,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        3059.2,
+        3532.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.2859375,
+          0.2890625
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.4941177368164062,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        5260.8,
+        5772.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.2078125,
+          0.2109375
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.5176472663879395,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        550.4,
+        947.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.1921875,
+          0.19687500000000002
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.5411767959594727,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        2700.8,
+        2995.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.1328125,
+          0.1359375
+        ]
+      },
+      "resolution_status": "unresolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.305882453918457,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        4249.6,
+        4454.4
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.12656250000000002,
+          0.1296875
+        ]
+      },
+      "resolution_status": "unresolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1176471710205078,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        2598.4,
+        2944.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.125,
+          0.128125
+        ]
+      },
+      "resolution_status": "unresolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.3294119834899902,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        12.8,
+        8179.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.078125,
+          0.12187500000000001
+        ]
+      },
+      "resolution_status": "unresolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 3.0,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        1241.6,
+        1344.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.05781249999999999,
+          0.06093749999999998
+        ]
+      },
+      "resolution_status": "unresolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1176471710205078,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        5696.0,
+        5990.4
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.04062500000000002,
+          0.046875
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.2352943420410156,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        742.4,
+        793.6
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.04062500000000002,
+          0.04375000000000001
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0470590591430664,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        2752.0,
+        2880.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.0390625,
+          0.04375000000000001
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1176471710205078,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        5849.6,
+        5952.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.0234375,
+          -0.020312499999999956
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0941176414489746,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        5196.8,
+        5580.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.050000000000000044,
+          -0.046875
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.141176700592041,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        2227.2,
+        2316.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.0625,
+          -0.059374999999999956
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0470590591430664,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        1728.0,
+        1830.4
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.07187500000000002,
+          -0.06874999999999998
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1647062301635742,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        5273.6,
+        5555.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.08906250000000004,
+          -0.0859375
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.4000000953674316,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        5721.6,
+        5964.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.12968749999999996,
+          -0.12656250000000002
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1647062301635742,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        3801.6,
+        3865.6
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.13906249999999998,
+          -0.13593750000000004
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0941176414489746,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        755.2,
+        819.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.15781250000000002,
+          -0.15468749999999998
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0235295295715332,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        7846.4,
+        8179.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.1796875,
+          -0.17656249999999996
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.305882453918457,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        12.8,
+        537.6
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.19843750000000004,
+          -0.1953125
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.470588207244873,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        2700.8,
+        2982.4
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.25,
+          -0.24687499999999996
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.2588233947753906,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        5824.0,
+        5977.6
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.2640625,
+          -0.26093750000000004
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.141176700592041,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        3302.4,
+        3494.4
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.34843749999999996,
+          -0.3421875
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1647062301635742,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        1728.0,
+        2060.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.34843749999999996,
+          -0.3453125
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.2352943420410156,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        6361.6,
+        6515.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.3578125,
+          -0.353125
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.0470590591430664,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        12.8,
+        320.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.38125,
+          -0.3765625
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1882352828979492,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        3225.6,
+        3456.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.3890625,
+          -0.38593750000000004
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.2588233947753906,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        1203.2,
+        1331.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.421875,
+          -0.41874999999999996
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1647062301635742,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        678.4,
+        844.8
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.44375,
+          -0.44062500000000004
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.1647062301635742,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    },
+    {
+      "detector_class": "unknown",
+      "confidence": null,
+      "time_sample_range": [
+        4326.4,
+        4480.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.4453125,
+          -0.44218749999999996
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_available_from_geometry_baseline",
+      "energy_score": 1.141176700592041,
+      "energy_score_type": "peak normalized spectrogram score; not a probability"
+    }
+  ],
+  "seed_dependent": false
+}

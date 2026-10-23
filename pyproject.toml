@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools==75.6.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wideband-signal-recognition"
+version = "0.2.0"
+description = "A small, explainable wideband RF signal recognition project"
+requires-python = ">=3.10,<3.13"
+dependencies = ["numpy==1.26.4", "Pillow==10.4.0", "scipy==1.14.1"]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.4"]
+ml = ["torch==2.5.1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
