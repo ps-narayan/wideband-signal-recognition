@@ -1,6 +1,6 @@
 # Wideband Signal Recognition
 
-A small, explainable reproduction of an end-to-end wideband RF recognition system. It turns complex I/Q samples into time/frequency detections and modulation labels for spectrum monitoring and interference hunting. The measured acceptance targets are in [SPEC.md](SPEC.md); Milestone 2 results are not yet measured because the Colab notebook has not been run.
+A small, explainable reproduction of an end-to-end wideband RF recognition system. It turns complex I/Q samples into time/frequency detections and modulation labels for spectrum monitoring and interference hunting. The measured acceptance targets are in [SPEC.md](SPEC.md). The Colab run is reported complete, but its summary was not included, so Milestone 2 results remain not yet measured.
 
 ## Architecture
 
@@ -52,7 +52,7 @@ subprocess.run([
 
 The CLI writes cli_demo/detections.json and annotated spectrogram images under that same Drive run folder. If the Colab runtime has ended, reopen the notebook, mount Drive, clone/install the repository as in its first cells, set DRIVE_OUT to the completed run folder printed earlier, set YOLO_DIR to /content/yolov5_pinned_f9578796, and run the same cell.
 
-The notebook's results are not reproduced or estimated in this repository. Since the notebook has not yet been run, [RESULTS.md](RESULTS.md) and the results table below are intentionally unfilled.
+The notebook's results are not reproduced or estimated in this repository. The latest message contained only a placeholder instead of the run summary, so [RESULTS.md](RESULTS.md) and the results table below remain unfilled.
 
 ## Quick start: run the CLI on an IQ recording
 
@@ -84,16 +84,16 @@ The repository includes one real CLI run on a generated 8,192-sample synthetic i
 
 ## Results
 
-Milestone 2 has not been run, so all measured cells are **not yet measured** and target statuses are pending. No performance values have been inferred or copied from the paper.
+A Milestone 2 run is reported, but the summary was not supplied; all measured cells are **not yet measured** and target statuses are awaiting the summary. No performance values have been inferred or copied from the paper.
 
 | Measurement | Target | Measured value | Recording-level 95% CI | Recordings / signals | Status |
 |---|---:|---:|---:|---:|---|
-| YOLO class-agnostic recall, global SNR >= 5 dB | >= 80% | not yet measured | not yet measured | not yet measured | Pending run |
-| YOLO mean IoU of true positives, global SNR >= 5 dB | >= 0.75 | not yet measured | not yet measured | not yet measured | Pending run |
-| YOLO class mAP@0.5, global SNR >= 5 dB | >= 60% | not yet measured | not yet measured | not yet measured | Pending run |
-| PAM oracle-box subtype accuracy, global SNR >= 10 dB | >= 80% | not yet measured | not yet measured | not yet measured | Pending run |
-| PAM subtype accuracy, 0 dB bin | > 50% | not yet measured | not yet measured | not yet measured | Pending run |
-| End-to-end precision / recall by global SNR | Report | not yet measured | not yet measured | not yet measured | Pending run |
+| YOLO class-agnostic recall, global SNR >= 5 dB | >= 80% | not yet measured | not yet measured | not yet measured | Awaiting summary |
+| YOLO mean IoU of true positives, global SNR >= 5 dB | >= 0.75 | not yet measured | not yet measured | not yet measured | Awaiting summary |
+| YOLO class mAP@0.5, global SNR >= 5 dB | >= 60% | not yet measured | not yet measured | not yet measured | Awaiting summary |
+| PAM oracle-box subtype accuracy, global SNR >= 10 dB | >= 80% | not yet measured | not yet measured | not yet measured | Awaiting summary |
+| PAM subtype accuracy, 0 dB bin | > 50% | not yet measured | not yet measured | not yet measured | Awaiting summary |
+| End-to-end precision / recall by global SNR | Report | not yet measured | not yet measured | not yet measured | Awaiting summary |
 | CPU processing time per 1M samples on owner's machine | < 5 s | not yet measured | n/a | n/a | Owner measurement pending |
 
 **Low support:** any per-class or per-SNR cell with fewer than 30 signals must be explicitly marked low-support; show its recording and signal support next to the interval. Full per-class, per-SNR, shifted-test, confusion-matrix, and bootstrap results belong in [RESULTS.md](RESULTS.md). The paper's reference results are not this project's measurements.

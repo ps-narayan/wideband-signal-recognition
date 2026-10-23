@@ -1,6 +1,6 @@
 # Results and acceptance tracker
 
-**Run status: not yet measured.** The Colab notebook has not been run. No measurements, confidence intervals, or support counts have been inserted or inferred. The paper's reported numbers are not project results. Every blank estimate/support cell below means **not yet measured** and is reserved for the actual notebook summary.
+**Run summary status: not provided.** The user reports that the Colab run completed, but the supplied message contained only a placeholder. No measurements, confidence intervals, or support counts have been inserted or inferred. The paper's reported numbers are not project results. Every blank estimate/support cell below means **not yet measured** and is reserved for the actual notebook summary.
 
 SNR means the synthetic generator's global ratio:
 10 log10(total clean signal power / total added noise power across the full I/Q segment).
@@ -10,11 +10,11 @@ PAM rows also need the per-signal approximate in-band SNR when that field is ava
 
 | Metric | Target | Measured value | Recording-level 95% CI | Recordings / signals | Status |
 |---|---:|---:|---:|---:|---|
-| YOLO class-agnostic recall at global SNR >= 5 dB | >= 0.80 | not yet measured | not yet measured | not yet measured | Pending run |
-| YOLO mean IoU of true positives at global SNR >= 5 dB | >= 0.75 | not yet measured | not yet measured | not yet measured | Pending run |
-| YOLO mAP@0.5 at global SNR >= 5 dB | >= 0.60 | not yet measured | not yet measured | not yet measured | Pending run |
-| PAM oracle-box accuracy at global SNR >= 10 dB | >= 0.80 | not yet measured | not yet measured | not yet measured | Pending run |
-| PAM oracle-box accuracy in the 0-to-1 dB bin | > 0.50 | not yet measured | not yet measured | not yet measured | Pending run |
+| YOLO class-agnostic recall at global SNR >= 5 dB | >= 0.80 | not yet measured | not yet measured | not yet measured | Awaiting summary |
+| YOLO mean IoU of true positives at global SNR >= 5 dB | >= 0.75 | not yet measured | not yet measured | not yet measured | Awaiting summary |
+| YOLO mAP@0.5 at global SNR >= 5 dB | >= 0.60 | not yet measured | not yet measured | not yet measured | Awaiting summary |
+| PAM oracle-box accuracy at global SNR >= 10 dB | >= 0.80 | not yet measured | not yet measured | not yet measured | Awaiting summary |
+| PAM oracle-box accuracy in the 0-to-1 dB bin | > 0.50 | not yet measured | not yet measured | not yet measured | Awaiting summary |
 | Processing time per 1M samples on owner's local machine | < 5 s | not yet measured | n/a | n/a | Owner measurement pending |
 
 All targets are not yet measured. Once the actual run summary is available, classify each target as met or missed using the reported values. If a target misses, report it as-is and propose the next experiment using training or validation data only. Keep the test data and operating-point selection frozen.

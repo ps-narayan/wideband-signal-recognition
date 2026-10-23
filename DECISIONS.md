@@ -19,5 +19,5 @@
 - Process spectrograms in bounded 1,000,000-sample chunks and report covered and omitted sample counts because 512-sample non-overlap windows can leave a tail outside the image.
 - Support a documented SigMF datatype subset and fail explicitly on unsupported layouts so the CLI cannot silently misread multi-channel or discontinuous recordings.
 - Use 0.25 only as a runnable CLI confidence default; measured deployment must pass the threshold calibrated on validation, never select it from test results.
-- Keep README and RESULTS measurements unfilled because the Milestone 2 Colab run has not happened.
+- Keep README and RESULTS measurements unfilled because the reported Milestone 2 run summary was not included.
 - Label the saved synthetic CLI example as a reduced CPU energy-geometry demonstration because no trained checkpoints or CUDA GPU are available in this environment.
