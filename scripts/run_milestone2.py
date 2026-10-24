@@ -6,9 +6,11 @@ import argparse
 import json
 import os
 from pathlib import Path
+import signal
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from collections import Counter, defaultdict
 
@@ -44,27 +46,60 @@ FRAME_SAMPLES = 1024
 SEED = 2026
 
 
-def _run(command, *, cwd=None, log_path=None, env=None):
-    """Run a command while echoing and optionally retaining its complete log."""
+def _run(command, *, cwd=None, log_path=None, env=None, timeout_seconds=None, interrupt_grace_seconds=90):
+    """Stream a command; on a deadline, interrupt it and preserve output/checkpoints."""
     print("+", " ".join(map(str, command)), flush=True)
+    popen_options = {"start_new_session": os.name != "nt"}
+    if os.name == "nt":
+        popen_options["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
     process = subprocess.Popen(
         list(map(str, command)), cwd=cwd, env=env,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+        **popen_options,
     )
     handle = open(log_path, "w", encoding="utf-8") if log_path else None
-    try:
+    timed_out = False
+
+    def forward_output():
         assert process.stdout is not None
         for line in process.stdout:
             print(line, end="", flush=True)
             if handle:
                 handle.write(line)
-        code = process.wait()
+                handle.flush()
+
+    reader = threading.Thread(target=forward_output, daemon=True)
+    reader.start()
+    try:
+        try:
+            code = process.wait(timeout=timeout_seconds)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            print(
+                f"TIME BUDGET: interrupting process after {timeout_seconds:.0f}s; "
+                f"allowing {interrupt_grace_seconds}s to save its latest checkpoint.",
+                flush=True,
+            )
+            try:
+                if os.name == "nt":
+                    process.send_signal(signal.CTRL_BREAK_EVENT)
+                else:
+                    os.killpg(process.pid, signal.SIGINT)
+                code = process.wait(timeout=interrupt_grace_seconds)
+            except (OSError, subprocess.TimeoutExpired):
+                process.terminate()
+                try:
+                    code = process.wait(timeout=30)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    code = process.wait()
+        reader.join(timeout=30)
     finally:
         if handle:
             handle.close()
-    if code:
+    if code and not timed_out:
         raise subprocess.CalledProcessError(code, command)
-
+    return timed_out
 
 def _check_yolo(yolo_dir: Path) -> dict:
     sha = subprocess.check_output(
@@ -267,6 +302,8 @@ def _filtered_items(items, *, class_name=None, snr_bin=None):
 
 def _bootstrap_detection(items, metric, threshold, iterations):
     # Match once, then resample additive recording-level counts for speed.
+    if not items:
+        return {"estimate": None, "ci95": [None, None], "recordings": 0, "signals": 0, "low_support": True}
     by_recording = defaultdict(lambda: {"tp": 0, "fp": 0, "fn": 0, "iou_sum": 0.0})
     for item in items:
         selected = [pred for pred in item["pred"] if pred["confidence"] >= threshold]
@@ -279,6 +316,17 @@ def _bootstrap_detection(items, metric, threshold, iterations):
         row["fn"] += len(missed)
         row["iou_sum"] += sum(value[2] for value in matches)
     groups = list(by_recording.values())
+    count = sum(len(item["gt"]) for item in items)
+    true_positive_count = sum(row["tp"] for row in groups)
+    predicted_count = sum(row["tp"] + row["fp"] for row in groups)
+    undefined = (metric == "mean_iou_true_positives" and true_positive_count == 0)
+    undefined |= (metric == "recall" and count == 0)
+    undefined |= (metric == "precision" and predicted_count == 0)
+    if undefined:
+        return {
+            "estimate": None, "ci95": [None, None], "recordings": len(groups),
+            "signals": count, "low_support": count < 30,
+        }
 
     def statistic(sample):
         tp = sum(row["tp"] for row in sample)
@@ -298,7 +346,6 @@ def _bootstrap_detection(items, metric, threshold, iterations):
         sample_ids = rng.integers(0, len(groups), size=len(groups)) if groups else []
         samples[index] = statistic([groups[int(i)] for i in sample_ids])
     low, high = np.quantile(samples, [0.025, 0.975]) if iterations else (estimate, estimate)
-    count = sum(len(item["gt"]) for item in items)
     return {
         "estimate": estimate, "ci95": [float(low), float(high)],
         "recordings": len(groups), "signals": count, "low_support": count < 30,
@@ -311,6 +358,8 @@ def _binary_rate_summary(rows, *, class_filter=None, snr_bin=None, iterations=50
         if (class_filter is None or row["detector_class"] == class_filter)
         and (snr_bin is None or row["snr_bin"] == snr_bin)
     ]
+    if not selected:
+        return {"rate": None, "ci95": [None, None], "recordings": 0, "signals": 0, "low_support": True}
     grouped = defaultdict(list)
     for row in selected:
         grouped[row["recording_id"]].append(row)
@@ -331,6 +380,8 @@ def _accuracy_summary(rows, *, snr_bin=None, label_filter=None, iterations=500):
         if (snr_bin is None or row["snr_bin"] == snr_bin)
         and (label_filter is None or row["label"] == label_filter)
     ]
+    if not selected:
+        return {"accuracy": None, "ci95": [None, None], "recordings": 0, "signals": 0, "low_support": True}
     grouped = defaultdict(list)
     for row in selected:
         grouped[row["recording_id"]].append(row)
@@ -385,7 +436,7 @@ def _build_frame_set(rows, data_dir: Path, *, jitter: bool):
 
 def _train_pam(
     train_data, val_data, checkpoint_path: Path, *, epochs: int, batch_size: int,
-    seed: int, device: str,
+    seed: int, device: str, max_runtime_seconds=None,
 ):
     import torch
     from torch.utils.data import DataLoader, TensorDataset
@@ -411,8 +462,15 @@ def _train_pam(
     )
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     history = {"train_loss": [], "validation_loss": [], "validation_accuracy": [], "class_counts": counts.tolist()}
-    best_loss, best_state, stale = float("inf"), None, 0
+    best_loss = float("inf")
+    best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
+    stale = 0
+    training_started = time.monotonic()
+    budget_expired = False
     for epoch in range(epochs):
+        if max_runtime_seconds is not None and time.monotonic() - training_started >= max_runtime_seconds:
+            budget_expired = True
+            break
         model.train()
         losses = []
         for batch_x, batch_y in loader:
@@ -443,8 +501,11 @@ def _train_pam(
             stale += 1
             if stale >= 4:
                 break
-    if best_state is None:
-        raise RuntimeError("PAM training did not produce a checkpoint")
+    history["epochs_completed"] = len(history["train_loss"])
+    history["training_status"] = (
+        "untrained_time_budget" if not history["train_loss"] else
+        ("partial_time_budget" if budget_expired else "completed")
+    )
     model.load_state_dict(best_state)
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(
@@ -772,6 +833,8 @@ def _bootstrap_ap(items, class_name, iterations):
         return average_precision(flat, class_name)[0]
     estimate, low, high = recording_bootstrap(groups, statistic, iterations=iterations)
     signal_count = sum(sum(gt["class"] == class_name for gt in item["gt"]) for item in items)
+    if signal_count == 0:
+        return {"estimate": None, "ci95": [None, None], "recordings": len(groups), "signals": 0, "low_support": True}
     return {
         "estimate": estimate, "ci95": [low, high], "recordings": len(groups),
         "signals": signal_count, "low_support": signal_count < 30,
@@ -789,6 +852,8 @@ def _bootstrap_map50(items, class_names, iterations):
         return class_map50(flat, class_names)["map50"]
     estimate, low, high = recording_bootstrap(groups, statistic, iterations=iterations)
     signals = sum(len(item["gt"]) for item in items)
+    if signals == 0:
+        return {"estimate": None, "ci95": [None, None], "recordings": len(groups), "signals": 0, "low_support": True}
     return {
         "estimate": estimate, "ci95": [low, high], "recordings": len(groups),
         "signals": signals, "low_support": signals < 30,
@@ -866,17 +931,16 @@ def _load_config(path: str | Path) -> dict:
 
 
 def _check_config(config: dict) -> None:
-    fixed = {
-        "segment_samples": (config["data"]["segment_samples"], N_SAMPLES),
-        "image_size": (config["data"]["image_size"], IMAGE_SIZE),
-        "frame_samples": (config["pam_classifier"]["frame_samples"], FRAME_SAMPLES),
-    }
-    mismatches = [
-        f"{name}: config={value}, implementation={expected}"
-        for name, (value, expected) in fixed.items() if value != expected
-    ]
-    if mismatches:
-        raise ValueError("Config disagrees with implemented physical dimensions: " + "; ".join(mismatches))
+    if int(config["data"]["segment_samples"]) < 8192:
+        raise ValueError("data.segment_samples must contain at least one minimum-duration signal")
+    if int(config["data"]["image_size"]) <= 0 or int(config["data"]["image_size"]) % 32:
+        raise ValueError("data.image_size must be a positive multiple of 32 for YOLOv5")
+    if int(config["detector"]["image_size"]) != int(config["data"]["image_size"]):
+        raise ValueError("detector.image_size must match data.image_size")
+    if int(config["pam_classifier"]["frame_samples"]) != FRAME_SAMPLES:
+        raise ValueError(
+            f"pam_classifier.frame_samples must remain {FRAME_SAMPLES} to match extraction and PAMCNN"
+        )
 
 def _write_summary(metrics, path: Path):
     main = metrics["main_test"]
@@ -896,6 +960,10 @@ def _write_summary(metrics, path: Path):
 
     lines = [
         "Milestone 2 run summary (every metric below was measured by this run)",
+        f"Run label: {metrics.get('run_label', 'configured Milestone 2 run')}",
+        f"Execution device: {metrics.get('device', 'unknown')}",
+        f"Detector training status: {metrics.get('training_status', {}).get('detector', 'completed')}",
+        f"PAM training status: {metrics.get('training_status', {}).get('pam', 'completed')}; epochs completed={metrics.get('training_status', {}).get('pam_epochs_completed', 'n/a')}",
         f"YOLOv5 source commit verified: {metrics['yolo']['commit']}",
         f"Output folder: {path.parent.parent}",
         "",
@@ -1019,23 +1087,26 @@ def _write_summary(metrics, path: Path):
     lines.append(f"Shifted unresolved detector boxes: {len(shifted['unresolved_detections'])}")
     lines.append("")
     lines.append("ACCEPTANCE TARGETS")
+    not_comparable = metrics.get("comparison_scope") == "not_comparable"
     for name, row in metrics["acceptance_targets"].items():
         if row["measured"] is None:
-            lines.append(f"{name}: not measured here; target={row['target']}; {row.get('note', '')}")
+            status = "NOT COMPARABLE" if not_comparable else "NOT MEASURED"
+            lines.append(f"{name}: {status}; target={row['target']}; {row.get('note', '')}")
             continue
-        status = "PASS" if row["pass"] else "FAIL"
+        status = "NOT COMPARABLE" if not_comparable else ("PASS" if row["pass"] else "FAIL")
         lines.append(
             f"{name}: {status}; target={row['target']}; measured={fmt(row['measured'])}; "
             f"CI95={row.get('ci95', 'n/a')}; support={row.get('support', {})}"
         )
-        if not row["pass"]:
+        if not row["pass"] and not not_comparable:
             if name.startswith(("recall", "mean_iou", "map50")):
                 lines.append("  Next: inspect missed/false boxes; test a higher image resolution or larger minimum signal on validation only, then rerun the frozen tests.")
             elif name.startswith("pam_"):
                 lines.append("  Next: inspect the subtype confusion and in-band SNR; improve extraction or training without changing the held-out sets.")
     lines.extend([
         "",
-        "Output files: metrics.json, plots, confusion matrices, training/inference logs, checkpoints, and generated dataset are in the Drive output folder.",
+        "Output files: metrics.json, plots, confusion matrices, training/inference logs, checkpoints, and generated dataset are in the run output folder.",
+        f"Total pipeline runtime seconds: {metrics.get('runtime_seconds_pipeline', {}).get('total', 'n/a')}",
         f"Metrics JSON: {metrics['metrics_path']}",
         "Paper results are not project results and are not included.",
     ])
@@ -1045,17 +1116,25 @@ def _write_summary(metrics, path: Path):
 def run(args):
     import torch
 
+    global IMAGE_SIZE, N_SAMPLES
+    pipeline_started = time.monotonic()
     config = _load_config(args.config)
+    IMAGE_SIZE = int(config["data"]["image_size"])
+    N_SAMPLES = int(config["data"]["segment_samples"])
     _check_config(config)
     yolo_dir = Path(args.yolo_dir).resolve()
     out_dir = Path(args.out_dir).resolve()
     data_work = Path(args.data_work).resolve()
     data_work.mkdir(parents=True, exist_ok=True)
-    if not torch.cuda.is_available():
-        raise RuntimeError("Full training requires the Colab T4 GPU; run the local tests and smoke command instead.")
-    device = "cuda:0"
+    device = args.device
+    if device == "auto":
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    if device.startswith("cuda") and not torch.cuda.is_available():
+        raise RuntimeError(f"Requested device {device!r}, but CUDA is unavailable.")
+    yolo_device = "0" if device.startswith("cuda") else "cpu"
     torch.manual_seed(args.seed)
-    torch.backends.cudnn.benchmark = False
+    if device.startswith("cuda"):
+        torch.backends.cudnn.benchmark = False
 
     for directory in (out_dir / "results", out_dir / "plots", out_dir / "checkpoints"):
         directory.mkdir(parents=True, exist_ok=True)
@@ -1098,17 +1177,17 @@ def run(args):
         "main_segments": len(main_rows), "shifted_segments": len(shifted_rows),
         "segments_per_recording": args.segments_per_recording,
         "recordings_per_split": dict(split_counts),
-        "generation_wall_seconds_colab": generation_seconds,
+        "generation_wall_seconds": generation_seconds,
         "classes_per_segment": list(DETECTOR_CLASSES),
         "iq_retained_on_disk": False,
     })
 
-    # Archive generated data before training so a Colab interruption cannot discard it.
+    # Archive generated artifacts before training so a job interruption does not discard them.
     archived = out_dir / "dataset"
     if archived.exists():
         raise FileExistsError(f"{archived} already exists; choose a new --out-dir.")
     shutil.copytree(data_dir, archived)
-    print(f"Archived generated dataset to Drive: {archived}", flush=True)
+    print(f"Archived generated dataset to run output: {archived}", flush=True)
 
     yolo_project = out_dir / "checkpoints" / "yolo"
     project_root = Path(__file__).resolve().parents[1]
@@ -1118,25 +1197,53 @@ def run(args):
         "--batch-size", str(args.yolo_batch), "--epochs", str(args.yolo_epochs),
         "--data", str(data_yaml), "--weights", "", "--cfg", "models/yolov5n.yaml",
         "--hyp", str(hyp_path),
-        "--device", "0", "--workers", "2", "--project", str(yolo_project),
+        "--device", yolo_device, "--workers", "0" if yolo_device == "cpu" else "2",
+        "--project", str(yolo_project),
         "--name", "milestone2", "--exist-ok", "--seed", str(args.seed),
         "--save-period", str(max(1, args.yolo_epochs // 5)),
     ]
     yolo_env = os.environ.copy()
     yolo_env["WANDB_MODE"] = "disabled"
-    _run(train_command, cwd=yolo_dir, log_path=out_dir / "results" / "yolo_training.log", env=yolo_env)
+    train_timeout = None
+    if args.runtime_budget_minutes > 0:
+        elapsed = time.monotonic() - pipeline_started
+        train_timeout = (
+            args.runtime_budget_minutes * 60
+            - elapsed
+            - args.evaluation_reserve_minutes * 60
+            - args.pam_training_budget_minutes * 60
+        )
+        if train_timeout <= 0:
+            raise RuntimeError(
+                "Runtime budget expired before detector training; no trained checkpoint is available to evaluate."
+            )
+    detector_training_partial = _run(
+        train_command, cwd=yolo_dir,
+        log_path=out_dir / "results" / "yolo_training.log", env=yolo_env,
+        timeout_seconds=train_timeout,
+    )
     training_log = (out_dir / "results" / "yolo_training.log").read_text(encoding="utf-8")
     autoanchor_lines = [
         line for line in training_log.splitlines()
         if "AutoAnchor" in line or "Best Possible Recall" in line
     ]
-    if not any("Best Possible Recall" in line for line in autoanchor_lines):
+    if not any("Best Possible Recall" in line for line in autoanchor_lines) and not detector_training_partial:
         raise RuntimeError("YOLOv5 training log did not contain the expected AutoAnchor BPR result")
     yolo_info["autoanchor_training_log_excerpt"] = autoanchor_lines
     _save_json(out_dir / "results" / "yolov5_api_check.json", yolo_info)
-    weights = yolo_project / "milestone2" / "weights" / "best.pt"
-    if not weights.exists():
-        raise FileNotFoundError(f"YOLOv5 did not save best.pt at {weights}")
+    weights_dir = yolo_project / "milestone2" / "weights"
+    candidates = [weights_dir / "best.pt", weights_dir / "last.pt"]
+    weights = next((candidate for candidate in candidates if candidate.is_file()), None)
+    if weights is None:
+        raise FileNotFoundError(
+            "YOLOv5 produced no saved best.pt or last.pt checkpoint before the time budget ended; "
+            "evaluation cannot run without a trained checkpoint."
+        )
+    if detector_training_partial:
+        print(
+            f"PARTIAL TRAINING: time budget ended; evaluating saved checkpoint {weights.name}.",
+            flush=True,
+        )
     shutil.copy2(weights, out_dir / "checkpoints" / "yolov5n_best.pt")
 
     prediction_dirs = {}
@@ -1146,7 +1253,7 @@ def run(args):
         command = [
             sys.executable, "detect.py", "--weights", str(weights), "--source", str(source),
             "--img", str(IMAGE_SIZE), "--conf-thres", "0.001", "--iou-thres", "0.6",
-            "--max-det", "300", "--device", "0", "--save-txt", "--save-conf",
+            "--max-det", "300", "--device", yolo_device, "--save-txt", "--save-conf",
             "--project", str(result_dir.parent), "--name", result_dir.name,
             "--exist-ok", "--nosave",
         ]
@@ -1170,6 +1277,14 @@ def run(args):
     pam_model, pam_history = _train_pam(
         train_data, val_data, out_dir / "checkpoints" / "pam_cnn.pt",
         epochs=args.pam_epochs, batch_size=args.pam_batch, seed=args.seed, device=device,
+        max_runtime_seconds=(
+            max(0.0, min(
+                args.pam_training_budget_minutes * 60,
+                args.runtime_budget_minutes * 60
+                - (time.monotonic() - pipeline_started)
+                - args.evaluation_reserve_minutes * 60,
+            )) if args.runtime_budget_minutes > 0 else None
+        ),
     )
     _save_json(out_dir / "results" / "pam_training_history.json", pam_history)
     _save_pam_curves(pam_history, out_dir / "plots" / "pam_training_curves.png")
@@ -1225,6 +1340,8 @@ def run(args):
         map_result["map50_recording_bootstrap"] = _bootstrap_map50(
             map_items, DETECTOR_CLASSES, args.bootstrap_iterations
         )
+        if map_result["map50_recording_bootstrap"]["signals"] == 0:
+            map_result["map50"] = None
         map_result["per_class_with_recording_bootstrap"] = {
             name: _bootstrap_ap(map_items, name, args.bootstrap_iterations)
             for name in DETECTOR_CLASSES
@@ -1443,11 +1560,11 @@ def run(args):
 
     acceptance = {
         "recall_at_global_snr_ge_5_db": {
-            "target": 0.80, "measured": high_snr_detector["recall"],
+            "target": 0.80, "measured": high_snr_detector["recall"] if high_snr_map["map50_recording_bootstrap"]["signals"] else None,
             "ci95": _bootstrap_detection(
                 high_snr_items, "recall", float(yolo_calibration["threshold"]), args.bootstrap_iterations
             )["ci95"],
-            "pass": high_snr_detector["recall"] >= 0.80,
+            "pass": high_snr_detector["recall"] >= 0.80 if high_snr_map["map50_recording_bootstrap"]["signals"] else None,
             "support": {
                 "recordings": len({i["recording_id"] for i in high_snr_items}),
                 "signals": sum(len(i["gt"]) for i in high_snr_items),
@@ -1455,12 +1572,12 @@ def run(args):
             },
         },
         "mean_iou_at_global_snr_ge_5_db": {
-            "target": 0.75, "measured": high_snr_detector["mean_iou_true_positives"],
+            "target": 0.75, "measured": high_snr_detector["mean_iou_true_positives"] if high_snr_detector["tp"] else None,
             "ci95": _bootstrap_detection(
                 high_snr_items, "mean_iou_true_positives",
                 float(yolo_calibration["threshold"]), args.bootstrap_iterations
             )["ci95"],
-            "pass": high_snr_detector["mean_iou_true_positives"] >= 0.75,
+            "pass": high_snr_detector["mean_iou_true_positives"] >= 0.75 if high_snr_detector["tp"] else None,
             "support": {
                 "recordings": len({i["recording_id"] for i in high_snr_items}),
                 "signals": sum(len(i["gt"]) for i in high_snr_items),
@@ -1470,7 +1587,7 @@ def run(args):
         "map50_at_global_snr_ge_5_db": {
             "target": 0.60, "measured": high_snr_map["map50"],
             "ci95": high_snr_map["map50_recording_bootstrap"]["ci95"],
-            "pass": high_snr_map["map50"] >= 0.60,
+            "pass": high_snr_map["map50"] >= 0.60 if high_snr_map["map50"] is not None else None,
             "support": {
                 "recordings": high_snr_map["map50_recording_bootstrap"]["recordings"],
                 "signals": high_snr_map["map50_recording_bootstrap"]["signals"],
@@ -1480,29 +1597,47 @@ def run(args):
         "pam_oracle_accuracy_global_snr_ge_10_db": {
             "target": 0.80, "measured": high_snr_accuracy["accuracy"],
             "ci95": high_snr_accuracy["ci95"],
-            "pass": high_snr_accuracy["accuracy"] >= 0.80,
+            "pass": high_snr_accuracy["accuracy"] >= 0.80 if high_snr_accuracy["accuracy"] is not None else None,
             "support": {key: high_snr_accuracy[key] for key in ("recordings", "signals", "low_support")},
         },
         "pam_oracle_accuracy_near_0_db_0_to_1": {
             "target": 0.50, "measured": zero_snr_accuracy["accuracy"],
             "ci95": zero_snr_accuracy["ci95"],
-            "pass": zero_snr_accuracy["accuracy"] > 0.50,
+            "pass": zero_snr_accuracy["accuracy"] > 0.50 if zero_snr_accuracy["accuracy"] is not None else None,
             "support": {key: zero_snr_accuracy[key] for key in ("recordings", "signals", "low_support")},
         },
         "processing_time_per_segment_local_seconds": {
             "target": 5.0, "measured": None, "pass": None,
-            "note": "Not measured by this Colab T4 run; measure on the user's laptop separately.",
+            "note": "Not measured on the owner's local machine; a hosted CPU timing is not a substitute.",
         },
     }
+    pipeline_seconds = time.monotonic() - pipeline_started
+    run_label = args.run_label
     metrics = {
         "schema_version": 1,
+        "run_label": run_label,
+        "comparison_scope": "not_comparable" if "not comparable" in run_label.lower() else "configured_run",
+        "training_status": {
+            "detector": "partial_time_budget" if detector_training_partial else "completed",
+            "detector_checkpoint_used": weights.name,
+            "detector_epochs_requested": args.yolo_epochs,
+            "pam": pam_history["training_status"],
+            "pam_epochs_completed": pam_history["epochs_completed"],
+            "pam_epochs_requested": args.pam_epochs,
+            "evaluation_completed": True,
+            "runtime_budget_minutes": args.runtime_budget_minutes or None,
+            "pam_training_budget_minutes": args.pam_training_budget_minutes,
+            "evaluation_reserve_minutes": args.evaluation_reserve_minutes,
+        },
+        "device": device,
         "config": config,
         "seed": args.seed,
         "yolo": yolo_info,
         "snr_definition": "10*log10(total clean signal power / total added noise power over the full I/Q segment)",
-        "runtime_seconds_colab": {
+        "runtime_seconds_pipeline": {
             "data_generation": generation_seconds,
-            "note": "Colab runtime; not a local-machine acceptance measurement.",
+            "total": pipeline_seconds,
+            "note": "Measured end-to-end runtime on the configured execution device.",
         },
         "split_counts_recordings": dict(split_counts),
         "validation_calibration": {
@@ -1517,6 +1652,8 @@ def run(args):
             "yolo": {
                 "matched_precision": main_yolo_stats,
                 "matched_precision_with_recording_bootstrap": main_yolo_ci,
+                "detector_confusion_matrix": detector_confusion.tolist(),
+                "detector_confusion_labels": confusion_names,
                 "map50_all_snr": main_map,
                 "map50_global_snr_ge_5_db": high_snr_map,
                 "per_class_with_recording_bootstrap": per_class,
@@ -1651,8 +1788,8 @@ def parse_args():
     defaults = _load_config(default_config)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--yolo-dir", required=True)
-    parser.add_argument("--out-dir", required=True, help="Google Drive result folder")
-    parser.add_argument("--data-work", required=True, help="Colab local-SSD temporary data folder")
+    parser.add_argument("--out-dir", required=True, help="Run output folder")
+    parser.add_argument("--data-work", required=True, help="Temporary dataset work folder")
     parser.add_argument("--config", default=str(default_config))
     parser.add_argument("--recordings", type=int, default=defaults["data"]["main_recordings"])
     parser.add_argument("--shift-recordings", type=int, default=defaults["data"]["shifted_recordings"])
@@ -1662,6 +1799,11 @@ def parse_args():
     parser.add_argument("--pam-epochs", type=int, default=defaults["pam_classifier"]["epochs"])
     parser.add_argument("--pam-batch", type=int, default=defaults["pam_classifier"]["batch_size"])
     parser.add_argument("--bootstrap-iterations", type=int, default=defaults["evaluation"]["bootstrap_iterations"])
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda", "cuda:0"), default="auto")
+    parser.add_argument("--runtime-budget-minutes", type=float, default=0.0)
+    parser.add_argument("--evaluation-reserve-minutes", type=float, default=45.0)
+    parser.add_argument("--pam-training-budget-minutes", type=float, default=15.0)
+    parser.add_argument("--run-label", default="configured Milestone 2 run")
     parser.add_argument("--seed", type=int, default=defaults["seed"])
     return parser.parse_args()
 

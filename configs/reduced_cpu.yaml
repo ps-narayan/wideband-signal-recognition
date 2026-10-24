@@ -1,0 +1,33 @@
+seed: 2026
+data:
+  segment_samples: 1000000
+  main_recordings: 18
+  shifted_recordings: 4
+  segments_per_recording: 1
+  image_size: 640
+  main_profile:
+    bandwidth_cycles_per_sample: [0.008, 0.08]
+    bandwidth_distribution: log_uniform
+    global_snr_db: [-5, 20]
+  shifted_profile:
+    bandwidth_cycles_per_sample: [0.02, 0.12]
+    bandwidth_distribution: uniform
+    global_snr_db: [-5, 5]
+detector:
+  framework: YOLOv5n
+  repository: https://github.com/ultralytics/yolov5.git
+  commit: f9578796b8a64889aa9e66dc06914d19f40d338e
+  epochs: 3
+  batch_size: 2
+  image_size: 640
+  matched_precision: 0.80
+  iou_threshold: 0.50
+pam_classifier:
+  frame_samples: 1024
+  frames_per_signal: 2
+  epochs: 5
+  batch_size: 32
+  loss: inverse_frequency_weighted_cross_entropy
+evaluation:
+  bootstrap_iterations: 200
+  bootstrap_unit: parent_recording

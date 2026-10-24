@@ -14,10 +14,14 @@
 - Keep the PAM classifier compact and include Others for the specified non-PAM signals because the extraction stage needs a rejection option.
 - Keep the minimum signal dimensions and 640-pixel resize because they pass the agreed visibility check; the small raster boxes remain a localization risk to measure.
 - Save outputs to Drive early and train from Colab local storage where possible because session loss should not erase the generated dataset or reports.
-- Do not put measured values in README or RESULTS until the owner pastes the final notebook summary.
 - Make the Milestone 3 CLI read a real IQ/SigMF input and never call the generator or depend on a seed; deterministic extraction keeps deployment aligned with evaluation framing.
 - Process spectrograms in bounded 1,000,000-sample chunks and report covered and omitted sample counts because 512-sample non-overlap windows can leave a tail outside the image.
 - Support a documented SigMF datatype subset and fail explicitly on unsupported layouts so the CLI cannot silently misread multi-channel or discontinuous recordings.
 - Use 0.25 only as a runnable CLI confidence default; measured deployment must pass the threshold calibrated on validation, never select it from test results.
-- Keep README and RESULTS measurements unfilled because the reported Milestone 2 run summary was not included.
+- Keep measured result files empty until the reduced CPU workflow completes evaluation; it then publishes only values from that run.
 - Label the saved synthetic CLI example as a reduced CPU energy-geometry demonstration because no trained checkpoints or CUDA GPU are available in this environment.
+
+- Use 18 main and 4 shifted recordings, one 1M-sample segment each, 640-pixel images, 3 YOLO epochs, 5 PAM epochs, and 200 recording bootstraps for the hosted CPU run; this keeps the same pipeline and recording split while explicitly making results not comparable to full-scale targets.
+- Give the workflow a 4h30 hard limit and the model pipeline a 3h30 runtime budget; cap detector training so up to 15 minutes remains for PAM training and 45 minutes for inference/evaluation, then evaluate the latest saved detector checkpoint and mark any time-limited model training in the report.
+- Publish metrics only after evaluation completes, keep the test sets frozen, and mark every reduced-run target not comparable because the CPU subset is intentionally small and hosted timing is not the owner's laptop timing.
+- Use only GitHub's built-in GITHUB_TOKEN for the result commit; paths-ignore plus [skip ci] prevent the results commit from starting another reduced run.

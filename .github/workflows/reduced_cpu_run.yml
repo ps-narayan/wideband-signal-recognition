@@ -1,0 +1,160 @@
+name: Reduced CPU model run
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - RESULTS.md
+      - README.md
+      - results/**
+      - docs/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reduced-cpu-main
+  cancel-in-progress: false
+
+jobs:
+  reduced-cpu-run:
+    name: Reduced CPU training and evaluation
+    runs-on: ubuntu-latest
+    timeout-minutes: 270
+    env:
+      PYTHONUNBUFFERED: "1"
+      WANDB_MODE: disabled
+      RUN_DIR: ${{ runner.temp }}/wideband-reduced-run
+      DATA_WORK: ${{ runner.temp }}/wideband-reduced-data
+      YOLO_DIR: ${{ runner.temp }}/yolov5-pinned
+      VISIBILITY_DIR: ${{ runner.temp }}/visibility-check
+    steps:
+      - name: Check out main using the built-in workflow token
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ github.token }}
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Set up Python
+        id: python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-cpu-run.txt
+
+      - name: Install pinned CPU-only dependencies
+        id: install
+        run: |
+          python -m pip install pip==24.3.1
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple -r requirements-cpu-run.txt
+          python -m pip install --no-deps -e .
+
+      - name: Fetch and verify pinned YOLOv5 source
+        id: yolo
+        run: |
+          git clone --filter=blob:none https://github.com/ultralytics/yolov5.git "$YOLO_DIR"
+          git -C "$YOLO_DIR" checkout --detach f9578796b8a64889aa9e66dc06914d19f40d338e
+          test "$(git -C "$YOLO_DIR" rev-parse HEAD)" = "f9578796b8a64889aa9e66dc06914d19f40d338e"
+
+      - name: Run unit tests and CPU smoke test first
+        id: tests
+        run: |
+          python -m pytest -q
+          python scripts/smoke_test.py
+
+      - name: Verify minimum-box visibility at -5 dB over 50 seeds
+        id: visibility
+        run: |
+          python scripts/visibility_check.py --seeds 50 --seed-start 0 --snr-db -5 --n-samples 1000000 --output-dir "$VISIBILITY_DIR"
+
+      - name: Train reduced models and evaluate frozen test sets
+        id: pipeline
+        run: |
+          python scripts/run_milestone2.py \
+            --config configs/reduced_cpu.yaml \
+            --yolo-dir "$YOLO_DIR" \
+            --out-dir "$RUN_DIR" \
+            --data-work "$DATA_WORK" \
+            --recordings 18 \
+            --shift-recordings 4 \
+            --segments-per-recording 1 \
+            --yolo-epochs 3 \
+            --yolo-batch 2 \
+            --pam-epochs 5 \
+            --pam-batch 32 \
+            --bootstrap-iterations 200 \
+            --device cpu \
+            --runtime-budget-minutes 210 \
+            --pam-training-budget-minutes 15 \
+            --evaluation-reserve-minutes 45 \
+            --run-label "reduced run: CPU, small data, not comparable to target"
+
+      - name: Publish measured results to README and RESULTS
+        id: publish
+        run: |
+          python scripts/publish_reduced_results.py --run-dir "$RUN_DIR"
+
+      - name: Add and commit measured results
+        id: commit
+        run: |
+          git config user.name "ps-narayan"
+          git config user.email "188357719+ps-narayan@users.noreply.github.com"
+          git add README.md RESULTS.md results/reduced_cpu
+          if git diff --cached --quiet; then
+            echo "No measured-result changes to commit."
+          else
+            git commit -m "Record measured reduced CPU results [skip ci]"
+            git push origin HEAD:main
+          fi
+
+      - name: Upload run metrics, plots, visibility report, and logs
+        id: artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reduced-cpu-run-${{ github.run_id }}
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/wideband-reduced-run/results/metrics.json
+            ${{ runner.temp }}/wideband-reduced-run/results/summary.txt
+            ${{ runner.temp }}/wideband-reduced-run/results/*.log
+            ${{ runner.temp }}/wideband-reduced-run/plots/*.png
+            ${{ runner.temp }}/visibility-check/visibility_summary.json
+            ${{ runner.temp }}/visibility-check/worst_seed_spectrogram.png
+
+      - name: Report the failing step clearly
+        if: failure()
+        env:
+          CHECKOUT_RESULT: ${{ steps.checkout.outcome }}
+          PYTHON_RESULT: ${{ steps.python.outcome }}
+          INSTALL_RESULT: ${{ steps.install.outcome }}
+          YOLO_RESULT: ${{ steps.yolo.outcome }}
+          TESTS_RESULT: ${{ steps.tests.outcome }}
+          VISIBILITY_RESULT: ${{ steps.visibility.outcome }}
+          PIPELINE_RESULT: ${{ steps.pipeline.outcome }}
+          PUBLISH_RESULT: ${{ steps.publish.outcome }}
+          COMMIT_RESULT: ${{ steps.commit.outcome }}
+          ARTIFACTS_RESULT: ${{ steps.artifacts.outcome }}
+        run: |
+          {
+            echo "## Reduced CPU run failed"
+            echo
+            echo "Step outcomes (the first \`failure\` identifies where to inspect):"
+            echo "- checkout: $CHECKOUT_RESULT"
+            echo "- Python setup: $PYTHON_RESULT"
+            echo "- dependency install: $INSTALL_RESULT"
+            echo "- YOLOv5 pin verification: $YOLO_RESULT"
+            echo "- tests: $TESTS_RESULT"
+            echo "- visibility check: $VISIBILITY_RESULT"
+            echo "- training/evaluation: $PIPELINE_RESULT"
+            echo "- measured-result publication: $PUBLISH_RESULT"
+            echo "- commit/push: $COMMIT_RESULT"
+            echo "- artifact upload: $ARTIFACTS_RESULT"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Reduced CPU workflow failed. Review the first failed step in the job log and the step-outcomes summary."

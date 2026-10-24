@@ -1,6 +1,6 @@
 # Wideband Signal Recognition
 
-A small, explainable reproduction of an end-to-end wideband RF recognition system. It turns complex I/Q samples into time/frequency detections and modulation labels for spectrum monitoring and interference hunting. The measured acceptance targets are in [SPEC.md](SPEC.md). The Colab run is reported complete, but its summary was not included, so Milestone 2 results remain not yet measured.
+A small, explainable reproduction of an end-to-end wideband RF recognition system. It turns complex I/Q samples into time/frequency detections and modulation labels for spectrum monitoring and interference hunting. The measurable acceptance targets are in [SPEC.md](SPEC.md). The reduced CPU workflow publishes actual measured results after a successful run; no reduced CPU run has been reported yet. The optional full GPU Colab run remains unmeasured.
 
 ## Architecture
 
@@ -21,38 +21,17 @@ flowchart LR
 
 Training and evaluation can regenerate I/Q from saved metadata and seeds. Deployment reads the user's input file directly and reports seed_dependent=false; it never needs generator metadata. The YOLOv5 source is pinned to commit f9578796b8a64889aa9e66dc06914d19f40d338e and checked at runtime.
 
-## Quick start: reproduce the model
+## Quick start: reduced CPU run
 
-The complete Milestone 2 notebook installs pinned dependencies, runs tests and a CPU smoke path, verifies the YOLOv5 revision and visibility checks, generates data, trains, evaluates, and saves reports/checkpoints/plots to Google Drive.
+The GitHub Actions workflow runs the tests first, then the 50-seed visibility check, the reduced detector/PAM pipeline, and evaluation. It uses a recording-disjoint split, keeps test sets fixed, and selects operating thresholds from validation only. The reduced configuration uses 18 main recordings, 4 shifted recordings, one 1M-sample segment per recording, 640 x 640 images, 3 YOLO epochs, 5 PAM epochs, and 200 recording-level bootstrap iterations. These values are in [DECISIONS.md](DECISIONS.md). This is labelled **reduced run: CPU, small data, not comparable to target**.
 
-1. Create a public GitHub repository and push this project using the commands in the handoff.
-2. Open [notebooks/milestone2_detector_pam_evaluation.ipynb](notebooks/milestone2_detector_pam_evaluation.ipynb) in Colab and select a T4 GPU runtime.
-3. Run the notebook in order and paste back the final printed summary.
-4. Colab saves metrics JSON, confidence intervals, support counts, plots, confusion matrices, logs, and checkpoints in the new Drive run folder. It does not archive full I/Q arrays.
-5. The notebook prints the exact run folder, shaped as /content/drive/MyDrive/wideband_signal_recognition/milestone2_<UTC timestamp>. Its model files are checkpoints/yolov5n_best.pt and checkpoints/pam_cnn.pt.
-6. DeepSig and Zenodo data are not used. Read [LICENSES.md](LICENSES.md) before adding external data.
+To start it manually, open the repository's Actions tab, choose Reduced CPU model run, select Run workflow, and confirm the main branch. It also starts on pushes to main except changes only to README.md, RESULTS.md, results/**, or docs/**. The job has a 4 hour 30 minute hard limit; the model pipeline has a 3 hour 30 minute runtime budget. Detector training stops early enough to leave up to 15 minutes for PAM fitting and 45 minutes for detector inference and evaluation. Data generation and dataset preparation reduce the detector-training allowance. If time expires during training, the job evaluates the saved detector checkpoint; the PAM classifier is evaluated with its best saved weights, or its initialized weights if no epoch fit before the limit, and the summary marks that status. If tests fail, training does not start. A successful evaluation commits its measured results to this repository using GitHub's built-in workflow token. Metrics, plots, visibility output, and logs are also available as a downloadable workflow artifact.
 
-After training, put a real IQ or SigMF input in Drive, set IQ_FILE to its path, and run this in a later Colab cell while the notebook runtime is still active. This reuses the pinned project and YOLO checkout and reads the trained checkpoints directly from Drive:
+The reduced CPU numbers will be written here and in [RESULTS.md](RESULTS.md) only after a successful workflow evaluation. **The full GPU run in the Colab notebook remains optional and unmeasured.** The reduced CPU results are not comparable to the portfolio targets and do not replace the full run.
 
-~~~python
-from pathlib import Path
-import subprocess
-import sys
+### Optional full GPU run
 
-IQ_FILE = Path("/content/drive/MyDrive/captures/capture.sigmf-meta")  # replace with your Drive input path
-subprocess.run([
-    sys.executable, "-m", "wideband_recognition.cli", str(IQ_FILE),
-    "--detector-weights", str(DRIVE_OUT / "checkpoints" / "yolov5n_best.pt"),
-    "--pam-weights", str(DRIVE_OUT / "checkpoints" / "pam_cnn.pt"),
-    "--yolo-dir", str(YOLO_DIR),
-    "--output-dir", str(DRIVE_OUT / "cli_demo"),
-    "--device", "0",
-], cwd=PROJECT_DIR, check=True)
-~~~
-
-The CLI writes cli_demo/detections.json and annotated spectrogram images under that same Drive run folder. If the Colab runtime has ended, reopen the notebook, mount Drive, clone/install the repository as in its first cells, set DRIVE_OUT to the completed run folder printed earlier, set YOLO_DIR to /content/yolov5_pinned_f9578796, and run the same cell.
-
-The notebook's results are not reproduced or estimated in this repository. The latest message contained only a placeholder instead of the run summary, so [RESULTS.md](RESULTS.md) and the results table below remain unfilled.
+For a larger run, open [notebooks/milestone2_detector_pam_evaluation.ipynb](notebooks/milestone2_detector_pam_evaluation.ipynb) in Colab, select a T4 runtime, and run the notebook in order. It saves metrics and checkpoints to Google Drive. This optional notebook has not been run as part of the results reported here.
 
 ## Quick start: run the CLI on an IQ recording
 
@@ -84,21 +63,20 @@ The repository includes one real CLI run on a generated 8,192-sample synthetic i
 
 ## Results
 
-A Milestone 2 run is reported, but the summary was not supplied; all measured cells are **not yet measured** and target statuses are awaiting the summary. No performance values have been inferred or copied from the paper.
+The reduced CPU workflow is the source of measured values in this section. Before its first successful evaluation, measurements are **not yet measured**. A completed reduced run is labelled **not comparable to target**; full GPU results remain optional and unmeasured. The paper's reference results are not project measurements.
 
-| Measurement | Target | Measured value | Recording-level 95% CI | Recordings / signals | Status |
-|---|---:|---:|---:|---:|---|
-| YOLO class-agnostic recall, global SNR >= 5 dB | >= 80% | not yet measured | not yet measured | not yet measured | Awaiting summary |
-| YOLO mean IoU of true positives, global SNR >= 5 dB | >= 0.75 | not yet measured | not yet measured | not yet measured | Awaiting summary |
-| YOLO class mAP@0.5, global SNR >= 5 dB | >= 60% | not yet measured | not yet measured | not yet measured | Awaiting summary |
-| PAM oracle-box subtype accuracy, global SNR >= 10 dB | >= 80% | not yet measured | not yet measured | not yet measured | Awaiting summary |
-| PAM subtype accuracy, 0 dB bin | > 50% | not yet measured | not yet measured | not yet measured | Awaiting summary |
-| End-to-end precision / recall by global SNR | Report | not yet measured | not yet measured | not yet measured | Awaiting summary |
-| CPU processing time per 1M samples on owner's machine | < 5 s | not yet measured | n/a | n/a | Owner measurement pending |
+| Acceptance metric | Target | Reduced CPU measured | Recording-level 95% CI | Support | Status |
+|---|---:|---:|---:|---|---|
+<!-- REDUCED_CPU_RESULTS_START -->
+| Detector recall, global SNR >= 5 dB | >= 80% | not yet measured | not yet measured | not yet measured | not yet measured |
+| Mean IoU, global SNR >= 5 dB | >= 0.75 | not yet measured | not yet measured | not yet measured | not yet measured |
+| Class mAP@0.5, global SNR >= 5 dB | >= 60% | not yet measured | not yet measured | not yet measured | not yet measured |
+| PAM oracle accuracy, global SNR >= 10 dB | >= 80% | not yet measured | not yet measured | not yet measured | not yet measured |
+| PAM oracle accuracy, global SNR [0, 1) dB | > 50% | not yet measured | not yet measured | not yet measured | not yet measured |
+| Owner's local processing time per 1M samples | < 5 seconds | not yet measured | n/a | n/a | not yet measured |
+<!-- REDUCED_CPU_RESULTS_END -->
 
-**Low support:** any per-class or per-SNR cell with fewer than 30 signals must be explicitly marked low-support; show its recording and signal support next to the interval. Full per-class, per-SNR, shifted-test, confusion-matrix, and bootstrap results belong in [RESULTS.md](RESULTS.md). The paper's reference results are not this project's measurements.
-
-**Acceptance status:** every performance target is **not yet measured**, so none can be marked met or missed. When the actual run summary is available, fill only its numbers and intervals. For any missed target, report the miss and a validation-only next experiment; keep the test set frozen and do not tune it.
+Per-class and per-SNR metrics, confidence intervals, support counts, confusion matrices, and plots are linked from [RESULTS.md](RESULTS.md) after a completed run. Cells with fewer than 30 signals are marked LOW-SUPPORT. The energy geometry baseline is compared with YOLO at matched validation precision; class mAP@0.5 is reported separately. A missed target is investigated using validation only, and test sets remain frozen.
 
 ## Final limitations
 
@@ -111,10 +89,7 @@ A Milestone 2 run is reported, but the summary was not supplied; all measured ce
 - The filter and classifier use the detector's estimated box; localization error can shift or clip the extracted signal and lower PAM accuracy.
 - The 640-pixel resize can erase details in the smallest boxes. The minimum bandwidth and duration checks reduce this risk but do not prove detector localization succeeds.
 - Raw IQ files without sample-rate metadata cannot produce time in seconds or frequency in Hz. Only the explicitly listed SigMF datatypes are supported by this reader. It accepts one complex channel and conforming sample data; multi-channel recordings, dataset header/trailer bytes, and sample discontinuities are rejected. The current implementation reads the selected file into memory before chunking it.
-- The local processing-time target must be measured on the owner's hardware; a Colab T4 timing is not a substitute.
+- The local processing-time target must be measured on the owner's hardware; a GitHub-hosted CPU or Colab T4 timing is not a substitute.
 - License status for the Zenodo companion remains unverified by the project owner; no external dataset is included.
 
 See [EXPLAINER.md](EXPLAINER.md) for interview notes and [DECISIONS.md](DECISIONS.md) for one-line design rationale. The project and dependency license notes are in [LICENSES.md](LICENSES.md).
-
-
-
