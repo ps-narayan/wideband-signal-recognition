@@ -1,0 +1,109 @@
+Milestone 2 run summary (every metric below was measured by this run)
+Run label: reduced run: CPU, small data, not comparable to target
+Execution device: cpu
+Detector training status: completed
+PAM training status: completed; epochs completed=5
+YOLOv5 source commit verified: f9578796b8a64889aa9e66dc06914d19f40d338e
+Output folder: results/reduced_cpu
+
+VALIDATION OPERATING POINTS (thresholds chosen on validation only)
+YOLO target precision attained: False; threshold=1.0100; measured precision=0.0000
+Energy target precision attained: True; mask threshold=1.7500; confidence threshold=1.0100; measured precision=0.9167
+
+MAIN RECORDING-DISJOINT TEST
+YOLO class-agnostic geometry metrics at the frozen validation operating point:
+  precision: n/a; CI95=[n/a, n/a]; recordings=4; signals=24; low_support=True
+  recall: 0.0000; CI95=[0.0000, 0.0000]; recordings=4; signals=24; low_support=True
+  mean_iou_true_positives: n/a; CI95=[n/a, n/a]; recordings=4; signals=24; low_support=True
+Energy baseline class-agnostic geometry metrics at the frozen validation operating point:
+  precision: 0.6061; CI95=[0.5000, 0.7333]; recordings=4; signals=24; low_support=True
+  recall: 0.8333; CI95=[0.7083, 0.9583]; recordings=4; signals=24; low_support=True
+  mean_iou_true_positives: 0.7238; CI95=[0.6784, 0.7723]; recordings=4; signals=24; low_support=True
+YOLO mAP@0.5, all SNR: 0.0000; CI95=[0.0000, 0.0000]; recordings=4; signals=24; low_support=True
+YOLO mAP@0.5, global SNR at least 5 dB: 0.0000; CI95=[0.0000, 0.0000]; recordings=3; signals=18; low_support=True
+YOLO per-class precision, recall, mean IoU, and AP@0.5:
+  AM-DSB: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  FM: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  OFDM: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  2-FSK: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  OOK: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  PAM: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+YOLO and energy baseline recall/IoU by global SNR bin:
+  [0,5) dB: YOLO P=n/a CI95=[n/a,n/a], R=0.0000 CI95=[0.0000,0.0000], IoU=n/a CI95=[n/a,n/a]; energy P=0.8333 CI95=[0.8333,0.8333], R=0.8333 CI95=[0.8333,0.8333], IoU=0.7529 CI95=[0.7529,0.7529]
+  [10,15) dB: YOLO P=n/a CI95=[n/a,n/a], R=0.0000 CI95=[0.0000,0.0000], IoU=n/a CI95=[n/a,n/a]; energy P=0.5000 CI95=[0.5000,0.5000], R=0.8333 CI95=[0.8333,0.8333], IoU=0.7169 CI95=[0.7169,0.7169]
+  [15,20) dB: YOLO P=n/a CI95=[n/a,n/a], R=0.0000 CI95=[0.0000,0.0000], IoU=n/a CI95=[n/a,n/a]; energy P=0.5882 CI95=[0.5000,0.6667], R=0.8333 CI95=[0.6667,1.0000], IoU=0.7128 CI95=[0.6577,0.7954]
+
+PAM CLASSIFIER
+Oracle-box subtype accuracy: 0.2500; CI95=[0.0000, 0.7500]; recordings=4; signals=4; low_support=True
+Detector-box subtype accuracy (conditional on usable matched detections): n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Oracle PAM accuracy at global SNR [0,5) dB: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=1; low_support=True
+Oracle PAM accuracy at global SNR [10,15) dB: 1.0000; CI95=[1.0000, 1.0000]; recordings=1; signals=1; low_support=True
+Oracle PAM accuracy at global SNR [15,20) dB: 0.0000; CI95=[0.0000, 0.0000]; recordings=2; signals=2; low_support=True
+Oracle PAM accuracy for 2-PSK: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=1; low_support=True
+Oracle PAM accuracy for 4-PSK: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Oracle PAM accuracy for 8-PSK: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=1; low_support=True
+Oracle PAM accuracy for 16-QAM: 1.0000; CI95=[1.0000, 1.0000]; recordings=1; signals=1; low_support=True
+Oracle PAM accuracy for 64-QAM: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=1; low_support=True
+Oracle PAM accuracy for 256-QAM: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Detector-box PAM accuracy for 2-PSK: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Detector-box PAM accuracy for 4-PSK: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Detector-box PAM accuracy for 8-PSK: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Detector-box PAM accuracy for 16-QAM: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Detector-box PAM accuracy for 64-QAM: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Detector-box PAM accuracy for 256-QAM: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+All-signal PAM CNN accuracy (PAM subtypes plus Others): 0.1500; CI95=[0.0500, 0.2000]; recordings=4; signals=20; low_support=True
+All-signal classifier accuracy for 2-PSK: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=1; low_support=True
+All-signal classifier accuracy for 4-PSK: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+All-signal classifier accuracy for 8-PSK: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=1; low_support=True
+All-signal classifier accuracy for 16-QAM: 1.0000; CI95=[1.0000, 1.0000]; recordings=1; signals=1; low_support=True
+All-signal classifier accuracy for 64-QAM: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=1; low_support=True
+All-signal classifier accuracy for 256-QAM: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+All-signal classifier accuracy for Others: 0.1250; CI95=[0.0000, 0.2500]; recordings=4; signals=16; low_support=True
+Non-PAM detections classified as Others: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+  non-PAM class AM-DSB -> Others: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+  non-PAM class FM -> Others: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+  non-PAM class 2-FSK -> Others: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+  non-PAM class OOK -> Others: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Approximate PAM in-band SNR dB (per-signal values are also in metadata): {"count": 4, "max": 44.03210932857731, "mean": 35.81053724124328, "min": 26.057143535041902}
+End-to-end precision: 0.0000; CI95=[0.0000, 0.0000]; recordings=4; signals=24; low_support=True
+End-to-end recall: 0.0000; CI95=[0.0000, 0.0000]; recordings=4; signals=24; low_support=True
+End-to-end precision at global SNR [0,5) dB: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=6; low_support=True
+End-to-end recall at global SNR [0,5) dB: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=6; low_support=True
+End-to-end precision at global SNR [10,15) dB: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=6; low_support=True
+End-to-end recall at global SNR [10,15) dB: 0.0000; CI95=[0.0000, 0.0000]; recordings=1; signals=6; low_support=True
+End-to-end precision at global SNR [15,20) dB: 0.0000; CI95=[0.0000, 0.0000]; recordings=2; signals=12; low_support=True
+End-to-end recall at global SNR [15,20) dB: 0.0000; CI95=[0.0000, 0.0000]; recordings=2; signals=12; low_support=True
+Unresolved detector boxes skipped for PAM extraction: 0
+
+SHIFTED-PARAMETER TEST (not used for threshold selection)
+Shifted YOLO precision: n/a; CI95=[n/a, n/a]; recordings=4; signals=24; low_support=True
+Shifted YOLO recall: 0.0000; CI95=[0.0000, 0.0000]; recordings=4; signals=24; low_support=True
+Shifted YOLO mean IoU: n/a; CI95=[n/a, n/a]; recordings=4; signals=24; low_support=True
+Shifted YOLO mAP@0.5: 0.0000; CI95=[0.0000, 0.0000]; recordings=4; signals=24; low_support=True
+  shifted AM-DSB: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  shifted FM: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  shifted OFDM: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  shifted 2-FSK: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  shifted OOK: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+  shifted PAM: P=n/a CI95=[None, None]; R=0.0000 CI95=[0.0, 0.0]; IoU=n/a CI95=[None, None]; AP50=0.0000 CI95=[0.0, 0.0]; recordings=4; signals=4; low_support=True
+Shifted energy baseline precision: 0.5405; CI95=[0.4545, 0.6250]; recordings=4; signals=24; low_support=True
+Shifted energy baseline recall: 0.8333; CI95=[0.8333, 0.8333]; recordings=4; signals=24; low_support=True
+Shifted energy baseline mean IoU: 0.8419; CI95=[0.8063, 0.8677]; recordings=4; signals=24; low_support=True
+Shifted PAM oracle accuracy: 0.2500; CI95=[0.0000, 0.7500]; recordings=4; signals=4; low_support=True
+Shifted PAM detector-box accuracy: n/a; CI95=[n/a, n/a]; recordings=0; signals=0; low_support=True
+Shifted end-to-end precision: 0.0000; CI95=[0.0000, 0.0000]; recordings=4; signals=24; low_support=True
+Shifted end-to-end recall: 0.0000; CI95=[0.0000, 0.0000]; recordings=4; signals=24; low_support=True
+Shifted unresolved detector boxes: 0
+
+ACCEPTANCE TARGETS
+recall_at_global_snr_ge_5_db: NOT COMPARABLE; target=0.8; measured=0.0000; CI95=[0.0, 0.0]; support={'recordings': 3, 'signals': 18, 'low_support': True}
+mean_iou_at_global_snr_ge_5_db: NOT COMPARABLE; target=0.75; 
+map50_at_global_snr_ge_5_db: NOT COMPARABLE; target=0.6; measured=0.0000; CI95=[0.0, 0.0]; support={'recordings': 3, 'signals': 18, 'low_support': True}
+pam_oracle_accuracy_global_snr_ge_10_db: NOT COMPARABLE; target=0.8; measured=0.3333; CI95=[0.0, 1.0]; support={'recordings': 3, 'signals': 3, 'low_support': True}
+pam_oracle_accuracy_near_0_db_0_to_1: NOT COMPARABLE; target=0.5; 
+processing_time_per_segment_local_seconds: NOT COMPARABLE; target=5.0; Not measured on the owner's local machine; a hosted CPU timing is not a substitute.
+
+Output files: metrics.json, plots, confusion matrices, training/inference logs, checkpoints, and generated dataset are in the run output folder.
+Total pipeline runtime seconds: 42.42754430000002
+Metrics JSON: results/reduced_cpu/metrics.json
+Paper results are not project results and are not included.

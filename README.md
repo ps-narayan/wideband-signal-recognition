@@ -1,6 +1,6 @@
 # Wideband Signal Recognition
 
-A small, explainable reproduction of an end-to-end wideband RF recognition system. It turns complex I/Q samples into time/frequency detections and modulation labels for spectrum monitoring and interference hunting. The measurable acceptance targets are in [SPEC.md](SPEC.md). The reduced CPU workflow publishes actual measured results after a successful run; no reduced CPU run has been reported yet. The optional full GPU Colab run remains unmeasured.
+A small, explainable reproduction of an end-to-end wideband RF recognition system. It turns complex I/Q samples into time/frequency detections and modulation labels for spectrum monitoring and interference hunting. The measurable acceptance targets are in [SPEC.md](SPEC.md). The reduced CPU results in this README are from the GitHub-hosted CPU workflow. The optional full GPU Colab run remains unmeasured. The optional full GPU Colab run remains unmeasured.
 
 ## Architecture
 
@@ -27,7 +27,7 @@ The GitHub Actions workflow runs the tests first, then the 50-seed visibility ch
 
 To start it manually, open the repository's Actions tab, choose Reduced CPU model run, select Run workflow, and confirm the main branch. It also starts on pushes to main except changes only to README.md, RESULTS.md, results/**, or docs/**. The job has a 4 hour 30 minute hard limit; the model pipeline has a 3 hour 30 minute runtime budget. Detector training stops early enough to leave up to 15 minutes for PAM fitting and 45 minutes for detector inference and evaluation. Data generation and dataset preparation reduce the detector-training allowance. If time expires during training, the job evaluates the saved detector checkpoint; the PAM classifier is evaluated with its best saved weights, or its initialized weights if no epoch fit before the limit, and the summary marks that status. If tests fail, training does not start. Before expensive steps, the workflow creates and deletes a unique temporary branch to verify that GitHub Actions can write with its built-in token. If that check fails, open repository Settings > Actions > General > Workflow permissions and select Read and write permissions. A successful evaluation commits its measured results to this repository with [skip ci]. Metrics, plots, visibility output, and logs are also available as a downloadable workflow artifact.
 
-The reduced CPU numbers will be written here and in [RESULTS.md](RESULTS.md) only after a successful workflow evaluation. **The full GPU run in the Colab notebook remains optional and unmeasured.** The reduced CPU results are not comparable to the portfolio targets and do not replace the full run.
+The reduced CPU results below and in [RESULTS.md](RESULTS.md) were written after a successful workflow evaluation. **The full GPU run in the Colab notebook remains optional and unmeasured.** The reduced CPU results are not comparable to the portfolio targets and do not replace the full run.
 
 ### Optional full GPU run
 
@@ -63,17 +63,26 @@ The repository includes one real CLI run on a generated 8,192-sample synthetic i
 
 ## Results
 
-The reduced CPU workflow is the source of measured values in this section. Before its first successful evaluation, measurements are **not yet measured**. A completed reduced run is labelled **not comparable to target**; full GPU results remain optional and unmeasured. The paper's reference results are not project measurements.
+The measured values below are from the completed reduced CPU workflow. This run is labelled **not comparable to target**; full GPU results remain optional and unmeasured. The paper's reference results are not project measurements.
 
 | Acceptance metric | Target | Reduced CPU measured | Recording-level 95% CI | Support | Status |
 |---|---:|---:|---:|---|---|
 <!-- REDUCED_CPU_RESULTS_START -->
-| Detector recall, global SNR >= 5 dB | >= 80% | not yet measured | not yet measured | not yet measured | not yet measured |
-| Mean IoU, global SNR >= 5 dB | >= 0.75 | not yet measured | not yet measured | not yet measured | not yet measured |
-| Class mAP@0.5, global SNR >= 5 dB | >= 60% | not yet measured | not yet measured | not yet measured | not yet measured |
-| PAM oracle accuracy, global SNR >= 10 dB | >= 80% | not yet measured | not yet measured | not yet measured | not yet measured |
-| PAM oracle accuracy, global SNR [0, 1) dB | > 50% | not yet measured | not yet measured | not yet measured | not yet measured |
-| Owner's local processing time per 1M samples | < 5 seconds | not yet measured | n/a | n/a | not yet measured |
+
+**Run:** reduced run: CPU, small data, not comparable to target. Performance target status is not comparable due to reduced support. The full GPU run via the optional Colab notebook is still unmeasured.
+
+| Acceptance metric | Target | Reduced CPU measured | 95% recording-bootstrap CI | Support | Status |
+|---|---:|---:|---:|---|---|
+| Detector recall, global SNR >= 5 dB | >= 80% | 0.00% | [0.00%, 0.00%] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
+| Mean IoU, global SNR >= 5 dB | >= 75% | not measured | [not measured, not measured] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
+| Class mAP@0.5, global SNR >= 5 dB | >= 60% | 0.00% | [0.00%, 0.00%] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
+| PAM oracle accuracy, global SNR >= 10 dB | >= 80% | 33.33% | [0.00%, 100.00%] | 3 recordings / 3 signals; LOW-SUPPORT | not comparable |
+| PAM oracle accuracy, global SNR [0, 1) dB | >= 50% | not measured | [not measured, not measured] | 0 recordings / 0 signals; LOW-SUPPORT | not comparable |
+| Owner's local processing time per 1M samples | >= 500% | not measured | not applicable | owner measurement pending | not comparable |
+
+Main test support: 4 recordings / 4 segments; shifted test: 4 recordings / 4 segments.
+
+See [RESULTS.md](RESULTS.md) and [the measured metrics JSON](results/reduced_cpu/metrics.json) for per-class/per-SNR CIs, support, confusion matrices, and plots. Cells under 30 signals are LOW-SUPPORT.
 <!-- REDUCED_CPU_RESULTS_END -->
 
 Per-class and per-SNR metrics, confidence intervals, support counts, confusion matrices, and plots are linked from [RESULTS.md](RESULTS.md) after a completed run. Cells with fewer than 30 signals are marked LOW-SUPPORT. The energy geometry baseline is compared with YOLO at matched validation precision; class mAP@0.5 is reported separately. A missed target is investigated using validation only, and test sets remain frozen.

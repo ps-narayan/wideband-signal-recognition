@@ -1,0 +1,2835 @@
+{
+  "schema_version": 1,
+  "run_label": "reduced run: CPU, small data, not comparable to target",
+  "comparison_scope": "not_comparable",
+  "training_status": {
+    "detector": "completed",
+    "detector_checkpoint_used": "best.pt",
+    "detector_epochs_requested": 3,
+    "pam": "completed",
+    "pam_epochs_completed": 5,
+    "pam_epochs_requested": 5,
+    "evaluation_completed": true,
+    "runtime_budget_minutes": 210.0,
+    "pam_training_budget_minutes": 15.0,
+    "evaluation_reserve_minutes": 45.0
+  },
+  "device": "cpu",
+  "config": {
+    "seed": 2026,
+    "data": {
+      "segment_samples": 1000000,
+      "main_recordings": 18,
+      "shifted_recordings": 4,
+      "segments_per_recording": 1,
+      "image_size": 640,
+      "main_profile": {
+        "bandwidth_cycles_per_sample": [
+          0.008,
+          0.08
+        ],
+        "bandwidth_distribution": "log_uniform",
+        "global_snr_db": [
+          -5,
+          20
+        ]
+      },
+      "shifted_profile": {
+        "bandwidth_cycles_per_sample": [
+          0.02,
+          0.12
+        ],
+        "bandwidth_distribution": "uniform",
+        "global_snr_db": [
+          -5,
+          5
+        ]
+      }
+    },
+    "detector": {
+      "framework": "YOLOv5n",
+      "repository": "https://github.com/ultralytics/yolov5.git",
+      "commit": "f9578796b8a64889aa9e66dc06914d19f40d338e",
+      "epochs": 3,
+      "batch_size": 2,
+      "image_size": 640,
+      "matched_precision": 0.8,
+      "iou_threshold": 0.5
+    },
+    "pam_classifier": {
+      "frame_samples": 1024,
+      "frames_per_signal": 2,
+      "epochs": 5,
+      "batch_size": 32,
+      "loss": "inverse_frequency_weighted_cross_entropy"
+    },
+    "evaluation": {
+      "bootstrap_iterations": 200,
+      "bootstrap_unit": "parent_recording"
+    }
+  },
+  "seed": 2026,
+  "yolo": {
+    "repository": "https://github.com/ultralytics/yolov5.git",
+    "commit": "f9578796b8a64889aa9e66dc06914d19f40d338e",
+    "license": "AGPL-3.0",
+    "license_verified": true,
+    "train_cli_verified": true,
+    "detect_cli_verified": true,
+    "autoanchor_api_verified": true,
+    "autoanchor_training_enabled": true,
+    "minimum_box_width_height_pixels": [
+      5.243215565796211,
+      5.12
+    ],
+    "default_anchor_bpr_for_minimum_box": 1.0,
+    "default_anchors_px": [
+      [
+        10.0,
+        13.0
+      ],
+      [
+        16.0,
+        30.0
+      ],
+      [
+        33.0,
+        23.0
+      ],
+      [
+        30.0,
+        61.0
+      ],
+      [
+        62.0,
+        45.0
+      ],
+      [
+        59.0,
+        119.0
+      ],
+      [
+        116.0,
+        90.0
+      ],
+      [
+        156.0,
+        198.0
+      ],
+      [
+        373.0,
+        326.0
+      ]
+    ],
+    "autoanchor_note": "Pinned YOLOv5 train.py calls check_anchors unless --noautoanchor is set. It attempts anchor evolution when Best Possible Recall is <= 0.98. This ratio-fit check passes for the minimum raster box, but the box remains smaller than the stride-eight feature cell, so localization recall must be measured.",
+    "autoanchor_training_log_excerpt": [
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0m3.33 anchors/target, 0.958 Best Possible Recall (BPR). Anchors are a poor fit to dataset \u26a0\ufe0f, attempting to improve...",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mRunning kmeans for 9 anchors on 72 points...",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7747: 100% \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 1000/1000 21.2Kit/s 0.0s",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mthr=0.25: 1.0000 best possible recall, 4.97 anchors past thr",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mn=9, img_size=640, metric_all=0.333/0.775-mean/best, past_thr=0.472-mean: 7,20, 14,12, 27,8, 13,28, 55,8, 26,37, 108,9, 68,31, 146,20",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mDone \u2705 (optional: update model *.yaml to use these anchors in the future)"
+    ]
+  },
+  "snr_definition": "10*log10(total clean signal power / total added noise power over the full I/Q segment)",
+  "runtime_seconds_pipeline": {
+    "data_generation": 5.29472608399999,
+    "total": 42.42754430000002,
+    "note": "Measured end-to-end runtime on the configured execution device."
+  },
+  "split_counts_recordings": {
+    "train": 12,
+    "val": 2,
+    "test": 4
+  },
+  "validation_calibration": {
+    "target_precision": 0.8,
+    "yolo": {
+      "threshold": 1.01,
+      "attained_target": false,
+      "precision": 0.0,
+      "recall": 0.0,
+      "mean_iou_true_positives": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 12
+    },
+    "energy_mask_threshold": 1.75,
+    "energy_confidence_threshold": 1.01,
+    "energy_baseline": {
+      "threshold": 1.01,
+      "attained_target": true,
+      "precision": 0.9166666666666666,
+      "recall": 0.9166666666666666,
+      "mean_iou_true_positives": 0.7555580822278652,
+      "tp": 11,
+      "fp": 1,
+      "fn": 1
+    }
+  },
+  "acceptance_targets": {
+    "recall_at_global_snr_ge_5_db": {
+      "target": 0.8,
+      "measured": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "pass": false,
+      "support": {
+        "recordings": 3,
+        "signals": 18,
+        "low_support": true
+      }
+    },
+    "mean_iou_at_global_snr_ge_5_db": {
+      "target": 0.75,
+      "measured": null,
+      "ci95": [
+        null,
+        null
+      ],
+      "pass": null,
+      "support": {
+        "recordings": 3,
+        "signals": 18,
+        "low_support": true
+      }
+    },
+    "map50_at_global_snr_ge_5_db": {
+      "target": 0.6,
+      "measured": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "pass": false,
+      "support": {
+        "recordings": 3,
+        "signals": 18,
+        "low_support": true
+      }
+    },
+    "pam_oracle_accuracy_global_snr_ge_10_db": {
+      "target": 0.8,
+      "measured": 0.3333333333333333,
+      "ci95": [
+        0.0,
+        1.0
+      ],
+      "pass": false,
+      "support": {
+        "recordings": 3,
+        "signals": 3,
+        "low_support": true
+      }
+    },
+    "pam_oracle_accuracy_near_0_db_0_to_1": {
+      "target": 0.5,
+      "measured": null,
+      "ci95": [
+        null,
+        null
+      ],
+      "pass": null,
+      "support": {
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      }
+    },
+    "processing_time_per_segment_local_seconds": {
+      "target": 5.0,
+      "measured": null,
+      "pass": null,
+      "note": "Not measured on the owner's local machine; a hosted CPU timing is not a substitute."
+    }
+  },
+  "main_test": {
+    "yolo": {
+      "matched_precision": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "mean_iou_true_positives": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 24
+      },
+      "matched_precision_with_recording_bootstrap": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 24,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 24,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 24,
+          "low_support": true
+        }
+      },
+      "detector_confusion_matrix": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "detector_confusion_labels": [
+        "AM-DSB",
+        "FM",
+        "OFDM",
+        "2-FSK",
+        "OOK",
+        "PAM",
+        "missed",
+        "background"
+      ],
+      "map50_all_snr": {
+        "map50": 0.0,
+        "per_class": {
+          "AM-DSB": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "FM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "OFDM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "2-FSK": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "OOK": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "PAM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          }
+        },
+        "map50_recording_bootstrap": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 24,
+          "low_support": true
+        },
+        "per_class_with_recording_bootstrap": {
+          "AM-DSB": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "FM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "OFDM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "2-FSK": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "OOK": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "PAM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          }
+        }
+      },
+      "map50_global_snr_ge_5_db": {
+        "map50": 0.0,
+        "per_class": {
+          "AM-DSB": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "FM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "OFDM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "2-FSK": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "OOK": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "PAM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          }
+        },
+        "map50_recording_bootstrap": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 3,
+          "signals": 18,
+          "low_support": true
+        },
+        "per_class_with_recording_bootstrap": {
+          "AM-DSB": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "FM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "OFDM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "2-FSK": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "OOK": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          },
+          "PAM": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 3,
+            "signals": 3,
+            "low_support": true
+          }
+        }
+      },
+      "per_class_with_recording_bootstrap": {
+        "AM-DSB": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "ap50": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        },
+        "FM": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "ap50": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        },
+        "OFDM": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "ap50": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        },
+        "2-FSK": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "ap50": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        },
+        "OOK": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "ap50": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        },
+        "PAM": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "ap50": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 4,
+            "signals": 4,
+            "low_support": true
+          },
+          "tp": 0,
+          "fp": 0,
+          "fn": 4
+        }
+      },
+      "by_global_snr_with_recording_bootstrap": {
+        "[0,5)": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          }
+        },
+        "[10,15)": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          }
+        },
+        "[15,20)": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 2,
+            "signals": 12,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 2,
+            "signals": 12,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 2,
+            "signals": 12,
+            "low_support": true
+          }
+        }
+      }
+    },
+    "energy_baseline": {
+      "matched_precision": {
+        "precision": 0.6060606060606061,
+        "recall": 0.8333333333333334,
+        "mean_iou_true_positives": 0.723816228945618,
+        "tp": 20,
+        "fp": 13,
+        "fn": 4
+      },
+      "matched_precision_with_recording_bootstrap": {
+        "precision": {
+          "estimate": 0.6060606060606061,
+          "ci95": [
+            0.5,
+            0.7333333333333333
+          ],
+          "recordings": 4,
+          "signals": 24,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.8333333333333334,
+          "ci95": [
+            0.7083333333333334,
+            0.9583333333333334
+          ],
+          "recordings": 4,
+          "signals": 24,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.723816228945618,
+          "ci95": [
+            0.6783607174912075,
+            0.7723136715091224
+          ],
+          "recordings": 4,
+          "signals": 24,
+          "low_support": true
+        }
+      },
+      "by_global_snr_with_recording_bootstrap": {
+        "[0,5)": {
+          "precision": {
+            "estimate": 0.8333333333333334,
+            "ci95": [
+              0.8333333333333334,
+              0.8333333333333334
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.8333333333333334,
+            "ci95": [
+              0.8333333333333334,
+              0.8333333333333334
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.752873544156323,
+            "ci95": [
+              0.752873544156323,
+              0.752873544156323
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          }
+        },
+        "[10,15)": {
+          "precision": {
+            "estimate": 0.5,
+            "ci95": [
+              0.5,
+              0.5
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.8333333333333334,
+            "ci95": [
+              0.8333333333333334,
+              0.8333333333333334
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.7168609377220992,
+            "ci95": [
+              0.7168609377220992,
+              0.7168609377220992
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          }
+        },
+        "[15,20)": {
+          "precision": {
+            "estimate": 0.5882352941176471,
+            "ci95": [
+              0.5,
+              0.6666666666666666
+            ],
+            "recordings": 2,
+            "signals": 12,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.8333333333333334,
+            "ci95": [
+              0.6666666666666666,
+              1.0
+            ],
+            "recordings": 2,
+            "signals": 12,
+            "low_support": true
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.7127652169520248,
+            "ci95": [
+              0.657662710084231,
+              0.7954189772537156
+            ],
+            "recordings": 2,
+            "signals": 12,
+            "low_support": true
+          }
+        }
+      },
+      "mask_threshold_selected_on_validation": 1.75,
+      "confidence_threshold_selected_on_validation": 1.01
+    },
+    "pam": {
+      "oracle_accuracy": {
+        "accuracy": 0.25,
+        "ci95": [
+          0.0,
+          0.75
+        ],
+        "recordings": 4,
+        "signals": 4,
+        "low_support": true
+      },
+      "oracle_accuracy_by_global_snr": {
+        "[0,5)": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "[10,15)": {
+          "accuracy": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "[15,20)": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 2,
+          "signals": 2,
+          "low_support": true
+        }
+      },
+      "oracle_accuracy_by_subtype": {
+        "2-PSK": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "4-PSK": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "8-PSK": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "16-QAM": {
+          "accuracy": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "64-QAM": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "256-QAM": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        }
+      },
+      "detector_box_accuracy": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "detector_box_accuracy_by_global_snr": {},
+      "detector_box_accuracy_by_subtype": {
+        "2-PSK": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "4-PSK": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "8-PSK": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "16-QAM": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "64-QAM": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "256-QAM": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        }
+      },
+      "oracle_subtype_confusion_matrix": [
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "oracle_subtype_confusion_labels": [
+        "2-PSK",
+        "4-PSK",
+        "8-PSK",
+        "16-QAM",
+        "64-QAM",
+        "256-QAM",
+        "Others"
+      ],
+      "unresolved_detection_count": 0,
+      "unresolved_detections": [],
+      "non_pam_detections_classified_as_others": {
+        "overall": {
+          "rate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "by_detector_class": {
+          "AM-DSB": {
+            "rate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 0,
+            "signals": 0,
+            "low_support": true
+          },
+          "FM": {
+            "rate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 0,
+            "signals": 0,
+            "low_support": true
+          },
+          "2-FSK": {
+            "rate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 0,
+            "signals": 0,
+            "low_support": true
+          },
+          "OOK": {
+            "rate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 0,
+            "signals": 0,
+            "low_support": true
+          }
+        },
+        "by_global_snr": {},
+        "counts": {
+          "others": 0,
+          "total": 0,
+          "per_non_pam_detector_class": {}
+        }
+      },
+      "all_signal_classifier_accuracy": {
+        "accuracy": 0.15,
+        "ci95": [
+          0.05,
+          0.2
+        ],
+        "recordings": 4,
+        "signals": 20,
+        "low_support": true
+      },
+      "all_signal_classifier_accuracy_by_class": {
+        "2-PSK": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "4-PSK": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "8-PSK": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "16-QAM": {
+          "accuracy": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "64-QAM": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "256-QAM": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "Others": {
+          "accuracy": 0.125,
+          "ci95": [
+            0.0,
+            0.25
+          ],
+          "recordings": 4,
+          "signals": 16,
+          "low_support": true
+        }
+      },
+      "all_classes_confusion_matrix": [
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          3,
+          0,
+          7,
+          0,
+          1,
+          2
+        ]
+      ],
+      "all_classes_confusion_labels": [
+        "2-PSK",
+        "4-PSK",
+        "8-PSK",
+        "16-QAM",
+        "64-QAM",
+        "256-QAM",
+        "Others"
+      ],
+      "approximate_pam_inband_snr_db": {
+        "count": 4,
+        "mean": 35.81053724124328,
+        "min": 26.057143535041902,
+        "max": 44.03210932857731
+      }
+    },
+    "end_to_end": {
+      "precision": 0.0,
+      "precision_ci95": [
+        0.0,
+        0.0
+      ],
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ],
+      "correct": 0,
+      "predictions": 0,
+      "ground_truth": 24,
+      "recordings": 4,
+      "signals": 24,
+      "low_support": true,
+      "by_global_snr_with_recording_bootstrap": {
+        "[0,5)": {
+          "precision": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "recordings": 1,
+          "signals": 6,
+          "low_support": true
+        },
+        "[10,15)": {
+          "precision": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 1,
+            "signals": 6,
+            "low_support": true
+          },
+          "recordings": 1,
+          "signals": 6,
+          "low_support": true
+        },
+        "[15,20)": {
+          "precision": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 2,
+            "signals": 12,
+            "low_support": true
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 2,
+            "signals": 12,
+            "low_support": true
+          },
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        }
+      }
+    }
+  },
+  "shifted_test": {
+    "distribution": "bandwidth uniform [0.02, 0.12]; global SNR uniform [-5, 5] dB",
+    "yolo_matched_precision": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "mean_iou_true_positives": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 24
+    },
+    "yolo_matched_precision_with_recording_bootstrap": {
+      "precision": {
+        "estimate": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 4,
+        "signals": 24,
+        "low_support": true
+      },
+      "recall": {
+        "estimate": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 4,
+        "signals": 24,
+        "low_support": true
+      },
+      "mean_iou_true_positives": {
+        "estimate": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 4,
+        "signals": 24,
+        "low_support": true
+      }
+    },
+    "yolo_map50": {
+      "map50": 0.0,
+      "per_class": {
+        "AM-DSB": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "FM": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "OFDM": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "2-FSK": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "OOK": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "PAM": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        }
+      },
+      "map50_recording_bootstrap": {
+        "estimate": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 4,
+        "signals": 24,
+        "low_support": true
+      },
+      "per_class_with_recording_bootstrap": {
+        "AM-DSB": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "FM": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "OFDM": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "2-FSK": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "OOK": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "PAM": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        }
+      }
+    },
+    "detector_confusion_matrix": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "detector_confusion_labels": [
+      "AM-DSB",
+      "FM",
+      "OFDM",
+      "2-FSK",
+      "OOK",
+      "PAM",
+      "missed",
+      "background"
+    ],
+    "pam_subtype_confusion_matrix": [
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pam_subtype_confusion_labels": [
+      "2-PSK",
+      "4-PSK",
+      "8-PSK",
+      "16-QAM",
+      "64-QAM",
+      "256-QAM",
+      "Others"
+    ],
+    "unresolved_detection_count": 0,
+    "unresolved_detections": [],
+    "yolo_per_class_with_recording_bootstrap": {
+      "AM-DSB": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 4
+      },
+      "FM": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 4
+      },
+      "OFDM": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 4
+      },
+      "2-FSK": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 4
+      },
+      "OOK": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 4
+      },
+      "PAM": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 4,
+          "signals": 4,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 4
+      }
+    },
+    "yolo_by_global_snr_with_recording_bootstrap": {
+      "[-5,0)": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        }
+      },
+      "[0,5)": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        }
+      }
+    },
+    "energy_baseline_matched_precision": {
+      "precision": 0.5405405405405406,
+      "recall": 0.8333333333333334,
+      "mean_iou_true_positives": 0.8419384132746265,
+      "tp": 20,
+      "fp": 17,
+      "fn": 4
+    },
+    "energy_baseline_matched_precision_with_recording_bootstrap": {
+      "precision": {
+        "estimate": 0.5405405405405406,
+        "ci95": [
+          0.45454545454545453,
+          0.625
+        ],
+        "recordings": 4,
+        "signals": 24,
+        "low_support": true
+      },
+      "recall": {
+        "estimate": 0.8333333333333334,
+        "ci95": [
+          0.8333333333333334,
+          0.8333333333333334
+        ],
+        "recordings": 4,
+        "signals": 24,
+        "low_support": true
+      },
+      "mean_iou_true_positives": {
+        "estimate": 0.8419384132746265,
+        "ci95": [
+          0.8063154197848347,
+          0.8677026961870308
+        ],
+        "recordings": 4,
+        "signals": 24,
+        "low_support": true
+      }
+    },
+    "energy_baseline_by_global_snr_with_recording_bootstrap": {
+      "[-5,0)": {
+        "precision": {
+          "estimate": 0.47619047619047616,
+          "ci95": [
+            0.4166666666666667,
+            0.5555555555555556
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.8333333333333334,
+          "ci95": [
+            0.8333333333333334,
+            0.8333333333333334
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.8161741303622223,
+          "ci95": [
+            0.7857452493916585,
+            0.8466030113327863
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        }
+      },
+      "[0,5)": {
+        "precision": {
+          "estimate": 0.625,
+          "ci95": [
+            0.625,
+            0.625
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.8333333333333334,
+          "ci95": [
+            0.8333333333333334,
+            0.8333333333333334
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.8677026961870308,
+          "ci95": [
+            0.8673624490529965,
+            0.868042943321065
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        }
+      }
+    },
+    "pam_oracle_accuracy": {
+      "accuracy": 0.25,
+      "ci95": [
+        0.0,
+        0.75
+      ],
+      "recordings": 4,
+      "signals": 4,
+      "low_support": true
+    },
+    "pam_oracle_accuracy_by_global_snr": {
+      "[-5,0)": {
+        "accuracy": 0.5,
+        "ci95": [
+          0.0,
+          1.0
+        ],
+        "recordings": 2,
+        "signals": 2,
+        "low_support": true
+      },
+      "[0,5)": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 2,
+        "signals": 2,
+        "low_support": true
+      }
+    },
+    "pam_oracle_accuracy_by_subtype": {
+      "2-PSK": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 1,
+        "signals": 1,
+        "low_support": true
+      },
+      "4-PSK": {
+        "accuracy": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "recordings": 1,
+        "signals": 1,
+        "low_support": true
+      },
+      "8-PSK": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 1,
+        "signals": 1,
+        "low_support": true
+      },
+      "16-QAM": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "64-QAM": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "256-QAM": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 1,
+        "signals": 1,
+        "low_support": true
+      }
+    },
+    "pam_detector_box_accuracy": {
+      "accuracy": null,
+      "ci95": [
+        null,
+        null
+      ],
+      "recordings": 0,
+      "signals": 0,
+      "low_support": true
+    },
+    "pam_detector_box_accuracy_by_global_snr": {},
+    "pam_detector_box_accuracy_by_subtype": {
+      "2-PSK": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "4-PSK": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "8-PSK": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "16-QAM": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "64-QAM": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "256-QAM": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      }
+    },
+    "end_to_end": {
+      "precision": 0.0,
+      "precision_ci95": [
+        0.0,
+        0.0
+      ],
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ],
+      "correct": 0,
+      "predictions": 0,
+      "ground_truth": 24,
+      "recordings": 4,
+      "signals": 24,
+      "low_support": true
+    },
+    "end_to_end_by_global_snr_with_recording_bootstrap": {
+      "[-5,0)": {
+        "precision": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "recordings": 2,
+        "signals": 12,
+        "low_support": true
+      },
+      "[0,5)": {
+        "precision": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 2,
+          "signals": 12,
+          "low_support": true
+        },
+        "recordings": 2,
+        "signals": 12,
+        "low_support": true
+      }
+    },
+    "non_pam_detections_classified_as_others": {
+      "overall": {
+        "rate": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "by_detector_class": {
+        "AM-DSB": {
+          "rate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "FM": {
+          "rate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "2-FSK": {
+          "rate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "OOK": {
+          "rate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        }
+      },
+      "by_global_snr": {}
+    }
+  },
+  "support": {
+    "main_test_recordings": 4,
+    "main_test_segments": 4,
+    "shifted_test_recordings": 4,
+    "shifted_test_segments": 4,
+    "low_support_rule": "Any per-class or per-SNR cell with fewer than 30 signals is marked low_support.",
+    "pam_zero_db_bin": "[0, 1) dB because the generator draws a continuous SNR; inspect support before interpreting."
+  },
+  "metrics_path": "results/reduced_cpu/metrics.json"
+}
