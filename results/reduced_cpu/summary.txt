@@ -104,6 +104,6 @@ pam_oracle_accuracy_near_0_db_0_to_1: NOT COMPARABLE; target=0.5;
 processing_time_per_segment_local_seconds: NOT COMPARABLE; target=5.0; Not measured on the owner's local machine; a hosted CPU timing is not a substitute.
 
 Output files: metrics.json, plots, confusion matrices, training/inference logs, checkpoints, and generated dataset are in the run output folder.
-Total pipeline runtime seconds: 42.42754430000002
+Total pipeline runtime seconds: 62.69170220999999
 Metrics JSON: results/reduced_cpu/metrics.json
 Paper results are not project results and are not included.

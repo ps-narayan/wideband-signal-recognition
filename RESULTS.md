@@ -287,8 +287,8 @@ The metrics file preserves measured values, CIs, supports, validation thresholds
 
 ## Runtime
 
-Measured total pipeline runtime on hosted CPU (seconds): 42.42754430000002.
-Measured data generation runtime (seconds): 5.29472608399999.
+Measured total pipeline runtime on hosted CPU (seconds): 62.69170220999999.
+Measured data generation runtime (seconds): 8.410121461999978.
 Detector training status: completed; evaluation completed: True.
 The under-five-second target is specific to the owner's local machine and remains not measured there; hosted run time is not comparable.
 
