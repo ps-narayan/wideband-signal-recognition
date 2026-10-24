@@ -31,3 +31,4 @@
 - Publish metrics only after evaluation completes, keep the test sets frozen, and mark every reduced-run target not comparable because the CPU subset is intentionally small and hosted timing is not the owner's laptop timing.
 - Use only GitHub's built-in GITHUB_TOKEN for the result commit; paths-ignore plus [skip ci] prevent the results commit from starting another reduced run.
 - Publish recording IDs by split and block result publication if any main or shifted recording IDs overlap, because this makes the no-leakage check reviewable and reproducible.
+- Add an opt-in 10-epoch CPU detector probe with the same dataset, split, image size, and validation precision target; keep the default push profile at 3 epochs so the diagnostic change is isolated and existing results are not silently relabelled.

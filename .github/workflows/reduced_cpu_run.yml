@@ -2,6 +2,15 @@ name: Reduced CPU model run
 
 on:
   workflow_dispatch:
+    inputs:
+      detector_profile:
+        description: "Choose the standard reduced run or an opt-in detector training probe"
+        type: choice
+        required: true
+        default: standard
+        options:
+          - standard
+          - validation_probe_10_epoch
   push:
     branches:
       - main
@@ -94,16 +103,32 @@ jobs:
           RUN_DIR: ${{ runner.temp }}/wideband-reduced-run
           DATA_WORK: ${{ runner.temp }}/wideband-reduced-data
           YOLO_DIR: ${{ runner.temp }}/yolov5-pinned
+          DETECTOR_PROFILE: ${{ inputs.detector_profile || 'standard' }}
         run: |
+          case "$DETECTOR_PROFILE" in
+            standard)
+              CONFIG_PATH="configs/reduced_cpu.yaml"
+              YOLO_EPOCHS=3
+              ;;
+            validation_probe_10_epoch)
+              CONFIG_PATH="configs/reduced_cpu_yolo_10_epoch_probe.yaml"
+              YOLO_EPOCHS=10
+              ;;
+            *)
+              echo "::error::Unknown detector profile: $DETECTOR_PROFILE"
+              exit 2
+              ;;
+          esac
+          echo "Detector profile: $DETECTOR_PROFILE ($YOLO_EPOCHS YOLO epochs)" >> "$GITHUB_STEP_SUMMARY"
           python scripts/run_milestone2.py \
-            --config configs/reduced_cpu.yaml \
+            --config "$CONFIG_PATH" \
             --yolo-dir "$YOLO_DIR" \
             --out-dir "$RUN_DIR" \
             --data-work "$DATA_WORK" \
             --recordings 18 \
             --shift-recordings 4 \
             --segments-per-recording 1 \
-            --yolo-epochs 3 \
+            --yolo-epochs "$YOLO_EPOCHS" \
             --yolo-batch 2 \
             --pam-epochs 5 \
             --pam-batch 32 \
