@@ -30,3 +30,4 @@
 - Give the workflow a 4h30 hard limit and the model pipeline a 3h30 runtime budget; cap detector training so up to 15 minutes remains for PAM training and 45 minutes for inference/evaluation, then evaluate the latest saved detector checkpoint and mark any time-limited model training in the report.
 - Publish metrics only after evaluation completes, keep the test sets frozen, and mark every reduced-run target not comparable because the CPU subset is intentionally small and hosted timing is not the owner's laptop timing.
 - Use only GitHub's built-in GITHUB_TOKEN for the result commit; paths-ignore plus [skip ci] prevent the results commit from starting another reduced run.
+- Publish recording IDs by split and block result publication if any main or shifted recording IDs overlap, because this makes the no-leakage check reviewable and reproducible.

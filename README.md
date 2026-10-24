@@ -1,6 +1,6 @@
 # Wideband Signal Recognition
 
-A small, explainable reproduction of an end-to-end wideband RF recognition system. It turns complex I/Q samples into time/frequency detections and modulation labels for spectrum monitoring and interference hunting. The measurable acceptance targets are in [SPEC.md](SPEC.md). The reduced CPU results in this README are from the GitHub-hosted CPU workflow. The optional full GPU Colab run remains unmeasured. The optional full GPU Colab run remains unmeasured.
+A small, explainable reproduction of an end-to-end wideband RF recognition system. It turns complex I/Q samples into time/frequency detections and modulation labels for spectrum monitoring and interference hunting. The measurable acceptance targets are in [SPEC.md](SPEC.md). The reduced CPU results in this README are from the GitHub-hosted CPU workflow. The optional full GPU Colab run remains unmeasured.
 
 ## Architecture
 
@@ -50,7 +50,7 @@ git -C yolov5_pinned rev-parse HEAD
 The last command must print the pinned commit above. Then run:
 
 ~~~powershell
-python -m wideband_recognition.cli "C:\path\to\capture.sigmf-meta" --detector-weights "C:\path\to\milestone2\checkpoints\yolov5n_best.pt" --pam-weights "C:\path\to\milestone2\checkpoints\pam_cnn.pt" --yolo-dir ".\yolov5_pinned" --output-dir ".\outputs\cli" --device cpu
+python -m wideband_recognition.cli "capture.sigmf-meta" --detector-weights "checkpoints/yolov5n_best.pt" --pam-weights "checkpoints/pam_cnn.pt" --yolo-dir ".\yolov5_pinned" --output-dir ".\outputs\cli" --device cpu
 ~~~
 
 For .npy, .npz, or raw IQ, pass --sample-rate-hz if time in seconds and frequency in Hz are wanted. Without a rate, output uses sample indices and normalized cycles/sample. frequency_range.offset_hz_from_baseband_center is the frequency offset around the complex baseband center; absolute_hz is included only when SigMF also supplies core:frequency. The detector threshold defaults to 0.25; pass the validation-calibrated threshold printed in the run's metrics.json for the measured operating point. Never select a threshold from test results.
@@ -65,8 +65,6 @@ The repository includes one real CLI run on a generated 8,192-sample synthetic i
 
 The measured values below are from the completed reduced CPU workflow. This run is labelled **not comparable to target**; full GPU results remain optional and unmeasured. The paper's reference results are not project measurements.
 
-| Acceptance metric | Target | Reduced CPU measured | Recording-level 95% CI | Support | Status |
-|---|---:|---:|---:|---|---|
 <!-- REDUCED_CPU_RESULTS_START -->
 
 **Run:** reduced run: CPU, small data, not comparable to target. Performance target status is not comparable due to reduced support. The full GPU run via the optional Colab notebook is still unmeasured.
@@ -77,15 +75,15 @@ The measured values below are from the completed reduced CPU workflow. This run 
 | Mean IoU, global SNR >= 5 dB | >= 75% | not measured | [not measured, not measured] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
 | Class mAP@0.5, global SNR >= 5 dB | >= 60% | 0.00% | [0.00%, 0.00%] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
 | PAM oracle accuracy, global SNR >= 10 dB | >= 80% | 33.33% | [0.00%, 100.00%] | 3 recordings / 3 signals; LOW-SUPPORT | not comparable |
-| PAM oracle accuracy, global SNR [0, 1) dB | >= 50% | not measured | [not measured, not measured] | 0 recordings / 0 signals; LOW-SUPPORT | not comparable |
-| Owner's local processing time per 1M samples | >= 500% | not measured | not applicable | owner measurement pending | not comparable |
+| PAM oracle accuracy, global SNR [0, 1) dB | > 50% | not measured | [not measured, not measured] | 0 recordings / 0 signals; LOW-SUPPORT | not comparable |
+| Owner's local processing time per 1M samples | < 5 seconds | not measured | not applicable | owner measurement pending | not comparable |
 
 Main test support: 4 recordings / 4 segments; shifted test: 4 recordings / 4 segments.
 
-See [RESULTS.md](RESULTS.md) and [the measured metrics JSON](results/reduced_cpu/metrics.json) for per-class/per-SNR CIs, support, confusion matrices, and plots. Cells under 30 signals are LOW-SUPPORT.
+See [RESULTS.md](RESULTS.md), [the measured metrics JSON](results/reduced_cpu/metrics.json), and [the recording split audit](results/reduced_cpu/split_audit.json) for per-class/per-SNR CIs, support, confusion matrices, split IDs, and plots. Cells under 30 signals are LOW-SUPPORT.
 <!-- REDUCED_CPU_RESULTS_END -->
 
-Per-class and per-SNR metrics, confidence intervals, support counts, confusion matrices, and plots are linked from [RESULTS.md](RESULTS.md) after a completed run. Cells with fewer than 30 signals are marked LOW-SUPPORT. The energy geometry baseline is compared with YOLO at matched validation precision; class mAP@0.5 is reported separately. A missed target is investigated using validation only, and test sets remain frozen.
+Per-class and per-SNR metrics, confidence intervals, support counts, confusion matrices, and plots are linked from [RESULTS.md](RESULTS.md). The [recording split audit](results/reduced_cpu/split_audit.json) lists the run's train, validation, and test recording IDs. Cells with fewer than 30 signals are marked LOW-SUPPORT. Both geometry methods use validation-calibrated operating points targeting 80% precision; YOLO did not attain that target while the energy baseline did, so this run does not provide a matched-precision comparison. Class mAP@0.5 is reported separately. Investigate misses with validation only; keep both test sets frozen.
 
 ## Final limitations
 

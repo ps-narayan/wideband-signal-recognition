@@ -1,0 +1,48 @@
+{
+  "main_recording_ids_by_split": {
+    "train": [
+      "main-000",
+      "main-001",
+      "main-002",
+      "main-003",
+      "main-006",
+      "main-008",
+      "main-009",
+      "main-011",
+      "main-012",
+      "main-013",
+      "main-014",
+      "main-016"
+    ],
+    "val": [
+      "main-005",
+      "main-017"
+    ],
+    "test": [
+      "main-004",
+      "main-007",
+      "main-010",
+      "main-015"
+    ]
+  },
+  "main_recording_counts": {
+    "train": 12,
+    "val": 2,
+    "test": 4
+  },
+  "pairwise_main_split_overlaps": {
+    "train__val": [],
+    "train__test": [],
+    "val__test": []
+  },
+  "inconsistent_main_recording_assignments": [],
+  "main_splits_disjoint": true,
+  "shifted_test_recording_ids": [
+    "shift-000",
+    "shift-001",
+    "shift-002",
+    "shift-003"
+  ],
+  "shifted_test_overlap_with_main": [],
+  "shifted_test_disjoint_from_main": true
+}

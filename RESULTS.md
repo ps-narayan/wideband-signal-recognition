@@ -7,6 +7,7 @@ YOLOv5 source commit: f9578796b8a64889aa9e66dc06914d19f40d338e
 Detector training status: completed; checkpoint: best.pt; requested epochs: 3.
 PAM training status: completed; epochs completed: 5 of 5.
 Recording support: main test 4 recordings / 4 segments; shifted test 4 recordings / 4 segments.
+Recording-ID leakage audit: train=12, validation=2, test=4; main splits are pairwise disjoint; shifted test IDs are separate. See [split_audit.json](results/reduced_cpu/split_audit.json) for IDs.
 SNR definition: 10*log10(total clean signal power / total added noise power over the full I/Q segment).
 Confidence intervals use recording-level bootstrap resampling. Cells with fewer than 30 signals are marked LOW-SUPPORT.
 

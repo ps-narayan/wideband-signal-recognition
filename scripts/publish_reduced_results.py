@@ -26,6 +26,53 @@ def support(row):
     return f"{row.get('recordings', 'n/a')} recordings / {row.get('signals', 'n/a')} signals{suffix}"
 
 
+def build_split_audit(manifest):
+    """Return an auditable recording split and reject inconsistent IDs."""
+    main_rows = manifest.get("main")
+    if not isinstance(main_rows, list) or not main_rows:
+        raise ValueError("Recording split manifest has no main recording rows.")
+
+    split_names = ("train", "val", "test")
+    ids = {name: set() for name in split_names}
+    assignments = {}
+    for row in main_rows:
+        recording_id, split = row.get("recording_id"), row.get("split")
+        if not recording_id or split not in ids:
+            raise ValueError(f"Invalid main recording split row: {row!r}")
+        assignments.setdefault(recording_id, set()).add(split)
+        ids[split].add(recording_id)
+
+    overlaps = {
+        "train__val": sorted(ids["train"] & ids["val"]),
+        "train__test": sorted(ids["train"] & ids["test"]),
+        "val__test": sorted(ids["val"] & ids["test"]),
+    }
+    inconsistent = sorted(recording_id for recording_id, splits in assignments.items() if len(splits) != 1)
+    shifted_ids = sorted({row["recording_id"] for row in manifest.get("shifted", []) if row.get("recording_id")})
+    main_ids = set().union(*ids.values())
+    shifted_overlap = sorted(main_ids & set(shifted_ids))
+    return {
+        "main_recording_ids_by_split": {name: sorted(ids[name]) for name in split_names},
+        "main_recording_counts": {name: len(ids[name]) for name in split_names},
+        "pairwise_main_split_overlaps": overlaps,
+        "inconsistent_main_recording_assignments": inconsistent,
+        "main_splits_disjoint": not any(overlaps.values()) and not inconsistent,
+        "shifted_test_recording_ids": shifted_ids,
+        "shifted_test_overlap_with_main": shifted_overlap,
+        "shifted_test_disjoint_from_main": not shifted_overlap,
+    }
+
+
+def format_target(key, value):
+    if value is None:
+        return "report"
+    if key == "processing_time_per_segment_local_seconds":
+        return f"< {value:g} seconds"
+    if key.endswith("near_0_db_0_to_1"):
+        return f"> {value * 100:.0f}%"
+    return f">= {value * 100:.0f}%"
+
+
 def metric(label, row, key="estimate"):
     row = row or {}
     return f"| {label} | {pct(row.get(key))} | {ci(row)} | {support(row)} |"
@@ -40,7 +87,7 @@ def matrix(labels, values):
     return "\n".join(out)
 
 
-def build_results(m, repo):
+def build_results(m, repo, split_audit):
     main, shifted = m["main_test"], m["shifted_test"]
     yolo, energy, pam = main["yolo"], main["energy_baseline"], main["pam"]
     target_info = [
@@ -60,6 +107,7 @@ def build_results(m, repo):
         f"Detector training status: {m.get('training_status', {}).get('detector', 'not measured')}; checkpoint: {m.get('training_status', {}).get('detector_checkpoint_used', 'not measured')}; requested epochs: {m.get('training_status', {}).get('detector_epochs_requested', 'not measured')}.",
         f"PAM training status: {m.get('training_status', {}).get('pam', 'not measured')}; epochs completed: {m.get('training_status', {}).get('pam_epochs_completed', 'not measured')} of {m.get('training_status', {}).get('pam_epochs_requested', 'not measured')}.",
         f"Recording support: main test {m.get('support', {}).get('main_test_recordings', 'not measured')} recordings / {m.get('support', {}).get('main_test_segments', 'not measured')} segments; shifted test {m.get('support', {}).get('shifted_test_recordings', 'not measured')} recordings / {m.get('support', {}).get('shifted_test_segments', 'not measured')} segments.",
+        f"Recording-ID leakage audit: train={split_audit['main_recording_counts']['train']}, validation={split_audit['main_recording_counts']['val']}, test={split_audit['main_recording_counts']['test']}; main splits are pairwise disjoint; shifted test IDs are separate. See [split_audit.json](results/reduced_cpu/split_audit.json) for IDs.",
         f"SNR definition: {m.get('snr_definition', 'not measured')}.",
         "Confidence intervals use recording-level bootstrap resampling. Cells with fewer than 30 signals are marked LOW-SUPPORT.",
         "", "## Acceptance targets", "",
@@ -240,6 +288,11 @@ def build_results(m, repo):
 def update_readme(repo, m):
     path = repo / "README.md"
     text = path.read_text(encoding="utf-8")
+    text = text.replace(
+        "| Acceptance metric | Target | Reduced CPU measured | Recording-level 95% CI | Support | Status |\n"
+        "|---|---:|---:|---:|---|---|\n" + START,
+        START,
+    )
     if START not in text or END not in text:
         raise ValueError("README reduced-results markers are missing")
     text = text.replace(
@@ -272,12 +325,10 @@ def update_readme(repo, m):
         sup = support(r.get("support")) if r.get("support") else "owner measurement pending"
         if key == "processing_time_per_segment_local_seconds":
             value, ci_text, sup = None, "not applicable", "owner measurement pending"
-        threshold = r.get("target")
-        if isinstance(threshold, (int, float)):
-            threshold = f">= {threshold * 100:.0f}%" if threshold >= 0.1 else (f"> {threshold * 100:.0f}%" if key.endswith("0_to_1") else f"< {threshold:g} seconds")
-        rows.append(f"| {label} | {threshold or 'report'} | {pct(value)} | {ci_text} | {sup} | not comparable |")
+        threshold = format_target(key, r.get("target"))
+        rows.append(f"| {label} | {threshold} | {pct(value)} | {ci_text} | {sup} | not comparable |")
     rows += ["", f"Main test support: {m.get('support', {}).get('main_test_recordings', 'not measured')} recordings / {m.get('support', {}).get('main_test_segments', 'not measured')} segments; shifted test: {m.get('support', {}).get('shifted_test_recordings', 'not measured')} recordings / {m.get('support', {}).get('shifted_test_segments', 'not measured')} segments.", "",
-             "See [RESULTS.md](RESULTS.md) and [the measured metrics JSON](results/reduced_cpu/metrics.json) for per-class/per-SNR CIs, support, confusion matrices, and plots. Cells under 30 signals are LOW-SUPPORT.", ""]
+             "See [RESULTS.md](RESULTS.md), [the measured metrics JSON](results/reduced_cpu/metrics.json), and [the recording split audit](results/reduced_cpu/split_audit.json) for per-class/per-SNR CIs, support, confusion matrices, split IDs, and plots. Cells under 30 signals are LOW-SUPPORT.", ""]
     replacement = START + "\n" + "\n".join(rows) + END
     text = text[:text.index(START)] + replacement + text[text.index(END) + len(END):]
     path.write_text(text, encoding="utf-8")
@@ -293,6 +344,15 @@ def main():
     if not source.is_file():
         raise FileNotFoundError(f"Measured metrics are missing: {source}")
     m = json.loads(source.read_text(encoding="utf-8"))
+    manifest_source = run / "results" / "dataset_manifest.json"
+    if not manifest_source.is_file():
+        raise FileNotFoundError(f"Recording split manifest is missing: {manifest_source}")
+    split_audit = build_split_audit(json.loads(manifest_source.read_text(encoding="utf-8")))
+    if not split_audit["main_splits_disjoint"] or not split_audit["shifted_test_disjoint_from_main"]:
+        raise ValueError("Refusing to publish results with overlapping recording IDs across splits.")
+    expected_counts = m.get("split_counts_recordings", {})
+    if any(expected_counts.get(name) != count for name, count in split_audit["main_recording_counts"].items()):
+        raise ValueError("Metric split counts do not match the recording manifest.")
     if m.get("training_status", {}).get("evaluation_completed") is not True:
         raise ValueError("Refusing to publish because evaluation did not complete.")
     if m.get("comparison_scope") != "not_comparable":
@@ -301,6 +361,7 @@ def main():
     if dest.exists():
         shutil.rmtree(dest)
     (dest / "plots").mkdir(parents=True)
+    (dest / "split_audit.json").write_text(json.dumps(split_audit, indent=2) + "\n", encoding="utf-8")
     m["metrics_path"] = "results/reduced_cpu/metrics.json"
     (dest / "metrics.json").write_text(json.dumps(m, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     summary = run / "results" / "summary.txt"
@@ -315,7 +376,7 @@ def main():
         (dest / "summary.txt").write_text("\n".join(safe_lines) + "\n", encoding="utf-8")
     for plot in (run / "plots").glob("*.png"):
         shutil.copy2(plot, dest / "plots" / plot.name)
-    (repo / "RESULTS.md").write_text(build_results(m, repo), encoding="utf-8")
+    (repo / "RESULTS.md").write_text(build_results(m, repo, split_audit), encoding="utf-8")
     update_readme(repo, m)
     print(f"Published measured reduced CPU results from {source}")
 

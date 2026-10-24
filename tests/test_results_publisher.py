@@ -1,4 +1,6 @@
-from scripts.publish_reduced_results import END, START, matrix, pct, support, update_readme
+from scripts.publish_reduced_results import (
+    END, START, build_split_audit, format_target, matrix, pct, support, update_readme,
+)
 
 
 def test_missing_metrics_stay_unmeasured():
@@ -16,7 +18,8 @@ def test_low_support_is_explicit():
 def test_readme_publisher_changes_only_marked_results_block(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(
-        "intro\n" + START + "\nplaceholder\n" + END + "\noutro\n",
+        "intro\n| Acceptance metric | Target | Reduced CPU measured | Recording-level 95% CI | Support | Status |\n"
+        "|---|---:|---:|---:|---|---|\n" + START + "\nplaceholder\n" + END + "\noutro\n",
         encoding="utf-8",
     )
     keys = (
@@ -56,3 +59,28 @@ def test_empty_detector_cells_are_not_reported_as_zero():
     )
     assert no_ground_truth["estimate"] is None
     assert no_ground_truth["ci95"] == [None, None]
+
+
+def test_target_formatting_preserves_strictness_and_units():
+    assert format_target("pam_oracle_accuracy_near_0_db_0_to_1", 0.5) == "> 50%"
+    assert format_target("processing_time_per_segment_local_seconds", 5) == "< 5 seconds"
+
+
+def test_recording_split_audit_detects_disjoint_and_overlapping_ids():
+    manifest = {
+        "main": [
+            {"recording_id": "r-train", "split": "train"},
+            {"recording_id": "r-val", "split": "val"},
+            {"recording_id": "r-test", "split": "test"},
+        ],
+        "shifted": [{"recording_id": "shift-0"}],
+    }
+    audit = build_split_audit(manifest)
+    assert audit["main_splits_disjoint"]
+    assert audit["shifted_test_disjoint_from_main"]
+    assert audit["main_recording_counts"] == {"train": 1, "val": 1, "test": 1}
+
+    manifest["main"].append({"recording_id": "r-train", "split": "test"})
+    audit = build_split_audit(manifest)
+    assert not audit["main_splits_disjoint"]
+    assert audit["pairwise_main_split_overlaps"]["train__test"] == ["r-train"]
