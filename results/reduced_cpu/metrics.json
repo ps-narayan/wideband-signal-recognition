@@ -125,7 +125,7 @@
     "autoanchor_training_log_excerpt": [
       "\u001b[34m\u001b[1mAutoAnchor: \u001b[0m3.33 anchors/target, 0.958 Best Possible Recall (BPR). Anchors are a poor fit to dataset \u26a0\ufe0f, attempting to improve...",
       "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mRunning kmeans for 9 anchors on 72 points...",
-      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7747: 100% \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 1000/1000 6.7Kit/s 0.1s",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7747: 100% \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 1000/1000 13.8Kit/s 0.1s",
       "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mthr=0.25: 1.0000 best possible recall, 4.97 anchors past thr",
       "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mn=9, img_size=640, metric_all=0.333/0.775-mean/best, past_thr=0.472-mean: 7,20, 14,12, 27,8, 13,28, 55,8, 26,37, 108,9, 68,31, 146,20",
       "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mDone \u2705 (optional: update model *.yaml to use these anchors in the future)"
@@ -133,8 +133,8 @@
   },
   "snr_definition": "10*log10(total clean signal power / total added noise power over the full I/Q segment)",
   "runtime_seconds_pipeline": {
-    "data_generation": 8.410121461999978,
-    "total": 62.69170220999999,
+    "data_generation": 9.13046796799999,
+    "total": 56.166612220000005,
     "note": "Measured end-to-end runtime on the configured execution device."
   },
   "split_counts_recordings": {
