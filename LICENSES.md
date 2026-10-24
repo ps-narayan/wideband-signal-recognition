@@ -8,6 +8,8 @@ This repository is licensed under the GNU Affero General Public License, version
 
 The notebook fetches, but does not vendor, YOLOv5 commit `f9578796b8a64889aa9e66dc06914d19f40d338e`. The exact revision's upstream `LICENSE` identifies GNU AGPL version three. The notebook and training script verify the full commit, required train/detect options, AutoAnchor implementation, and training log before accepting the detector run.
 
+The pinned runtime helpers `ultralytics==8.4.164` and `ultralytics-thop==2.2.1` are also distributed under AGPL-3.0. They are installed as dependencies and are not copied into this repository.
+
 - [Pinned YOLOv5 license](https://github.com/ultralytics/yolov5/blob/f9578796b8a64889aa9e66dc06914d19f40d338e/LICENSE)
 - [Pinned training interface](https://github.com/ultralytics/yolov5/blob/f9578796b8a64889aa9e66dc06914d19f40d338e/train.py)
 - [Pinned detection interface](https://github.com/ultralytics/yolov5/blob/f9578796b8a64889aa9e66dc06914d19f40d338e/detect.py)

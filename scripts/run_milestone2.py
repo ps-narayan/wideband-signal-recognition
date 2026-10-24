@@ -117,7 +117,14 @@ def _check_yolo(yolo_dir: Path) -> dict:
         [sys.executable, "detect.py", "--help"], cwd=yolo_dir, text=True, capture_output=True
     )
     if train_help.returncode or detect_help.returncode:
-        raise RuntimeError("Pinned YOLOv5 train.py/detect.py help checks failed")
+        failures = []
+        for name, result in (("train.py", train_help), ("detect.py", detect_help)):
+            if result.returncode:
+                details = (result.stderr or result.stdout or "No diagnostic output").strip()
+                failures.append(f"{name} exited {result.returncode}:\n{details[-6000:]}")
+        raise RuntimeError(
+            "Pinned YOLOv5 train.py/detect.py help checks failed:\n" + "\n".join(failures)
+        )
     for option in (
         "--cfg", "--weights", "--epochs", "--img", "--hyp", "--noautoanchor",
         "--batch-size", "--data", "--device", "--workers", "--project",

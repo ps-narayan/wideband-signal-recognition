@@ -66,6 +66,21 @@ jobs:
           python -m pytest -q
           python scripts/smoke_test.py
 
+      - name: Verify GitHub Actions can write results
+        id: write_check
+        run: |
+          set -euo pipefail
+          probe="actions-write-check-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          cleanup() { git push origin --delete "$probe" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          if ! git push origin "HEAD:refs/heads/$probe"; then
+            echo "::error::GITHUB_TOKEN could not create a temporary branch. In repository settings, open Settings > Actions > General > Workflow permissions and select Read and write permissions."
+            echo "Workflow write preflight failed. Check Settings > Actions > General > Workflow permissions and select Read and write permissions." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          git push origin --delete "$probe"
+          trap - EXIT
+
       - name: Verify minimum-box visibility at -5 dB over 50 seeds
         id: visibility
         env:
@@ -99,6 +114,12 @@ jobs:
             --evaluation-reserve-minutes 45 \
             --run-label "reduced run: CPU, small data, not comparable to target"
 
+      - name: Fast-forward main before publishing results
+        id: sync
+        run: |
+          git fetch origin main
+          git merge --ff-only origin/main
+
       - name: Publish measured results to README and RESULTS
         id: publish
         env:
@@ -116,6 +137,7 @@ jobs:
             echo "No measured-result changes to commit."
           else
             git commit -m "Record measured reduced CPU results [skip ci]"
+            git pull --rebase origin main
             git push origin HEAD:main
           fi
 
@@ -127,9 +149,8 @@ jobs:
           name: reduced-cpu-run-${{ github.run_id }}
           if-no-files-found: warn
           path: |
-            ${{ runner.temp }}/wideband-reduced-run/results/metrics.json
-            ${{ runner.temp }}/wideband-reduced-run/results/summary.txt
-            ${{ runner.temp }}/wideband-reduced-run/results/*.log
+            ${{ runner.temp }}/wideband-reduced-run/results/**
+            ${{ runner.temp }}/wideband-reduced-run/checkpoints/**
             ${{ runner.temp }}/wideband-reduced-run/plots/*.png
             ${{ runner.temp }}/visibility-check/visibility_summary.json
             ${{ runner.temp }}/visibility-check/worst_seed_spectrogram.png
@@ -143,7 +164,9 @@ jobs:
           YOLO_RESULT: ${{ steps.yolo.outcome }}
           TESTS_RESULT: ${{ steps.tests.outcome }}
           VISIBILITY_RESULT: ${{ steps.visibility.outcome }}
+          WRITE_RESULT: ${{ steps.write_check.outcome }}
           PIPELINE_RESULT: ${{ steps.pipeline.outcome }}
+          SYNC_RESULT: ${{ steps.sync.outcome }}
           PUBLISH_RESULT: ${{ steps.publish.outcome }}
           COMMIT_RESULT: ${{ steps.commit.outcome }}
           ARTIFACTS_RESULT: ${{ steps.artifacts.outcome }}
@@ -157,10 +180,15 @@ jobs:
             echo "- dependency install: $INSTALL_RESULT"
             echo "- YOLOv5 pin verification: $YOLO_RESULT"
             echo "- tests: $TESTS_RESULT"
+            echo "- Actions write permission preflight: $WRITE_RESULT"
             echo "- visibility check: $VISIBILITY_RESULT"
             echo "- training/evaluation: $PIPELINE_RESULT"
+            echo "- fast-forward main before publication: $SYNC_RESULT"
             echo "- measured-result publication: $PUBLISH_RESULT"
             echo "- commit/push: $COMMIT_RESULT"
             echo "- artifact upload: $ARTIFACTS_RESULT"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "Reduced CPU workflow failed. Review the first failed step in the job log and the step-outcomes summary."
+          if [ "$WRITE_RESULT" = "failure" ]; then
+            echo "If the write preflight failed, open repository Settings > Actions > General > Workflow permissions and select Read and write permissions." >> "$GITHUB_STEP_SUMMARY"
+          fi

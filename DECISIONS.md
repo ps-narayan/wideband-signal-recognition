@@ -2,6 +2,11 @@
 
 - Use the GNU AGPL version three for this project because the reproducible detector dependency is distributed under the same copyleft license.
 - Pin YOLOv5 to full commit `f9578796b8a64889aa9e66dc06914d19f40d338e` because its source license and the required train, detect, and AutoAnchor interfaces were verified at that exact revision.
+- Pin `ultralytics==8.4.164`, `ultralytics-thop==2.2.1`, and `ultralytics-platform==0.1.45` because the pinned YOLOv5 source imports these runtime helpers; pinning them fixes the missing-module startup failure.
+- Preflight write access by creating and deleting a unique temporary branch after tests pass; this verifies the built-in workflow token before spending time on visibility and model training.
+- Fast-forward the checkout immediately before publishing so results from a long run apply to the latest main branch without overwriting intervening documentation or code changes.
+- Rebase the generated result commit onto the latest main tip immediately before its push to handle a commit that lands between publication and push.
+- Upload the run's results directory and checkpoints as artifacts even after failure so a time-limited or interrupted run remains inspectable and recoverable.
 - Use YOLOv5n at the agreed image size because a small detector is more appropriate for a free T4 session; the measured detector metrics, not the architecture name, decide whether it is adequate.
 - Keep the energy detector as a geometry baseline and fallback because it cannot supply modulation labels and must not gate class predictions.
 - Keep labels derived only from generator parameters because raster-derived labels would bake image-processing errors into the ground truth.
