@@ -26,10 +26,6 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       WANDB_MODE: disabled
-      RUN_DIR: ${{ runner.temp }}/wideband-reduced-run
-      DATA_WORK: ${{ runner.temp }}/wideband-reduced-data
-      YOLO_DIR: ${{ runner.temp }}/yolov5-pinned
-      VISIBILITY_DIR: ${{ runner.temp }}/visibility-check
     steps:
       - name: Check out main using the built-in workflow token
         id: checkout
@@ -57,6 +53,8 @@ jobs:
 
       - name: Fetch and verify pinned YOLOv5 source
         id: yolo
+        env:
+          YOLO_DIR: ${{ runner.temp }}/yolov5-pinned
         run: |
           git clone --filter=blob:none https://github.com/ultralytics/yolov5.git "$YOLO_DIR"
           git -C "$YOLO_DIR" checkout --detach f9578796b8a64889aa9e66dc06914d19f40d338e
@@ -70,11 +68,17 @@ jobs:
 
       - name: Verify minimum-box visibility at -5 dB over 50 seeds
         id: visibility
+        env:
+          VISIBILITY_DIR: ${{ runner.temp }}/visibility-check
         run: |
           python scripts/visibility_check.py --seeds 50 --seed-start 0 --snr-db -5 --n-samples 1000000 --output-dir "$VISIBILITY_DIR"
 
       - name: Train reduced models and evaluate frozen test sets
         id: pipeline
+        env:
+          RUN_DIR: ${{ runner.temp }}/wideband-reduced-run
+          DATA_WORK: ${{ runner.temp }}/wideband-reduced-data
+          YOLO_DIR: ${{ runner.temp }}/yolov5-pinned
         run: |
           python scripts/run_milestone2.py \
             --config configs/reduced_cpu.yaml \
@@ -97,6 +101,8 @@ jobs:
 
       - name: Publish measured results to README and RESULTS
         id: publish
+        env:
+          RUN_DIR: ${{ runner.temp }}/wideband-reduced-run
         run: |
           python scripts/publish_reduced_results.py --run-dir "$RUN_DIR"
 
