@@ -1,6 +1,8 @@
 # Wideband Signal Recognition
 
-The synthetic-to-CLI pipeline runs end to end, but the reduced CPU YOLOv5n did not learn useful detections. It processes I/Q through detection, PAM classification, and JSON plus annotated-spectrogram output. Latest measured reduced CPU run: YOLOv5n trained for 135 requested epochs; recall 37.50% (recording-bootstrap CI [25.00%, 50.00%]; 4 recordings / 24 signals; LOW-SUPPORT) and mAP@0.5 at global SNR >= 5 dB 28.78% (CI [20.00%, 64.02%]; 3 recordings / 18 signals; LOW-SUPPORT). The energy geometry baseline had higher held-out recall (54.17% vs 37.50%; CI [25.00%, 83.33%]; 4 recordings / 24 signals; LOW-SUPPORT), but this is not a matched-precision comparison (energy precision 50.00%; YOLO precision 60.00%). Validation calibration attained the 80% precision target for YOLO: True; energy baseline: True. PAM all-signal accuracy was 35.00% (uniform seven-class chance: 1/7 = 14.29%; CI [15.00%, 55.00%]; 4 recordings / 20 signals; LOW-SUPPORT). These are reduced CPU measurements and are not comparable to the full-scale targets; full GPU results remain unmeasured. See [DIAGNOSIS.md](DIAGNOSIS.md) for the training-only bug check and [RESULTS.md](RESULTS.md) for complete results.
+The synthetic pipeline runs end to end, including a checkpoint-backed YOLOv5 + PAM CLI. The reduced CPU detector generalized poorly on held-out synthetic data: recall was 37.50%, below the energy baseline's 54.17%; PAM oracle-box subtype accuracy was 0.00% on four signals. The trained detector still has six classes. A separate SigMF converter writes the paper's 12-class label map, but the Zenodo/DeepSig recordings have not been downloaded, used for training, or evaluated. Full-scale and 12-class results are not measured.
+
+Latest measured reduced CPU run: YOLOv5n trained for 135 requested epochs; all-SNR class-agnostic recall was 37.50% (recording-bootstrap CI [25.00%, 50.00%]; 4 recordings / 24 signals; LOW-SUPPORT), and mAP@0.5 at global SNR >= 5 dB was 28.78% (CI [20.00%, 64.02%]; 3 recordings / 18 signals; LOW-SUPPORT). The energy geometry baseline had higher held-out recall (54.17% vs 37.50%; CI [25.00%, 83.33%]; 4 recordings / 24 signals; LOW-SUPPORT), though test precision differed (energy 50.00%; YOLO 60.00%). PAM accuracy including `Others` was 35.00% (chance 1/7 = 14.29%; CI [15.00%, 55.00%]; 4 recordings / 20 signals; LOW-SUPPORT); PAM oracle-box subtype accuracy was 0.00% (chance 14.29%; CI [0.00%, 0.00%]; 4 recordings / 4 PAM signals; LOW-SUPPORT). The 12-class and full-scale results are not measured. Reduced CPU numbers are not comparable to the portfolio targets. See [DIAGNOSIS.md](DIAGNOSIS.md) and [RESULTS.md](RESULTS.md).
 
 ## Architecture
 
@@ -13,7 +15,7 @@ flowchart LR
     E --> F[Time and frequency boxes]
     F --> G[Resolution status and extraction]
     G --> H[Bandpass, downconvert, frame]
-    H --> I[Optional PAM CNN]
+    H --> I[PAM CNN]
     I --> J[Detections JSON]
     F --> J
     C --> K[Annotated spectrogram PNG]
@@ -37,6 +39,8 @@ For a larger run, open [notebooks/milestone2_detector_pam_evaluation.ipynb](note
 
 The CLI accepts a SigMF .sigmf-meta or .sigmf-data pair, a complex-IQ .npy file, an .npz file with an iq array, or raw interleaved complex samples. SigMF's declared datatype and sample rate are read from metadata. Supported SigMF complex datatypes are cf32_le/be, cf64_le/be, ci16_le/be, cu16_le/be, ci8, and cu8; unsupported types stop with an explicit error. This is a supported subset of the [SigMF dataset specification](https://sigmf.org/sigmf-spec.pdf).
 
+The CLI defaults to YOLO+PAM and requires both trained checkpoints. `--detector-only` explicitly disables subtype classification, and `--backend energy` explicitly selects the class-agnostic geometry baseline. `--detector-class-map` accepts a JSON class list when a checkpoint uses a custom order; without it, the CLI uses the six-class order of the published reduced checkpoint.
+
 Install the same pinned runtime dependencies used by the notebook. For a local CPU machine, use the CPU PyTorch wheel index:
 
 ~~~powershell
@@ -55,7 +59,19 @@ python -m wideband_recognition.cli "capture.sigmf-meta" --detector-weights "chec
 
 Use `--image-size` to match the checkpoint's training resolution; the medium CPU checkpoint uses 1280. For .npy, .npz, or raw IQ, pass `--sample-rate-hz` if time in seconds and frequency in Hz are wanted. Without a rate, output uses sample indices and normalized cycles/sample. `frequency_range.offset_hz_from_baseband_center` is the frequency offset around the complex baseband center; absolute_hz is included only when SigMF also supplies core:frequency. The detector threshold defaults to 0.25; pass the validation-calibrated threshold printed in the run's metrics.json for the measured operating point. Never select a threshold from test results.
 
-The output folder contains detections.json and one annotated_segment_XXXXX.png per processed chunk. Each detection records confidence, detector class, time_sample_range, frequency_range, and resolution_status; time_seconds appears when a sample rate is known. The report also records processed and omitted sample counts because the 512-sample STFT leaves a short remainder outside each image. A PAM subtype is populated only when PAM weights are provided and the predicted box is resolvable and long enough for extraction. The CLI marks close boxes unresolved and skips PAM subtype inference for them.
+The output folder contains detections.json and one annotated_segment_XXXXX.png per processed chunk. Each detection records confidence, detector class, time_sample_range, frequency_range, and resolution_status; time_seconds appears when a sample rate is known. The report also records processed and omitted sample counts because the 512-sample STFT leaves a short remainder outside each image. The default cascade requires PAM weights and records a subtype only when the detected PAM box can be resolved and extracted. The CLI marks close boxes unresolved and skips subtype inference for them.
+
+A checkpoint-backed CLI run completed on one generated 1M-sample, 16-QAM SigMF file with global SNR 10 dB and the validation-calibrated confidence threshold. It produced zero accepted detections, so it emitted no PAM subtype. This is an integration smoke example, not an accuracy measurement; see [the saved JSON and annotated image](examples/reduced_cpu_yolo/README.md).
+
+### Prepare annotated SigMF recordings for the 12-class detector
+
+The importer reads each complex-I/Q segment in turn, builds ground-truth boxes from SigMF annotations, and writes spectrograms, YOLO labels, recording/segment manifests, a dataset YAML, and a class-name JSON file. Assign splits per parent recording before conversion, keeping every segment of a recording in one split:
+
+~~~powershell
+python scripts/prepare_sigmf_dataset.py --meta "data/recording.sigmf-meta" --output "outputs/sigmf_dataset" --recording-id "recording-001" --split train
+~~~
+
+Repeat for each recording, choosing `train`, `val`, or `test` at the recording level. Explicit PSK/QAM/APSK labels map to `PAM`. The converter requires GMSK1 or GMSK2 labels and rejects generic `GMSK`, since the paper separates those detector classes by spectrogram shape. This is a data-preparation path only: the existing training workflow still uses its six-class synthetic profile, and no external recordings have been converted in a project run.
 
 ### Reduced CPU demonstration without checkpoints
 
@@ -83,20 +99,20 @@ Main test support: 4 recordings / 4 segments; shifted test: 4 recordings / 4 seg
 See [RESULTS.md](RESULTS.md), [the measured metrics JSON](results/reduced_cpu/metrics.json), and [the recording split audit](results/reduced_cpu/split_audit.json) for per-class/per-SNR CIs, support, confusion matrices, split IDs, and plots. Cells under 30 signals are LOW-SUPPORT.
 <!-- REDUCED_CPU_RESULTS_END -->
 
-Per-class and per-SNR metrics, confidence intervals, support counts, confusion matrices, and plots are linked from [RESULTS.md](RESULTS.md). The [recording split audit](results/reduced_cpu/split_audit.json) lists the run's train, validation, and test recording IDs. Cells with fewer than 30 signals are marked LOW-SUPPORT. Both geometry methods use validation-calibrated operating points targeting 80% precision; YOLO did not attain that target while the energy baseline did, so this run does not provide a matched-precision comparison. Class mAP@0.5 is reported separately. Investigate misses with validation only; keep both test sets frozen.
+Per-class and per-SNR metrics, confidence intervals, support counts, confusion matrices, and plots are linked from [RESULTS.md](RESULTS.md). The [recording split audit](results/reduced_cpu/split_audit.json) lists the run's train, validation, and test recording IDs. Cells with fewer than 30 signals are marked LOW-SUPPORT. YOLO and the geometry baseline both attained their validation-calibrated 80% precision target, but measured test precision differed (60% versus 50%), so the held-out recall comparison is not a matched-test-precision comparison. Class mAP@0.5 is reported separately. Investigate misses with validation only; keep both test sets frozen.
 
 ## Final limitations
 
 - The signal generator is synthetic and compact, not a standards-validated transmitter or a receiver emulator. There is no confirmed real DeepSig evaluation.
 - The primary synthetic layout has no time-frequency overlap; overlap is not covered except as a possible future stress test.
 - The shifted test is synthetic. A held-out seed from this generator does not establish real-world generalization.
-- The detector currently uses six labels: AM-DSB, FM, OFDM, 2-FSK, OOK, and PAM. The paper's AM-SSB, 2-CPFSK, 4-FSK, 4-CPFSK, GMSK1, and GMSK2 detector classes are not implemented. PAM merges phase/amplitude modulation for detection, then classifies a subtype from extracted I/Q. This code is not the full twelve-class reproduction.
+- The published reduced detector checkpoint and its measured run use six labels: AM-DSB, FM, OFDM, 2-FSK, OOK, and PAM. The SigMF preparation route supports the paper's 12-class label order, but those additional classes have not been trained or evaluated, and the synthetic benchmark training workflow remains six-class. PAM oracle-box subtype accuracy was 0.00% on four PAM test signals, so no subtype-performance claim is warranted.
 - OOK versus narrow AM-DSB and FM versus PAM confusion are expected cases to measure and inspect.
 - The model does not simulate fading, residual carrier-frequency offset beyond deliberate extraction-error tests, oscillator phase noise, IQ imbalance, DC offset, nonlinear RF hardware distortion, ADC quantization, AGC behavior, or sample-clock drift.
 - The filter and classifier use the detector's estimated box; localization error can shift or clip the extracted signal and lower PAM accuracy.
 - The 640-pixel reduced profile can erase details in the smallest boxes. The medium CPU diagnostic profile resizes to 1280 pixels. Minimum bandwidth and duration checks reduce visibility risk but do not prove detector localization succeeds.
 - Raw IQ files without sample-rate metadata cannot produce time in seconds or frequency in Hz. Only the explicitly listed SigMF datatypes are supported by this reader. It accepts one complex channel and conforming sample data; multi-channel recordings, dataset header/trailer bytes, and sample discontinuities are rejected. The current implementation reads the selected file into memory before chunking it.
 - The local processing-time target must be measured on the owner's hardware; a GitHub-hosted CPU or Colab T4 timing is not a substitute.
-- License status for the Zenodo companion remains unverified by the project owner; no external dataset is included.
+- The Zenodo record's Rights field was verified as CC BY-SA 4.0 and its four archives total 57,472,189,381 bytes. No data were downloaded because the complete record exceeds local free disk; the importer has not been run on that record. DeepSig access/licensing remains unverified and no real-data results exist.
 
 See [EXPLAINER.md](EXPLAINER.md) for interview notes and [DECISIONS.md](DECISIONS.md) for one-line design rationale. The project and dependency license notes are in [LICENSES.md](LICENSES.md).

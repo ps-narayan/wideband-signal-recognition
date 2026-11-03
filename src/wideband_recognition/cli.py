@@ -147,7 +147,11 @@ def _save_detector_image(resized: np.ndarray, destination: Path) -> None:
     Image.fromarray(pixels, mode="L").save(destination)
 
 
-def _read_yolo_labels(path: Path, image_size: int = IMAGE_SIZE) -> list[dict[str, Any]]:
+def _read_yolo_labels(
+    path: Path,
+    image_size: int = IMAGE_SIZE,
+    class_names: tuple[str, ...] = DETECTOR_CLASSES,
+) -> list[dict[str, Any]]:
     predictions = []
     if not path.is_file():
         return predictions
@@ -157,7 +161,7 @@ def _read_yolo_labels(path: Path, image_size: int = IMAGE_SIZE) -> list[dict[str
             raise ValueError(f"expected YOLO label with confidence on line {line_number} in {path}")
         class_id, cx, cy, width, height, confidence = parts
         class_index = int(class_id)
-        if class_index != class_id or not 0 <= class_index < len(DETECTOR_CLASSES):
+        if class_index != class_id or not 0 <= class_index < len(class_names):
             raise ValueError(f"invalid detector class id {class_id} in {path}")
         if not (0 <= cx <= 1 and 0 <= cy <= 1 and 0 < width <= 1 and 0 < height <= 1):
             raise ValueError(f"invalid normalized YOLO box in {path}: {line.strip()}")
@@ -172,9 +176,23 @@ def _read_yolo_labels(path: Path, image_size: int = IMAGE_SIZE) -> list[dict[str
         x1, y1, x2, y2 = np.clip(
             (x1, y1, x2, y2), 0.0, float(image_size)
         )
-        predictions.append({"class": DETECTOR_CLASSES[class_index], "confidence": float(confidence),
+        predictions.append({"class": class_names[class_index], "confidence": float(confidence),
                             "xyxy": (x1, y1, x2, y2)})
     return predictions
+
+
+def _load_detector_classes(path: str | Path | None) -> tuple[str, ...]:
+    """Load the exact class order used by a custom detector checkpoint."""
+    if path is None:
+        return DETECTOR_CLASSES
+    payload = json.loads(Path(path).expanduser().read_text(encoding="utf-8"))
+    names = payload.get("names") if isinstance(payload, dict) else payload
+    if not isinstance(names, list) or not names or not all(isinstance(name, str) for name in names):
+        raise ValueError("detector class map must be a JSON list of names or an object with a names list")
+    result = tuple(names)
+    if len(set(result)) != len(result):
+        raise ValueError("detector class names must be unique and preserve the checkpoint's class order")
+    return result
 
 
 def _isolated_yolo_environment(cache_root: Path) -> dict[str, str]:
@@ -201,11 +219,23 @@ def _isolated_yolo_environment(cache_root: Path) -> dict[str, str]:
         shutil.copyfile(local_font, font_path)
 
     environment = os.environ.copy()
+    # GitHub Actions checkpoints are serialized on Linux and contain pathlib.PosixPath
+    # objects. Windows cannot instantiate that class, so alias it only in YOLO's
+    # subprocess before pickle loading. The parent CLI process is left untouched.
+    compatibility = cache_root / "sitecustomize.py"
+    compatibility.write_text(
+        "import os, pathlib\n"
+        "if os.name == 'nt':\n"
+        "    pathlib.PosixPath = pathlib.WindowsPath\n",
+        encoding="utf-8",
+    )
+    existing_pythonpath = environment.get("PYTHONPATH")
     environment.update({
         "APPDATA": str(appdata),
         "YOLO_CONFIG_DIR": str(config_dir),
         "YOLOV5_CONFIG_DIR": str(config_dir),
         "MPLCONFIGDIR": str(mpl_config_dir),
+        "PYTHONPATH": str(cache_root) + (os.pathsep + existing_pythonpath if existing_pythonpath else ""),
     })
     return environment
 
@@ -286,6 +316,8 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
     source = Path(args.input).expanduser().resolve()
     output_dir = Path(args.output_dir).expanduser().resolve()
     backend = getattr(args, "backend", "yolo")
+    detector_only = bool(getattr(args, "detector_only", False))
+    class_names = _load_detector_classes(getattr(args, "detector_class_map", None))
     image_size = int(getattr(args, "image_size", IMAGE_SIZE))
     max_detections = int(getattr(args, "max_detections", 3000))
     if image_size <= 0 or image_size % 32:
@@ -296,6 +328,15 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("backend must be yolo or energy")
     sha, weights, detect_script = None, None, None
     if backend == "yolo":
+        if not args.pam_weights and not detector_only:
+            raise ValueError(
+                "default YOLO+PAM mode requires --pam-weights; pass --detector-only "
+                "to run object detection without subtype classification"
+            )
+        if args.pam_weights and detector_only:
+            raise ValueError("--detector-only cannot be combined with --pam-weights")
+        if args.pam_weights and "PAM" not in class_names:
+            raise ValueError("detector class map must include PAM when a PAM checkpoint is supplied")
         if not args.detector_weights or not args.yolo_dir:
             raise ValueError("YOLO backend requires --detector-weights and --yolo-dir")
         yolo_dir = Path(args.yolo_dir).expanduser().resolve()
@@ -356,11 +397,15 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
                 str(detect_output), "--name", "result", "--exist-ok", "--nosave",
             ]
             completed = subprocess.run(
-                command, cwd=yolo_dir, check=True, env=yolo_environment,
+                command, cwd=yolo_dir, check=False, env=yolo_environment,
                 capture_output=True, text=True, encoding="utf-8", errors="replace",
             )
             _write_child_output(completed.stdout, sys.stdout)
             _write_child_output(completed.stderr, sys.stderr)
+            if completed.returncode != 0:
+                raise RuntimeError(
+                    f"YOLOv5 detection failed with exit code {completed.returncode}"
+                )
             label_dir = detect_output / "result" / "labels"
         else:
             from .baseline import energy_proposals
@@ -368,7 +413,9 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
         for stem, (segment_start, chunk, covered, resized) in rendered.items():
             if backend == "yolo":
                 predictions = [
-                    prediction for prediction in _read_yolo_labels(label_dir / f"{stem}.txt", image_size)
+                    prediction for prediction in _read_yolo_labels(
+                        label_dir / f"{stem}.txt", image_size, class_names
+                    )
                     if prediction["confidence"] >= args.confidence_threshold
                 ]
             else:
@@ -441,7 +488,12 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
         ),
         "detector": {
             "backend": backend,
-            "architecture": "YOLOv5n" if backend == "yolo" else "Energy geometry baseline",
+            "architecture": (
+                "YOLOv5n + PAM CNN" if backend == "yolo" and pam_model is not None
+                else "YOLOv5n detector-only" if backend == "yolo"
+                else "Energy geometry baseline"
+            ),
+            "class_names": list(class_names) if backend == "yolo" else [],
             "source_commit": sha, "weights": weights.name if weights else None,
             "confidence_threshold": args.confidence_threshold if backend == "yolo" else None,
             "max_detections_per_image": max_detections if backend == "yolo" else None,
@@ -473,10 +525,12 @@ def build_parser() -> argparse.ArgumentParser:
                         help="trained YOLO detector or class-agnostic geometry baseline")
     parser.add_argument("--detector-weights", help="Milestone 2 YOLOv5n best.pt; required for yolo backend")
     parser.add_argument("--yolo-dir", help="checkout at the pinned YOLOv5 revision; required for yolo backend")
+    parser.add_argument("--detector-class-map", help="JSON list of names matching a custom detector checkpoint; defaults to the six-class reduced model")
     parser.add_argument("--energy-mask-threshold", type=float, default=1.0,
                         help="normalized spectrogram mask threshold for energy backend")
     parser.add_argument("--output-dir", default="outputs/cli", help="directory for JSON and annotated PNG files")
-    parser.add_argument("--pam-weights", help="optional Milestone 2 PAM CNN checkpoint")
+    parser.add_argument("--pam-weights", help="PAM CNN checkpoint required by the default YOLO+PAM mode")
+    parser.add_argument("--detector-only", action="store_true", help="explicitly disable PAM subtype classification")
     parser.add_argument("--sample-rate-hz", type=float, help="optional for raw/NumPy; required for Hz and seconds")
     parser.add_argument("--raw-dtype", default="complex64", help="raw file dtype, default complex64")
     parser.add_argument("--segment-samples", type=int, default=DEFAULT_SEGMENT_SAMPLES)

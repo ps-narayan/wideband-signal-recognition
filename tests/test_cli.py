@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 import unittest
 from argparse import Namespace
@@ -9,8 +10,11 @@ from unittest.mock import patch
 import numpy as np
 
 from wideband_recognition.cli import (
+    _isolated_yolo_environment,
     _frequency_output,
+    _load_detector_classes,
     _read_yolo_labels,
+    build_parser,
     extract_cli_frames,
     make_segments,
     read_iq_input,
@@ -21,6 +25,16 @@ from wideband_recognition.geometry import SignalBox
 
 
 class CliInputTests(unittest.TestCase):
+    def test_yolo_subprocess_gets_isolated_cross_platform_checkpoint_shim(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            runtime = Path(temporary) / "runtime"
+            with patch.dict("os.environ", {"PYTHONPATH": "existing-path"}):
+                environment = _isolated_yolo_environment(runtime)
+            shim = runtime / "sitecustomize.py"
+            self.assertTrue(shim.is_file())
+            self.assertIn("pathlib.PosixPath = pathlib.WindowsPath", shim.read_text(encoding="utf-8"))
+            self.assertEqual(environment["PYTHONPATH"].split(os.pathsep)[0], str(runtime))
+
     def test_sigmf_cf32_metadata_supplies_sample_rate_and_center(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -163,13 +177,14 @@ class CliInputTests(unittest.TestCase):
                 (labels / "segment_00000.txt").write_text(
                     "5 0.5 0.5 0.25 0.25 0.9\n", encoding="utf-8"
                 )
-                return SimpleNamespace(stdout="detect ok\n", stderr="")
+                return SimpleNamespace(returncode=0, stdout="detect ok\n", stderr="")
 
             args = Namespace(
                 input=str(input_path), output_dir=str(output_dir), yolo_dir=str(yolo_dir),
                 detector_weights=str(weights), confidence_threshold=0.25, device="cpu",
                 sample_rate_hz=None, raw_dtype="complex64", segment_samples=8199,
                 pam_weights=None,
+                detector_only=True,
             )
             with patch("wideband_recognition.cli.subprocess.check_output", return_value="f9578796b8a64889aa9e66dc06914d19f40d338e"), patch(
                 "wideband_recognition.cli.subprocess.run", side_effect=fake_detect
@@ -185,6 +200,28 @@ class CliInputTests(unittest.TestCase):
             self.assertTrue((output_dir / "annotated_segment_00000.png").is_file())
             saved = json.loads((output_dir / "detections.json").read_text(encoding="utf-8"))
             self.assertEqual(len(saved["detections"]), 1)
+
+    def test_default_cli_path_is_yolo_plus_pam_and_requires_pam_checkpoint(self):
+        args = build_parser().parse_args([
+            "capture.sigmf-meta", "--detector-weights", "detector.pt", "--yolo-dir", "yolov5"
+        ])
+        self.assertEqual(args.backend, "yolo")
+        self.assertFalse(args.detector_only)
+        self.assertIsNone(args.pam_weights)
+        with self.assertRaisesRegex(ValueError, "requires --pam-weights"):
+            run_inference(args)
+
+    def test_detector_class_map_can_name_all_twelve_reference_classes(self):
+        from wideband_recognition.signals import PAPER_DETECTOR_CLASSES
+
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "class_names.json"
+            path.write_text(json.dumps({"names": list(PAPER_DETECTOR_CLASSES)}), encoding="utf-8")
+            self.assertEqual(_load_detector_classes(path), PAPER_DETECTOR_CLASSES)
+            labels = Path(temporary) / "labels.txt"
+            labels.write_text("11 0.5 0.5 0.25 0.25 0.9\n", encoding="utf-8")
+            result = _read_yolo_labels(labels, class_names=PAPER_DETECTOR_CLASSES)
+        self.assertEqual(result[0]["class"], "PAM")
 
 
 if __name__ == "__main__":

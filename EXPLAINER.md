@@ -48,6 +48,10 @@ The classifier receives short complex I/Q frames, represented as two channels: I
 
 Accuracy with generator-defined boxes measures the classifier when extraction is ideal. Accuracy with detector boxes measures the effect of real localization errors. The joint end-to-end score is stricter: a detection counts only when its box overlaps enough, its detector class is correct, and its PAM subtype is correct when applicable.
 
+## What changed for the full detector labels?
+
+The reduced model that produced the published CPU results still has six classes. A separate SigMF importer can now read annotation time and frequency bounds and write YOLO labels using the paper's 12-class order. It maps PSK/QAM/APSK labels to the shared `PAM` detector class. It stops on a generic `GMSK` label because the paper splits GMSK1 and GMSK2 by spectrogram shape; assigning one automatically would invent ground truth. The importer has not been run on the Zenodo archive, and the 12-class model has not been trained.
+
 ## Why keep the energy baseline?
 
 A simple connected-component detector creates candidate boxes from bright spectrogram regions. We calibrate its confidence on validation data to the same 80 percent precision operating target as YOLO when possible. Then we compare class-agnostic recall and mean IoU on the untouched test recordings. YOLO class mAP is reported separately because the energy baseline has no class labels.
@@ -56,4 +60,4 @@ If YOLO does not improve geometry enough to justify its complexity, the result i
 
 ## What do we deliberately leave out?
 
-The prototype does not model fading, frequency offset beyond deliberate extraction-error tests, oscillator phase noise, IQ imbalance, DC offset, nonlinear hardware distortion, ADC quantization, AGC behavior, or sample-clock drift. It also does not validate the synthetic waveforms as standards-compliant emitters, cover every paper class, or establish real-world receiver performance. OOK versus narrow AM-DSB and FM versus PAM confusion are known cases to measure. External real data is deferred until access and license are checked.
+The prototype does not model fading, frequency offset beyond deliberate extraction-error tests, oscillator phase noise, IQ imbalance, DC offset, nonlinear hardware distortion, ADC quantization, AGC behavior, or sample-clock drift. It also does not validate the synthetic waveforms as standards-compliant emitters or establish real-world receiver performance. The 12-class importer prepares labeled data, but the current model is six-class and no real dataset has been evaluated. OOK versus narrow AM-DSB and FM versus PAM confusion are known cases to measure. The Zenodo record is CC BY-SA 4.0, but its archives have not been downloaded; DeepSig terms remain unverified.

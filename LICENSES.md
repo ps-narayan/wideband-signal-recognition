@@ -16,9 +16,9 @@ The pinned runtime helpers `ultralytics==8.4.164` and `ultralytics-thop==2.2.1` 
 
 ## Datasets
 
-The current milestone uses only generated synthetic signals and does not download or redistribute external recordings. The project owner will verify the Zenodo companion record's current file size and record-level license before use. The Zenodo record's Rights field is unverified in this repository. CC BY-SA 4.0 was mentioned in earlier planning but has not been confirmed against that record; do not treat it as an established license or use the data until the owner checks the current Rights field. DeepSig access and licensing are also unverified and remain optional.
+The Zenodo record [10.5281/zenodo.7799387](https://zenodo.org/records/7799387) was checked against its record metadata on 2026-11-03. Its Rights field identifies **CC BY-SA 4.0**. The four downloadable `.7z` files total 57,472,189,381 bytes (about 53.55 GiB). No archive or derived training data is included in this repository. The local machine had about 20.3 GB free, so the complete record cannot be downloaded there; an archive must not be treated as integrated until its contents have actually been ingested and evaluated.
 
-Zenodo's own documentation says licenses are record-specific and points users to each record's Rights section; a repository-wide default must not be assumed. See [Zenodo license guidance](https://help.zenodo.org/docs/deposit/describe-records/licenses/) and the [companion record DOI](https://doi.org/10.5281/zenodo.7799387).
+The license terms require attribution and share-alike for covered adaptations. Review the exact record and license before redistributing data or derived artifacts. Zenodo licenses are record-specific; see [Zenodo license guidance](https://help.zenodo.org/docs/deposit/describe-records/licenses/). The DeepSig SPAWC 2021 dataset has not been downloaded, and its applicable access/licensing terms have not been verified for this project.
 
 ## Python dependencies
 

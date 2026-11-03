@@ -22,6 +22,23 @@ PAM_SUBTYPES = (
 )
 NON_PAM = ("AM-DSB", "FM", "2-FSK", "OOK")
 DETECTOR_CLASSES = ("AM-DSB", "FM", "OFDM", "2-FSK", "OOK", "PAM")
+# Full detector taxonomy from the reference paper.  The reduced-CPU training
+# profile remains on DETECTOR_CLASSES so its already measured test results stay
+# tied to the exact six-class model and frozen test set.
+PAPER_DETECTOR_CLASSES = (
+    "AM-DSB",
+    "AM-SSB",
+    "FM",
+    "OFDM",
+    "2-FSK",
+    "2-CPFSK",
+    "4-FSK",
+    "4-CPFSK",
+    "OOK",
+    "GMSK1",
+    "GMSK2",
+    "PAM",
+)
 
 
 @dataclass(frozen=True)

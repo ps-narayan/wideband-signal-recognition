@@ -34,6 +34,8 @@ checkpoints/
 
 # Scratch and editor files
 work/
+tmp/
+run_state_recovery.json
 .DS_Store
 Thumbs.db
 /yolov5_pinned/
