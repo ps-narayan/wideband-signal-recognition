@@ -3,6 +3,6 @@
   "training_images": 12,
   "batch_size": 4,
   "batches_per_epoch": 3,
-  "wall_seconds": 22.309515293999993,
+  "wall_seconds": 13.575199409000007,
   "scope": "measured on generated training images immediately before the full fit; not used to select thresholds or inspect held-out test performance"
 }

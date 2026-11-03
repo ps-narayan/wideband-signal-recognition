@@ -1,6 +1,6 @@
 # Wideband Signal Recognition
 
-The synthetic-to-CLI pipeline runs end to end, but the reduced CPU YOLOv5n did not learn useful detections. It processes I/Q through detection, PAM classification, and JSON plus annotated-spectrogram output. Latest measured reduced CPU run: YOLOv5n trained for 135 requested epochs; recall 4.17% (recording-bootstrap CI [0.00%, 12.50%]; 4 recordings / 24 signals; LOW-SUPPORT) and mAP@0.5 at global SNR >= 5 dB 20.50% (CI [18.60%, 40.39%]; 3 recordings / 18 signals; LOW-SUPPORT). The energy geometry baseline had higher held-out recall (54.17% vs 4.17%; CI [25.00%, 83.33%]; 4 recordings / 24 signals; LOW-SUPPORT), but this is not a matched-precision comparison (energy precision 50.00%; YOLO precision 100.00%). Validation calibration attained the 80% precision target for YOLO: True; energy baseline: True. PAM all-signal accuracy was 35.00% (uniform seven-class chance: 1/7 = 14.29%; CI [15.00%, 55.00%]; 4 recordings / 20 signals; LOW-SUPPORT). These are reduced CPU measurements and are not comparable to the full-scale targets; full GPU results remain unmeasured. See [DIAGNOSIS.md](DIAGNOSIS.md) for the training-only bug check and [RESULTS.md](RESULTS.md) for complete results.
+The synthetic-to-CLI pipeline runs end to end, but the reduced CPU YOLOv5n did not learn useful detections. It processes I/Q through detection, PAM classification, and JSON plus annotated-spectrogram output. Latest measured reduced CPU run: YOLOv5n trained for 135 requested epochs; recall 37.50% (recording-bootstrap CI [25.00%, 50.00%]; 4 recordings / 24 signals; LOW-SUPPORT) and mAP@0.5 at global SNR >= 5 dB 28.78% (CI [20.00%, 64.02%]; 3 recordings / 18 signals; LOW-SUPPORT). The energy geometry baseline had higher held-out recall (54.17% vs 37.50%; CI [25.00%, 83.33%]; 4 recordings / 24 signals; LOW-SUPPORT), but this is not a matched-precision comparison (energy precision 50.00%; YOLO precision 60.00%). Validation calibration attained the 80% precision target for YOLO: True; energy baseline: True. PAM all-signal accuracy was 35.00% (uniform seven-class chance: 1/7 = 14.29%; CI [15.00%, 55.00%]; 4 recordings / 20 signals; LOW-SUPPORT). These are reduced CPU measurements and are not comparable to the full-scale targets; full GPU results remain unmeasured. See [DIAGNOSIS.md](DIAGNOSIS.md) for the training-only bug check and [RESULTS.md](RESULTS.md) for complete results.
 
 ## Architecture
 
@@ -71,9 +71,9 @@ The measured values below are from the completed reduced CPU workflow. This run 
 
 | Acceptance metric | Target | Reduced CPU measured | 95% recording-bootstrap CI | Support | Status |
 |---|---:|---:|---:|---|---|
-| Detector recall, global SNR >= 5 dB | >= 80% | 0.00% | [0.00%, 0.00%] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
-| Mean IoU, global SNR >= 5 dB | >= 75% | not measured | [not measured, not measured] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
-| Class mAP@0.5, global SNR >= 5 dB | >= 60% | 20.50% | [18.60%, 40.39%] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
+| Detector recall, global SNR >= 5 dB | >= 80% | 38.89% | [16.67%, 50.00%] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
+| Mean IoU, global SNR >= 5 dB | >= 75% | 78.57% | [66.47%, 89.27%] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
+| Class mAP@0.5, global SNR >= 5 dB | >= 60% | 28.78% | [20.00%, 64.02%] | 3 recordings / 18 signals; LOW-SUPPORT | not comparable |
 | PAM oracle accuracy (chance 1/7 = 14.29%), global SNR >= 10 dB | >= 80% | 0.00% | [0.00%, 0.00%] | 3 recordings / 3 signals; LOW-SUPPORT | not comparable |
 | PAM oracle accuracy (chance 1/7 = 14.29%), global SNR [0, 1) dB | > 50% | not measured | [not measured, not measured] | 0 recordings / 0 signals; LOW-SUPPORT | not comparable |
 | Owner's local processing time per 1M samples | < 5 seconds | not measured | not applicable | owner measurement pending | not comparable |
