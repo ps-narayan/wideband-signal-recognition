@@ -5,7 +5,7 @@ Comparison: reduced run: CPU, small data, not comparable to target. Target statu
 Device: cpu
 YOLOv5 source commit: f9578796b8a64889aa9e66dc06914d19f40d338e
 Detector training status: completed; checkpoint: best.pt; requested epochs: 135.
-PAM training status: completed; epochs completed: 23 of 125.
+PAM training status: completed; epochs completed: 23 of 125. Validation early stopping ended training after four consecutive epochs without a lower validation loss; the best validation loss occurred at epoch 19.
 Recording support: main test 4 recordings / 4 segments; shifted test 4 recordings / 4 segments.
 Recording-ID leakage audit: train=12, validation=2, test=4; main splits are pairwise disjoint; shifted test IDs are separate. See [split_audit.json](results/reduced_cpu/split_audit.json) for IDs.
 SNR definition: 10*log10(total clean signal power / total added noise power over the full I/Q segment).

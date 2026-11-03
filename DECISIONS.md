@@ -20,6 +20,6 @@
 - Keep the medium profile at 18 main and 4 shifted recordings with one 1M-sample segment per recording, the same seed, and frozen test IDs. Use 125 PAM epochs, at most 16 frames per represented class, and 500 recording bootstraps. This is still a small CPU evaluation, labelled not comparable to the portfolio targets.
 - Make the CLI image size an explicit option because a YOLO checkpoint trained at 1280 must not silently receive a 640-pixel spectrogram. The CLI records the chosen size and max detection count in its JSON output.
 - Use 0.25 only as the runnable CLI default. For measured inference, use a confidence threshold calibrated on validation, never one selected from test results.
-- Keep the existing reduced CPU results attributed to their measured source run. New training-schedule changes remain unmeasured on held-out data until the updated Actions workflow completes.
+- The updated training schedule was evaluated by Actions run `41566581098` on the frozen recording-disjoint splits. YOLO reached 4.17% main-test recall and 19.14% mAP@0.5; PAM all-signal accuracy was 35.00% versus 14.29% chance. These are low-support reduced-CPU measurements, not evidence that the portfolio targets were met.
 - Preflight GitHub Actions write access with the built-in token, run tests before model work, fast-forward before publishing, and add `[skip ci]` to automatic results commits.
 - Upload metrics, plots, checkpoints, generated dataset, and logs as workflow artifacts. Keep datasets and checkpoints out of Git.
