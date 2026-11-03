@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -145,7 +147,7 @@ def _save_detector_image(resized: np.ndarray, destination: Path) -> None:
     Image.fromarray(pixels, mode="L").save(destination)
 
 
-def _read_yolo_labels(path: Path) -> list[dict[str, Any]]:
+def _read_yolo_labels(path: Path, image_size: int = IMAGE_SIZE) -> list[dict[str, Any]]:
     predictions = []
     if not path.is_file():
         return predictions
@@ -159,13 +161,60 @@ def _read_yolo_labels(path: Path) -> list[dict[str, Any]]:
             raise ValueError(f"invalid detector class id {class_id} in {path}")
         if not (0 <= cx <= 1 and 0 <= cy <= 1 and 0 < width <= 1 and 0 < height <= 1):
             raise ValueError(f"invalid normalized YOLO box in {path}: {line.strip()}")
-        x1, y1 = (cx - width / 2) * IMAGE_SIZE, (cy - height / 2) * IMAGE_SIZE
-        x2, y2 = (cx + width / 2) * IMAGE_SIZE, (cy + height / 2) * IMAGE_SIZE
-        if not (0 <= x1 < x2 <= IMAGE_SIZE and 0 <= y1 < y2 <= IMAGE_SIZE):
+        x1, y1 = (cx - width / 2) * image_size, (cy - height / 2) * image_size
+        x2, y2 = (cx + width / 2) * image_size, (cy + height / 2) * image_size
+        rounding_tolerance = image_size * 1e-6 + 1e-6
+        if not (
+            -rounding_tolerance <= x1 < x2 <= image_size + rounding_tolerance
+            and -rounding_tolerance <= y1 < y2 <= image_size + rounding_tolerance
+        ):
             raise ValueError(f"YOLO box falls outside image in {path}: {line.strip()}")
+        x1, y1, x2, y2 = np.clip(
+            (x1, y1, x2, y2), 0.0, float(image_size)
+        )
         predictions.append({"class": DETECTOR_CLASSES[class_index], "confidence": float(confidence),
                             "xyxy": (x1, y1, x2, y2)})
     return predictions
+
+
+def _isolated_yolo_environment(cache_root: Path) -> dict[str, str]:
+    """Keep YOLOv5/Matplotlib settings and font caches inside the CLI temp folder."""
+    appdata = cache_root / "appdata"
+    config_dir = cache_root / "ultralytics-config"
+    mpl_config_dir = cache_root / "mpl-config"
+    for directory in (appdata, config_dir, mpl_config_dir):
+        directory.mkdir(parents=True, exist_ok=True)
+
+    font_path = config_dir / "Arial.ttf"
+    if not font_path.is_file():
+        from PIL import ImageFont
+
+        font_candidates = (
+            Path("C:/Windows/Fonts/arial.ttf"),
+            Path("/usr/share/fonts/truetype/msttcorefonts/Arial.ttf"),
+            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+            Path(ImageFont.__file__).parent / "fonts" / "DejaVuSans.ttf",
+        )
+        local_font = next((candidate for candidate in font_candidates if candidate.is_file()), None)
+        if local_font is None:
+            raise RuntimeError("YOLOv5 requires an ASCII label font; install Arial or DejaVu Sans")
+        shutil.copyfile(local_font, font_path)
+
+    environment = os.environ.copy()
+    environment.update({
+        "APPDATA": str(appdata),
+        "YOLO_CONFIG_DIR": str(config_dir),
+        "YOLOV5_CONFIG_DIR": str(config_dir),
+        "MPLCONFIGDIR": str(mpl_config_dir),
+    })
+    return environment
+
+
+def _write_child_output(output: str, stream: Any) -> None:
+    """Forward YOLO output without failing on a narrow Windows console encoding."""
+    encoding = getattr(stream, "encoding", None) or "utf-8"
+    for line in output.splitlines():
+        stream.write(line.encode(encoding, errors="replace").decode(encoding, errors="replace") + "\n")
 
 
 def _load_pam_model(checkpoint_path: Path, device: str):
@@ -210,12 +259,18 @@ def _frequency_output(box: SignalBox, sample_rate_hz: float | None, center_hz: f
     return result
 
 
-def _annotate(resized: np.ndarray, detections: list[dict[str, Any]], covered: int, destination: Path):
+def _annotate(
+    resized: np.ndarray,
+    detections: list[dict[str, Any]],
+    covered: int,
+    destination: Path,
+    image_size: int = IMAGE_SIZE,
+):
     pixels = np.clip((resized + 3.0) / 6.0 * 255.0, 0, 255).astype(np.uint8)
     image = Image.fromarray(pixels, mode="L").convert("RGB")
     draw = ImageDraw.Draw(image)
     for row in detections:
-        coords = box_to_pixels(row["_box"], covered, IMAGE_SIZE, IMAGE_SIZE)
+        coords = box_to_pixels(row["_box"], covered, image_size, image_size)
         draw.rectangle(coords, outline=(255, 65, 65), width=2)
         score = (f"{row['confidence']:.2f}" if row.get("confidence") is not None
                  else f"z={row['energy_score']:.2f}")
@@ -231,6 +286,12 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
     source = Path(args.input).expanduser().resolve()
     output_dir = Path(args.output_dir).expanduser().resolve()
     backend = getattr(args, "backend", "yolo")
+    image_size = int(getattr(args, "image_size", IMAGE_SIZE))
+    max_detections = int(getattr(args, "max_detections", 3000))
+    if image_size <= 0 or image_size % 32:
+        raise ValueError("image_size must be a positive multiple of 32 for YOLOv5")
+    if max_detections < 1:
+        raise ValueError("max_detections must be positive")
     if backend not in {"yolo", "energy"}:
         raise ValueError("backend must be yolo or energy")
     sha, weights, detect_script = None, None, None
@@ -279,21 +340,27 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
         rendered = {}
         for index, (start, chunk) in enumerate(segments):
             spectrum, covered = log_spectrogram(chunk)
-            resized = resize_spectrogram(spectrum, IMAGE_SIZE, IMAGE_SIZE)
+            resized = resize_spectrogram(spectrum, image_size, image_size)
             stem = f"segment_{index:05d}"
             _save_detector_image(resized, image_dir / f"{stem}.png")
             rendered[stem] = (start, chunk, covered, resized)
         label_dir = None
         if backend == "yolo":
             detect_output = temp / "detect"
+            yolo_environment = _isolated_yolo_environment(temp / "runtime")
             command = [
                 sys.executable, str(detect_script), "--weights", str(weights),
-                "--source", str(image_dir), "--img", str(IMAGE_SIZE),
-                "--conf-thres", "0.001", "--iou-thres", "0.6", "--max-det", "300",
+                "--source", str(image_dir), "--img", str(image_size),
+                "--conf-thres", "0.001", "--iou-thres", "0.6", "--max-det", str(max_detections),
                 "--device", detector_device, "--save-txt", "--save-conf", "--project",
                 str(detect_output), "--name", "result", "--exist-ok", "--nosave",
             ]
-            subprocess.run(command, cwd=yolo_dir, check=True)
+            completed = subprocess.run(
+                command, cwd=yolo_dir, check=True, env=yolo_environment,
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+            )
+            _write_child_output(completed.stdout, sys.stdout)
+            _write_child_output(completed.stderr, sys.stderr)
             label_dir = detect_output / "result" / "labels"
         else:
             from .baseline import energy_proposals
@@ -301,7 +368,7 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
         for stem, (segment_start, chunk, covered, resized) in rendered.items():
             if backend == "yolo":
                 predictions = [
-                    prediction for prediction in _read_yolo_labels(label_dir / f"{stem}.txt")
+                    prediction for prediction in _read_yolo_labels(label_dir / f"{stem}.txt", image_size)
                     if prediction["confidence"] >= args.confidence_threshold
                 ]
             else:
@@ -312,7 +379,9 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
                     "class": "unknown", "confidence": None,
                     "energy_score": proposal["confidence"], "xyxy": tuple(proposal["xyxy"]),
                 } for proposal in proposals]
-            boxes = [pixels_to_box(prediction["xyxy"], covered, class_name=prediction["class"])
+            boxes = [pixels_to_box(
+                prediction["xyxy"], covered, image_size, image_size, prediction["class"]
+            )
                      for prediction in predictions]
             statuses = resolution_statuses(boxes)
             annotated_rows = []
@@ -350,7 +419,9 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
                         except (ValueError, RuntimeError) as exc:
                             row["pam_classifier_status"] = f"unavailable: {exc}"
                 annotated_rows.append(row)
-            _annotate(resized, annotated_rows, covered, output_dir / f"annotated_{stem}.png")
+            _annotate(
+                resized, annotated_rows, covered, output_dir / f"annotated_{stem}.png", image_size
+            )
             for row in annotated_rows:
                 row.pop("_box")
             detections.extend(annotated_rows)
@@ -373,6 +444,7 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
             "architecture": "YOLOv5n" if backend == "yolo" else "Energy geometry baseline",
             "source_commit": sha, "weights": weights.name if weights else None,
             "confidence_threshold": args.confidence_threshold if backend == "yolo" else None,
+            "max_detections_per_image": max_detections if backend == "yolo" else None,
             "energy_mask_threshold": args.energy_mask_threshold if backend == "energy" else None,
         },
         "pam_classifier": {
@@ -381,6 +453,7 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
             "labels": list(pam_labels) if pam_labels else [],
         },
         "segment_samples": args.segment_samples,
+        "detector_image_size": image_size,
         "segments_processed": len(segments),
         "covered_samples_per_segment": [int(rendered[f"segment_{i:05d}"][2]) for i in range(len(segments))],
         "samples_processed": int(sum(rendered[f"segment_{i:05d}"][2] for i in range(len(segments)))),
@@ -407,6 +480,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sample-rate-hz", type=float, help="optional for raw/NumPy; required for Hz and seconds")
     parser.add_argument("--raw-dtype", default="complex64", help="raw file dtype, default complex64")
     parser.add_argument("--segment-samples", type=int, default=DEFAULT_SEGMENT_SAMPLES)
+    parser.add_argument("--image-size", type=int, default=IMAGE_SIZE,
+                        help="square YOLO/spectrogram size, a positive multiple of 32; match the checkpoint training size")
+    parser.add_argument("--max-detections", type=int, default=3000,
+                        help="maximum raw YOLO detections per image before confidence filtering")
     parser.add_argument("--confidence-threshold", type=float, default=0.25,
                         help="use the validation-calibrated threshold from metrics.json")
     parser.add_argument("--device", default="auto", help="auto, cpu, or CUDA device index such as 0")

@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse
 import json
+import re
 from pathlib import Path
 import shutil
 
@@ -78,6 +79,10 @@ def metric(label, row, key="estimate"):
     return f"| {label} | {pct(row.get(key))} | {ci(row)} | {support(row)} |"
 
 
+def pam_metric(label, row, key="estimate"):
+    return metric(f"{label} (chance level: 1/7 = 14.29%)", row, key)
+
+
 def matrix(labels, values):
     if not labels or not values:
         return "Not measured."
@@ -87,6 +92,89 @@ def matrix(labels, values):
     return "\n".join(out)
 
 
+def normalize_zero_detection_precision(metrics):
+    """Represent undefined precision as null when the operating point emitted no boxes."""
+    for split_name in ("main_test", "shifted_test"):
+        split = metrics.get(split_name, {})
+        end_to_end = split.get("end_to_end", {})
+        if end_to_end.get("predictions") == 0:
+            end_to_end["precision"] = None
+            end_to_end["precision_ci95"] = [None, None]
+        yolo_by_snr = split.get("yolo", {}).get("by_global_snr_with_recording_bootstrap", {})
+        e2e_by_snr = end_to_end.get("by_global_snr_with_recording_bootstrap", {})
+        for snr_bin, row in e2e_by_snr.items():
+            detector_precision = yolo_by_snr.get(snr_bin, {}).get("precision", {})
+            if detector_precision.get("estimate") is None:
+                row.setdefault("precision", {})["estimate"] = None
+                row["precision"]["ci95"] = [None, None]
+    shifted = metrics.get("shifted_test", {})
+    shifted_snr = shifted.get("end_to_end_by_global_snr_with_recording_bootstrap", {})
+    yolo_snr = shifted.get("yolo_by_global_snr_with_recording_bootstrap", {})
+    for snr_bin, row in shifted_snr.items():
+        detector_precision = yolo_snr.get(snr_bin, {}).get("precision", {})
+        if detector_precision.get("estimate") is None:
+            row.setdefault("precision", {})["estimate"] = None
+            row["precision"]["ci95"] = [None, None]
+    return metrics
+
+
+def normalize_summary(summary, metrics):
+    """Make legacy zero-detection precision and PAM chance notes explicit."""
+    main = metrics.get("main_test", {})
+    shifted = metrics.get("shifted_test", {})
+    main_zero = main.get("end_to_end", {}).get("predictions") == 0
+    shifted_zero = shifted.get("end_to_end", {}).get("predictions") == 0
+    main_snr = main.get("yolo", {}).get("by_global_snr_with_recording_bootstrap", {})
+    shifted_snr = shifted.get("yolo_by_global_snr_with_recording_bootstrap", {})
+    out = []
+    for line in summary.splitlines():
+        lower = line.lower()
+        if "accuracy" in lower and (
+            "pam" in lower or "subtype" in lower or "all-signal classifier" in lower
+        ) and "chance level" not in lower:
+            head, sep, tail = line.partition(":")
+            if sep:
+                line = f"{head} (PAM chance level 1/7 = 14.29%):{tail}"
+        if "precision" in lower:
+            line = line.replace("n/a; CI95=[n/a, n/a]", "not measured; CI95=[not measured, not measured]")
+            should_be_unmeasured = (
+                (main_zero and lower.startswith("end-to-end precision"))
+                or (shifted_zero and lower.startswith("shifted end-to-end precision"))
+            )
+            match = re.search(r"global snr (\[[^]]+\] dB)", lower)
+            if match and lower.startswith("end-to-end precision"):
+                snr = match.group(1).replace(" dB", "")
+                should_be_unmeasured = should_be_unmeasured or main_snr.get(snr, {}).get("precision", {}).get("estimate") is None
+            if match and lower.startswith("shifted end-to-end precision"):
+                snr = match.group(1).replace(" dB", "")
+                should_be_unmeasured = should_be_unmeasured or shifted_snr.get(snr, {}).get("precision", {}).get("estimate") is None
+            if should_be_unmeasured:
+                line = re.sub(r": [^;]+; CI95=\[[^]]+\]", ": not measured; CI95=[not measured, not measured]", line, count=1)
+        # Normalize legacy undefined per-class and per-SNR precision fields.
+        line = re.sub(
+            r"(\bP=)n/a CI95=\[(?:None|n/a),\s*(?:None|n/a)\]",
+            r"\1not measured CI95=[not measured, not measured]",
+            line, flags=re.IGNORECASE,
+        )
+        line = re.sub(
+            r"(\bprecision:\s*)n/a; CI95=\[(?:None|n/a),\s*(?:None|n/a)\]",
+            r"\1not measured; CI95=[not measured, not measured]",
+            line, flags=re.IGNORECASE,
+        )
+        # Undefined mean-IoU and zero-support accuracy cells use the same
+        # explicit wording as undefined precision.
+        line = re.sub(
+            r"(\bIoU=)n/a CI95=\[(?:None|n/a),\s*(?:None|n/a)\]",
+            r"\1not measured CI95=[not measured, not measured]", line, flags=re.IGNORECASE,
+        )
+        line = re.sub(
+            r"(accuracy(?:[^:]*):\s*)n/a; CI95=\[(?:n/a|None),\s*(?:n/a|None)\]",
+            r"\1not measured; CI95=[not measured, not measured]", line, flags=re.IGNORECASE,
+        )
+        out.append(line.rstrip())
+    return "\n".join(out) + "\n"
+
+
 def build_results(m, repo, split_audit):
     main, shifted = m["main_test"], m["shifted_test"]
     yolo, energy, pam = main["yolo"], main["energy_baseline"], main["pam"]
@@ -94,8 +182,8 @@ def build_results(m, repo, split_audit):
         ("recall_at_global_snr_ge_5_db", "Detector recall, global SNR >= 5 dB", ">= 80%"),
         ("mean_iou_at_global_snr_ge_5_db", "Mean IoU, global SNR >= 5 dB", ">= 0.75"),
         ("map50_at_global_snr_ge_5_db", "Class mAP@0.5, global SNR >= 5 dB", ">= 60%"),
-        ("pam_oracle_accuracy_global_snr_ge_10_db", "PAM oracle-box accuracy, global SNR >= 10 dB", ">= 80%"),
-        ("pam_oracle_accuracy_near_0_db_0_to_1", "PAM oracle-box accuracy, global SNR [0, 1) dB", "> 50%"),
+        ("pam_oracle_accuracy_global_snr_ge_10_db", "PAM oracle-box accuracy (chance 1/7 = 14.29%), global SNR >= 10 dB", ">= 80%"),
+        ("pam_oracle_accuracy_near_0_db_0_to_1", "PAM oracle-box accuracy (chance 1/7 = 14.29%), global SNR [0, 1) dB", "> 50%"),
         ("processing_time_per_segment_local_seconds", "Processing time per 1M samples on owner's machine", "< 5 seconds"),
     ]
     lines = [
@@ -149,11 +237,11 @@ def build_results(m, repo, split_audit):
                            ("mean_iou_true_positives", "mean IoU"), ("ap50", "AP@0.5")):
             lines.append(metric(f"{name}: {title}", rows[key]))
     lines += ["", "### Main test by global SNR", "",
-              "| Global SNR bin | YOLO recall | 95% CI | Support | YOLO mean IoU | 95% CI | Support | PAM oracle accuracy | 95% CI | Support |",
+              "| Global SNR bin | YOLO recall | 95% CI | Support | YOLO mean IoU | 95% CI | Support | PAM oracle accuracy (chance 1/7 = 14.29%) | 95% CI | Support |",
               "|---|---:|---|---|---:|---|---|---:|---|---|"]
     for snr, row in yolo["by_global_snr_with_recording_bootstrap"].items():
         r, i, p = row.get("recall", {}), row.get("mean_iou_true_positives", {}), pam["oracle_accuracy_by_global_snr"].get(snr, {})
-        lines.append(f"| {snr} dB | {pct(r.get('estimate'))} | {ci(r)} | {support(r)} | {pct(i.get('estimate'))} | {ci(i)} | {support(i)} | {pct(p.get('accuracy'))} | {ci(p)} | {support(p)} |")
+        lines.append(f"| {snr} dB | {pct(r.get('estimate'))} | {ci(r)} | {support(r)} | {pct(i.get('estimate'))} | {ci(i)} | {support(i)} | {pct(p.get('accuracy'))} (chance 1/7 = 14.29%) | {ci(p)} | {support(p)} |")
     snr_keys = list(yolo["by_global_snr_with_recording_bootstrap"])
     for mapping in (
         energy["by_global_snr_with_recording_bootstrap"],
@@ -178,8 +266,8 @@ def build_results(m, repo, split_audit):
                 if row:
                     lines.append(f"| {snr} dB | {model_name} {key} | {pct(row.get('estimate'))} | {ci(row)} | {support(row)} |")
         for label, mapping, value_key in (
-            ("PAM oracle-box accuracy", pam["oracle_accuracy_by_global_snr"], "accuracy"),
-            ("PAM detector-box accuracy", pam["detector_box_accuracy_by_global_snr"], "accuracy"),
+            ("PAM oracle-box accuracy (chance 1/7 = 14.29%)", pam["oracle_accuracy_by_global_snr"], "accuracy"),
+            ("PAM detector-box accuracy (chance 1/7 = 14.29%)", pam["detector_box_accuracy_by_global_snr"], "accuracy"),
             ("Non-PAM detections classified as Others", pam["non_pam_detections_classified_as_others"]["by_global_snr"], "rate"),
             ("End-to-end precision", main["end_to_end"]["by_global_snr_with_recording_bootstrap"], "precision"),
             ("End-to-end recall", main["end_to_end"]["by_global_snr_with_recording_bootstrap"], "recall"),
@@ -189,21 +277,22 @@ def build_results(m, repo, split_audit):
             if row:
                 lines.append(f"| {snr} dB | {label} | {pct(row.get(value_key))} | {ci(row)} | {support(row)} |")
     lines += ["", "### PAM accuracy and false-class results by class", "",
+              "PAM classifier chance accuracy is 1/7 = 14.29%; every PAM accuracy below carries this reference.",
               "| Class / metric | Estimate | Recording-level 95% CI | Recordings / signals |",
               "|---|---:|---:|---|"]
     for subtype in pam["oracle_accuracy_by_subtype"]:
-        lines.append(metric(f"{subtype}: oracle-box accuracy", pam["oracle_accuracy_by_subtype"][subtype], "accuracy"))
-        lines.append(metric(f"{subtype}: detector-box accuracy", pam["detector_box_accuracy_by_subtype"][subtype], "accuracy"))
+        lines.append(pam_metric(f"{subtype}: oracle-box accuracy", pam["oracle_accuracy_by_subtype"][subtype], "accuracy"))
+        lines.append(pam_metric(f"{subtype}: detector-box accuracy", pam["detector_box_accuracy_by_subtype"][subtype], "accuracy"))
     for label, row in pam["all_signal_classifier_accuracy_by_class"].items():
-        lines.append(metric(f"All-signal classifier: {label}", row, "accuracy"))
+        lines.append(pam_metric(f"All-signal classifier: {label}", row, "accuracy"))
     for detector_class, row in pam["non_pam_detections_classified_as_others"]["by_detector_class"].items():
         lines.append(metric(f"False-class {detector_class} detections classified as Others", row, "rate"))
     lines += ["", "### PAM and end-to-end metrics", "",
               "| Metric | Estimate | Recording-level 95% CI | Recordings / signals |",
               "|---|---:|---:|---|"]
-    lines.append(metric("PAM accuracy with oracle boxes", pam["oracle_accuracy"], "accuracy"))
-    lines.append(metric("PAM accuracy with detector boxes", pam["detector_box_accuracy"], "accuracy"))
-    lines.append(metric("PAM CNN all-signal accuracy incl. Others", pam["all_signal_classifier_accuracy"], "accuracy"))
+    lines.append(pam_metric("PAM accuracy with oracle boxes", pam["oracle_accuracy"], "accuracy"))
+    lines.append(pam_metric("PAM accuracy with detector boxes", pam["detector_box_accuracy"], "accuracy"))
+    lines.append(pam_metric("PAM CNN all-signal accuracy incl. Others", pam["all_signal_classifier_accuracy"], "accuracy"))
     lines.append(metric("Non-PAM detections predicted as Others", pam["non_pam_detections_classified_as_others"]["overall"], "rate"))
     e2e = main["end_to_end"]
     for name in ("precision", "recall"):
@@ -226,8 +315,8 @@ def build_results(m, repo, split_audit):
         ("YOLO recall", shifted["yolo_matched_precision_with_recording_bootstrap"]["recall"], "estimate"),
         ("YOLO mean IoU", shifted["yolo_matched_precision_with_recording_bootstrap"]["mean_iou_true_positives"], "estimate"),
         ("YOLO mAP@0.5", shifted["yolo_map50"]["map50_recording_bootstrap"], "estimate"),
-        ("PAM oracle-box accuracy", shifted["pam_oracle_accuracy"], "accuracy"),
-        ("PAM detector-box accuracy", shifted["pam_detector_box_accuracy"], "accuracy"),
+        ("PAM oracle-box accuracy (chance 1/7 = 14.29%)", shifted["pam_oracle_accuracy"], "accuracy"),
+        ("PAM detector-box accuracy (chance 1/7 = 14.29%)", shifted["pam_detector_box_accuracy"], "accuracy"),
     ):
         lines.append(metric(name, row, key))
     lines += ["", "| Shifted detector class | Precision (95% CI) | Recall (95% CI) | Mean IoU (95% CI) | AP@0.5 (95% CI) | Support |",
@@ -249,8 +338,8 @@ def build_results(m, repo, split_audit):
             for key, row in mapping.get(snr, {}).items():
                 lines.append(f"| {snr} dB | {model_name} {key} | {pct(row.get('estimate'))} | {ci(row)} | {support(row)} |")
         for label, mapping, value_key in (
-            ("PAM oracle-box accuracy", shifted["pam_oracle_accuracy_by_global_snr"], "accuracy"),
-            ("PAM detector-box accuracy", shifted["pam_detector_box_accuracy_by_global_snr"], "accuracy"),
+            ("PAM oracle-box accuracy (chance 1/7 = 14.29%)", shifted["pam_oracle_accuracy_by_global_snr"], "accuracy"),
+            ("PAM detector-box accuracy (chance 1/7 = 14.29%)", shifted["pam_detector_box_accuracy_by_global_snr"], "accuracy"),
             ("Non-PAM detections classified as Others", shifted["non_pam_detections_classified_as_others"]["by_global_snr"], "rate"),
         ):
             row = mapping.get(snr)
@@ -278,6 +367,7 @@ def build_results(m, repo, split_audit):
               "## Runtime", "",
               f"Measured total pipeline runtime on hosted CPU (seconds): {m.get('runtime_seconds_pipeline', {}).get('total', 'not measured')}.",
               f"Measured data generation runtime (seconds): {m.get('runtime_seconds_pipeline', {}).get('data_generation', 'not measured')}.",
+              f"YOLO timing probe: {('not run for this profile' if not m.get('timing_probe') else str(m['timing_probe'].get('wall_seconds', 'not measured')) + ' seconds for ' + str(m['timing_probe'].get('batches_per_epoch', 'not measured')) + ' training batches')}. See [timing_probe.json](results/reduced_cpu/timing_probe.json) when present.",
               f"Detector training status: {m.get('training_status', {}).get('detector', 'not measured')}; evaluation completed: {m.get('training_status', {}).get('evaluation_completed', 'not measured')}.",
               "The under-five-second target is specific to the owner's local machine and remains not measured there; hosted run time is not comparable.",
               "", "## Interpretation", "",
@@ -285,9 +375,36 @@ def build_results(m, repo, split_audit):
     return "\n".join(lines) + "\n"
 
 
+def latest_run_summary(m):
+    main = m.get("main_test", {})
+    yolo = main.get("yolo", {}).get("matched_precision_with_recording_bootstrap", {})
+    energy = main.get("energy_baseline", {}).get("matched_precision_with_recording_bootstrap", {})
+    yolo_recall = yolo.get("recall", {})
+    energy_recall = energy.get("recall", {})
+    yolo_precision = yolo.get("precision", {})
+    energy_precision = energy.get("precision", {})
+    map_row = main.get("yolo", {}).get("map50_global_snr_ge_5_db", {}).get("map50_recording_bootstrap", {})
+    pam = main.get("pam", {}).get("all_signal_classifier_accuracy", {})
+    training = m.get("training_status", {})
+    calibration = m.get("validation_calibration", {})
+    return (
+        "The synthetic-to-CLI pipeline runs end to end, but the reduced CPU YOLOv5n did not learn useful detections. It processes I/Q through detection, PAM classification, and JSON plus annotated-spectrogram output. "
+        f"Latest measured reduced CPU run: YOLOv5n trained for {training.get('detector_epochs_requested', 'not measured')} requested epochs; recall {pct(yolo_recall.get('estimate'))} (recording-bootstrap CI {ci(yolo_recall)}; {support(yolo_recall)}) and mAP@0.5 at global SNR >= 5 dB {pct(map_row.get('estimate'))} (CI {ci(map_row)}; {support(map_row)}). "
+        f"The energy geometry baseline had higher held-out recall ({pct(energy_recall.get('estimate'))} vs {pct(yolo_recall.get('estimate'))}; CI {ci(energy_recall)}; {support(energy_recall)}), but this is not a matched-precision comparison (energy precision {pct(energy_precision.get('estimate'))}; YOLO precision {pct(yolo_precision.get('estimate'))}). "
+        f"Validation calibration attained the 80% precision target for YOLO: {calibration.get('yolo', {}).get('attained_target', 'not measured')}; energy baseline: {calibration.get('energy_baseline', {}).get('attained_target', 'not measured')}. "
+        f"PAM all-signal accuracy was {pct(pam.get('accuracy'))} (uniform seven-class chance: 1/7 = 14.29%; CI {ci(pam)}; {support(pam)}). "
+        "These are reduced CPU measurements and are not comparable to the full-scale targets; full GPU results remain unmeasured. See [DIAGNOSIS.md](DIAGNOSIS.md) for the training-only bug check and [RESULTS.md](RESULTS.md) for complete results."
+    )
+
+
 def update_readme(repo, m):
     path = repo / "README.md"
     text = path.read_text(encoding="utf-8")
+    architecture_marker = "\n## Architecture\n"
+    if architecture_marker in text:
+        title, rest = text.split(architecture_marker, 1)
+        heading = next((line for line in title.splitlines() if line.startswith("# ")), "# Wideband Signal Recognition")
+        text = heading + "\n\n" + latest_run_summary(m) + "\n" + architecture_marker + rest
     text = text.replace(
         "| Acceptance metric | Target | Reduced CPU measured | Recording-level 95% CI | Support | Status |\n"
         "|---|---:|---:|---:|---|---|\n" + START,
@@ -311,8 +428,8 @@ def update_readme(repo, m):
         ("Detector recall, global SNR >= 5 dB", "recall_at_global_snr_ge_5_db"),
         ("Mean IoU, global SNR >= 5 dB", "mean_iou_at_global_snr_ge_5_db"),
         ("Class mAP@0.5, global SNR >= 5 dB", "map50_at_global_snr_ge_5_db"),
-        ("PAM oracle accuracy, global SNR >= 10 dB", "pam_oracle_accuracy_global_snr_ge_10_db"),
-        ("PAM oracle accuracy, global SNR [0, 1) dB", "pam_oracle_accuracy_near_0_db_0_to_1"),
+        ("PAM oracle accuracy (chance 1/7 = 14.29%), global SNR >= 10 dB", "pam_oracle_accuracy_global_snr_ge_10_db"),
+        ("PAM oracle accuracy (chance 1/7 = 14.29%), global SNR [0, 1) dB", "pam_oracle_accuracy_near_0_db_0_to_1"),
         ("Owner's local processing time per 1M samples", "processing_time_per_segment_local_seconds"),
     ]
     rows = ["", "**Run:** reduced run: CPU, small data, not comparable to target. Performance target status is not comparable due to reduced support. The full GPU run via the optional Colab notebook is still unmeasured.", "",
@@ -343,7 +460,7 @@ def main():
     source = run / "results" / "metrics.json"
     if not source.is_file():
         raise FileNotFoundError(f"Measured metrics are missing: {source}")
-    m = json.loads(source.read_text(encoding="utf-8"))
+    m = normalize_zero_detection_precision(json.loads(source.read_text(encoding="utf-8")))
     manifest_source = run / "results" / "dataset_manifest.json"
     if not manifest_source.is_file():
         raise FileNotFoundError(f"Recording split manifest is missing: {manifest_source}")
@@ -373,7 +490,11 @@ def main():
             elif line.startswith("Metrics JSON:"):
                 line = "Metrics JSON: results/reduced_cpu/metrics.json"
             safe_lines.append(line)
-        (dest / "summary.txt").write_text("\n".join(safe_lines) + "\n", encoding="utf-8")
+        normalized_summary = normalize_summary("\n".join(safe_lines), m)
+        (dest / "summary.txt").write_text(normalized_summary, encoding="utf-8")
+    timing_probe = run / "results" / "yolo_timing_probe.json"
+    if timing_probe.is_file():
+        shutil.copy2(timing_probe, dest / "timing_probe.json")
     for plot in (run / "plots").glob("*.png"):
         shutil.copy2(plot, dest / "plots" / plot.name)
     (repo / "RESULTS.md").write_text(build_results(m, repo, split_audit), encoding="utf-8")

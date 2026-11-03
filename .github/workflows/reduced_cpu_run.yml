@@ -4,13 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       detector_profile:
-        description: "Choose the standard reduced run or an opt-in detector training probe"
+        description: "Choose the standard reduced run, a validation probe, or the medium CPU profile"
         type: choice
         required: true
-        default: standard
+        default: medium_cpu
         options:
           - standard
           - validation_probe_10_epoch
+          - medium_cpu
   push:
     branches:
       - main
@@ -103,41 +104,52 @@ jobs:
           RUN_DIR: ${{ runner.temp }}/wideband-reduced-run
           DATA_WORK: ${{ runner.temp }}/wideband-reduced-data
           YOLO_DIR: ${{ runner.temp }}/yolov5-pinned
-          DETECTOR_PROFILE: ${{ inputs.detector_profile || 'standard' }}
+          DETECTOR_PROFILE: ${{ inputs.detector_profile || 'medium_cpu' }}
         run: |
+          TIMING_PROBE_ARGS=()
           case "$DETECTOR_PROFILE" in
             standard)
               CONFIG_PATH="configs/reduced_cpu.yaml"
-              YOLO_EPOCHS=3
+              MAIN_RECORDINGS=18; SHIFT_RECORDINGS=4; YOLO_EPOCHS=3; YOLO_BATCH=2
+              PAM_EPOCHS=5; PAM_BATCH=32; PAM_FRAME_LIMIT=0; BOOTSTRAP_ITERATIONS=200
               ;;
             validation_probe_10_epoch)
               CONFIG_PATH="configs/reduced_cpu_yolo_10_epoch_probe.yaml"
-              YOLO_EPOCHS=10
+              MAIN_RECORDINGS=18; SHIFT_RECORDINGS=4; YOLO_EPOCHS=10; YOLO_BATCH=2
+              PAM_EPOCHS=5; PAM_BATCH=32; PAM_FRAME_LIMIT=0; BOOTSTRAP_ITERATIONS=200
+              ;;
+            medium_cpu)
+              CONFIG_PATH="configs/medium_cpu.yaml"
+              MAIN_RECORDINGS=18; SHIFT_RECORDINGS=4; YOLO_EPOCHS=135; YOLO_BATCH=4
+              PAM_EPOCHS=125; PAM_BATCH=32; PAM_FRAME_LIMIT=16; BOOTSTRAP_ITERATIONS=500
+              TIMING_PROBE_ARGS=(--timing-probe)
               ;;
             *)
               echo "::error::Unknown detector profile: $DETECTOR_PROFILE"
               exit 2
               ;;
           esac
-          echo "Detector profile: $DETECTOR_PROFILE ($YOLO_EPOCHS YOLO epochs)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Detector profile: $DETECTOR_PROFILE ($MAIN_RECORDINGS main recordings, $YOLO_EPOCHS YOLO epochs, $PAM_EPOCHS PAM epochs)" >> "$GITHUB_STEP_SUMMARY"
           python scripts/run_milestone2.py \
             --config "$CONFIG_PATH" \
             --yolo-dir "$YOLO_DIR" \
             --out-dir "$RUN_DIR" \
             --data-work "$DATA_WORK" \
-            --recordings 18 \
-            --shift-recordings 4 \
+            --recordings "$MAIN_RECORDINGS" \
+            --shift-recordings "$SHIFT_RECORDINGS" \
             --segments-per-recording 1 \
             --yolo-epochs "$YOLO_EPOCHS" \
-            --yolo-batch 2 \
-            --pam-epochs 5 \
-            --pam-batch 32 \
-            --bootstrap-iterations 200 \
+            --yolo-batch "$YOLO_BATCH" \
+            --pam-epochs "$PAM_EPOCHS" \
+            --pam-batch "$PAM_BATCH" \
+            --pam-frames-per-class "$PAM_FRAME_LIMIT" \
+            --bootstrap-iterations "$BOOTSTRAP_ITERATIONS" \
             --device cpu \
             --runtime-budget-minutes 210 \
             --pam-training-budget-minutes 15 \
             --evaluation-reserve-minutes 45 \
-            --run-label "reduced run: CPU, small data, not comparable to target"
+            --run-label "reduced run: CPU, small data, not comparable to target" \
+            "${TIMING_PROBE_ARGS[@]}"
 
       - name: Fast-forward main before publishing results
         id: sync

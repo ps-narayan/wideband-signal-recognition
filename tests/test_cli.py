@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from argparse import Namespace
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import numpy as np
@@ -97,6 +98,27 @@ class CliInputTests(unittest.TestCase):
         self.assertAlmostEqual(result[0]["confidence"], 0.9)
         self.assertEqual(result[0]["xyxy"], (240.0, 160.0, 400.0, 480.0))
 
+    def test_yolo_label_pixels_follow_training_image_size(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            labels = Path(temporary) / "labels.txt"
+            labels.write_text("5 0.5 0.5 0.25 0.5 0.9\n", encoding="utf-8")
+            result = _read_yolo_labels(labels, image_size=1280)
+        self.assertEqual(result[0]["xyxy"], (480.0, 320.0, 800.0, 960.0))
+
+    def test_yolo_label_rounding_overshoot_is_clamped_at_image_edge(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            labels = Path(temporary) / "labels.txt"
+            labels.write_text("5 0.937891 0.5 0.124219 0.1 0.9\n", encoding="utf-8")
+            result = _read_yolo_labels(labels, image_size=1280)
+        self.assertEqual(result[0]["xyxy"][2], 1280.0)
+
+    def test_yolo_label_rejects_materially_out_of_frame_box(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            labels = Path(temporary) / "labels.txt"
+            labels.write_text("5 0.95 0.5 0.2 0.1 0.9\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "falls outside image"):
+                _read_yolo_labels(labels, image_size=1280)
+
     def test_hz_output_is_baseband_offset_and_absolute_when_center_is_known(self):
         box = SignalBox(0, 1024, -0.1, 0.2)
         result = _frequency_output(box, 1_000_000, 915_000_000)
@@ -127,6 +149,13 @@ class CliInputTests(unittest.TestCase):
             output_dir = root / "outputs"
 
             def fake_detect(command, **kwargs):
+                runtime = Path(kwargs["env"]["APPDATA"]).parent
+                self.assertTrue((runtime / "appdata").is_dir())
+                self.assertTrue((runtime / "ultralytics-config" / "Arial.ttf").is_file())
+                self.assertTrue((runtime / "mpl-config").is_dir())
+                self.assertTrue(kwargs["capture_output"])
+                self.assertEqual(kwargs["encoding"], "utf-8")
+                self.assertEqual(kwargs["errors"], "replace")
                 project = Path(command[command.index("--project") + 1])
                 name = command[command.index("--name") + 1]
                 labels = project / name / "labels"
@@ -134,6 +163,7 @@ class CliInputTests(unittest.TestCase):
                 (labels / "segment_00000.txt").write_text(
                     "5 0.5 0.5 0.25 0.25 0.9\n", encoding="utf-8"
                 )
+                return SimpleNamespace(stdout="detect ok\n", stderr="")
 
             args = Namespace(
                 input=str(input_path), output_dir=str(output_dir), yolo_dir=str(yolo_dir),

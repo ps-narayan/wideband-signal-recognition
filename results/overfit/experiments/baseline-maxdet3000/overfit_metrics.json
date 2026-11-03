@@ -1,0 +1,337 @@
+{
+  "scope": "training-only memorization check; no validation or test recordings used",
+  "recordings": [
+    "main-000",
+    "main-001",
+    "main-002",
+    "main-003",
+    "main-006",
+    "main-008",
+    "main-009",
+    "main-011"
+  ],
+  "images": [
+    "main-000-s00",
+    "main-001-s00",
+    "main-002-s00",
+    "main-003-s00",
+    "main-006-s00",
+    "main-008-s00",
+    "main-009-s00",
+    "main-011-s00"
+  ],
+  "image_count": 8,
+  "yolo_revision": "f9578796b8a64889aa9e66dc06914d19f40d338e",
+  "experiment_config": {
+    "image_size": 640,
+    "model_size": "n",
+    "min_bandwidth": 0.008,
+    "min_duration": 8192,
+    "optimizer": "SGD",
+    "lr0": 0.01,
+    "warmup_epochs_argument": 3.0,
+    "augmentation": {
+      "mosaic": 0.0,
+      "mixup": 0.0,
+      "geometric": 0.0
+    }
+  },
+  "label_and_coordinate_checks": {
+    "label_rows": 48,
+    "class_counts": {
+      "AM-DSB": 8,
+      "FM": 8,
+      "OFDM": 8,
+      "2-FSK": 8,
+      "OOK": 8,
+      "PAM": 8
+    },
+    "max_abs_normalized_coordinate_error": 4.970558131756064E-09,
+    "class_mapping_matches_generator": true,
+    "coordinates_match_generator_parameters": true,
+    "image_orientation": "image columns are time and rows are shifted frequency, matching YOLO x/y box convention"
+  },
+  "training_box_dimensions": {
+    "box_count": 48,
+    "width_pixels_min_median_max": [
+      5.8256512,
+      30.5789184,
+      158.1272384
+    ],
+    "height_pixels_min_median_max": [
+      5.464876800000001,
+      12.669049600000001,
+      49.321299200000006
+    ],
+    "boxes_with_either_dimension_below_stride8": 13,
+    "yolov5_detection_strides": [
+      8,
+      16,
+      32
+    ]
+  },
+  "training_setup": {
+    "batches_per_epoch": 2,
+    "warmup_iterations_from_pinned_train_py": 100,
+    "warmup_fraction_of_requested_training_iterations": 0.5,
+    "note": "Pinned YOLOv5 v7 floors warmup at 100 optimizer iterations; calculated from max(round(warmup_epochs * batches_per_epoch), 100)."
+  },
+  "yolo": {
+    "epochs_requested": 100,
+    "wall_seconds": null,
+    "checkpoint_reused_without_retraining": true,
+    "same_image_confidence_threshold": 0.001,
+    "same_image_max_detections_per_image": 3000,
+    "model_parameters": 1772035,
+    "same_image_inference_seconds": 27.353031599894166,
+    "autoanchor_log_lines": [
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0m3.29 anchors/target, 0.958 Best Possible Recall (BPR). Anchors are a poor fit to dataset , attempting to improve...",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mRunning kmeans for 9 anchors on 48 points...",
+      "\u001b[K\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7863: 6% ╸─────────── 67/1000 199.1it/s 0.1s<4.7s",
+      "\u001b[K\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7882: 15% ━╸────────── 155/1000 382.0it/s 0.2s<2.2s",
+      "\u001b[K\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7891: 25% ━━━───────── 256/1000 542.9it/s 0.3s<1.4s",
+      "\u001b[K\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7893: 36% ━━━━──────── 363/1000 697.3it/s 0.4s<0.9s",
+      "\u001b[K\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7893: 48% ━━━━━╸────── 486/1000 834.7it/s 0.5s<0.6s",
+      "\u001b[K\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7893: 60% ━━━━━━━───── 609/1000 944.5it/s 0.6s<0.4s",
+      "\u001b[K\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7893: 74% ━━━━━━━━╸─── 744/1000 1.1Kit/s 0.7s<0.2s",
+      "\u001b[K\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7906: 87% ━━━━━━━━━━── 872/1000 1.1Kit/s 0.8s<0.1s",
+      "\u001b[K\u001b[34m\u001b[1mAutoAnchor: \u001b[0mEvolving anchors with Genetic Algorithm: fitness = 0.7912: 100% ━━━━━━━━━━━━ 1000/1000 1.1Kit/s 0.9s",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mthr=0.25: 1.0000 best possible recall, 4.77 anchors past thr",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mn=9, img_size=640, metric_all=0.328/0.791-mean/best, past_thr=0.477-mean: 11,12, 8,20, 30,7, 56,9, 91,8, 25,40, 55,33, 153,21, 113,49",
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0mDone  (optional: update model *.yaml to use these anchors in the future)"
+    ],
+    "checkpoint": "training checkpoint used on the identical 8 training images",
+    "saved_class_names": [
+      "AM-DSB",
+      "FM",
+      "OFDM",
+      "2-FSK",
+      "OOK",
+      "PAM"
+    ],
+    "class_mapping_matches": true,
+    "prediction_count_at_conf_0_001": 12578,
+    "max_prediction_confidence": 0.0331374,
+    "mean_prediction_confidence": 0.0022171303537923356,
+    "same_image_metrics_by_confidence_threshold": {
+      "0.001": {
+        "class_agnostic": {
+          "precision": 0.000556527269836222,
+          "recall": 0.14583333333333334,
+          "mean_iou_true_positives": 0.6105040472667185,
+          "tp": 7,
+          "fp": 12571,
+          "fn": 41
+        },
+        "class_aware": {
+          "precision": 0.0001590077913817777,
+          "recall": 0.041666666666666664,
+          "mean_iou_true_positives": 0.5719193513917813,
+          "tp": 2,
+          "fp": 12576,
+          "fn": 46
+        },
+        "class_map50": {
+          "map50": 0.0007844333454965638,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 2469
+            },
+            "FM": {
+              "ap50": 0.004629629629629629,
+              "signals": 8,
+              "predictions": 3807
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 899
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1624
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1638
+            },
+            "PAM": {
+              "ap50": 7.69704433497537E-05,
+              "signals": 8,
+              "predictions": 2141
+            }
+          }
+        }
+      },
+      "0.01": {
+        "class_agnostic": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 29,
+          "fn": 48
+        },
+        "class_aware": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 29,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0007844333454965638,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 2469
+            },
+            "FM": {
+              "ap50": 0.004629629629629629,
+              "signals": 8,
+              "predictions": 3807
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 899
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1624
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1638
+            },
+            "PAM": {
+              "ap50": 7.69704433497537E-05,
+              "signals": 8,
+              "predictions": 2141
+            }
+          }
+        }
+      },
+      "0.1": {
+        "class_agnostic": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_aware": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0007844333454965638,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 2469
+            },
+            "FM": {
+              "ap50": 0.004629629629629629,
+              "signals": 8,
+              "predictions": 3807
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 899
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1624
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1638
+            },
+            "PAM": {
+              "ap50": 7.69704433497537E-05,
+              "signals": 8,
+              "predictions": 2141
+            }
+          }
+        }
+      },
+      "0.25": {
+        "class_agnostic": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_aware": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0007844333454965638,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 2469
+            },
+            "FM": {
+              "ap50": 0.004629629629629629,
+              "signals": 8,
+              "predictions": 3807
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 899
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1624
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1638
+            },
+            "PAM": {
+              "ap50": 7.69704433497537E-05,
+              "signals": 8,
+              "predictions": 2141
+            }
+          }
+        }
+      }
+    },
+    "memorization_pass": false,
+    "training_log": "work/overfit/yolo_train.log",
+    "logged_training_completion": "100 epochs completed in 0.248 hours.",
+    "inference_log": "work/overfit/yolo_detect.log"
+  },
+  "pam_cnn": null,
+  "note": "Thresholds shown here are diagnostic thresholds on train images; none were calibrated from validation or test data."
+}

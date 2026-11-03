@@ -56,12 +56,13 @@ def detection_stats(items, *, confidence_threshold, iou_threshold=0.5, class_agn
         fp += len(extra_pred)
         fn += len(missed_gt)
         overlaps.extend(match[2] for match in matches)
-    precision = tp / (tp + fp) if tp + fp else 0.0
-    recall = tp / (tp + fn) if tp + fn else 0.0
+    # No emitted boxes means precision is undefined, not zero.
+    precision = tp / (tp + fp) if tp + fp else None
+    recall = tp / (tp + fn) if tp + fn else None
     return {
         "precision": precision,
         "recall": recall,
-        "mean_iou_true_positives": float(np.mean(overlaps)) if overlaps else 0.0,
+        "mean_iou_true_positives": float(np.mean(overlaps)) if overlaps else None,
         "tp": tp,
         "fp": fp,
         "fn": fn,
@@ -89,15 +90,19 @@ def calibrate_confidence(items, *, target_precision=0.8, class_agnostic=True, io
             class_agnostic=class_agnostic,
         )
         evaluated.append((threshold, stats))
-    feasible = [entry for entry in evaluated if entry[1]["precision"] >= target_precision]
+    feasible = [entry for entry in evaluated if entry[1]["precision"] is not None and entry[1]["precision"] >= target_precision]
     if feasible:
         closest_precision = min(abs(row[1]["precision"] - target_precision) for row in feasible)
         closest = [row for row in feasible if abs(row[1]["precision"] - target_precision) <= closest_precision + 1e-12]
         threshold, stats = max(closest, key=lambda row: row[1]["recall"])
         return {"threshold": threshold, "attained_target": True, **stats}
+    measured = [row for row in evaluated if row[1]["precision"] is not None]
+    if not measured:
+        threshold, stats = evaluated[0]
+        return {"threshold": threshold, "attained_target": False, **stats}
     threshold, stats = min(
-        evaluated,
-        key=lambda row: (abs(row[1]["precision"] - target_precision), -row[1]["recall"]),
+        measured,
+        key=lambda row: (abs(row[1]["precision"] - target_precision), -(row[1]["recall"] or 0.0)),
     )
     return {"threshold": threshold, "attained_target": False, **stats}
 
@@ -172,6 +177,30 @@ def recording_bootstrap(groups, statistic, *, iterations=1000, seed=2026):
     return estimate, float(low), float(high)
 
 
+def recording_bootstrap_optional(groups, statistic, *, iterations=1000, seed=2026):
+    """Bootstrap a metric that can be undefined for a resampled recording set.
+
+    Undefined replicates are excluded; when the full dataset has no defined
+    estimate, both the estimate and confidence interval are not measured.
+    """
+    if not groups:
+        return None, None, None
+    estimate = statistic(list(groups))
+    if estimate is None or not np.isfinite(estimate):
+        return None, None, None
+    rng = np.random.default_rng(seed)
+    samples = []
+    for _ in range(iterations):
+        indices = rng.integers(0, len(groups), size=len(groups))
+        value = statistic([groups[int(index)] for index in indices])
+        if value is not None and np.isfinite(value):
+            samples.append(float(value))
+    if not samples:
+        return float(estimate), None, None
+    low, high = np.quantile(samples, [0.025, 0.975])
+    return float(estimate), float(low), float(high)
+
+
 def summarize_by_recording(items, metric, *, confidence_threshold, iou_threshold=0.5, class_agnostic=False):
     """Return overall estimate/CI and recording/signal support for a detection metric."""
     grouped = defaultdict(list)
@@ -181,16 +210,15 @@ def summarize_by_recording(items, metric, *, confidence_threshold, iou_threshold
 
     def statistic(sampled_groups):
         sampled = [item for group in sampled_groups for item in group["items"]]
-        return float(
-            detection_stats(
-                sampled,
-                confidence_threshold=confidence_threshold,
-                iou_threshold=iou_threshold,
-                class_agnostic=class_agnostic,
-            )[metric]
-        )
+        value = detection_stats(
+            sampled,
+            confidence_threshold=confidence_threshold,
+            iou_threshold=iou_threshold,
+            class_agnostic=class_agnostic,
+        )[metric]
+        return None if value is None else float(value)
 
-    estimate, low, high = recording_bootstrap(groups, statistic)
+    estimate, low, high = recording_bootstrap_optional(groups, statistic)
     signals = sum(len(item["gt"]) for item in items)
     return {
         "estimate": estimate,

@@ -1,0 +1,354 @@
+{
+  "scope": "training-only memorization check; any final YOLO internal validation reuses these same training images; no held-out validation or test recordings used",
+  "recordings": [
+    "main-000",
+    "main-001",
+    "main-002",
+    "main-003",
+    "main-006",
+    "main-008",
+    "main-009",
+    "main-011"
+  ],
+  "images": [
+    "main-000-s00",
+    "main-001-s00",
+    "main-002-s00",
+    "main-003-s00",
+    "main-006-s00",
+    "main-008-s00",
+    "main-009-s00",
+    "main-011-s00"
+  ],
+  "image_count": 8,
+  "yolo_revision": "f9578796b8a64889aa9e66dc06914d19f40d338e",
+  "experiment_config": {
+    "image_size": 640,
+    "model_size": "n",
+    "min_bandwidth": 0.016,
+    "min_duration": 16384,
+    "optimizer": "SGD",
+    "lr0": 0.01,
+    "nominal_batch_size": 64,
+    "warmup_min_iterations": 100,
+    "warmup_epochs_argument": 3.0,
+    "augmentation": {
+      "mosaic": 0.0,
+      "mixup": 0.0,
+      "geometric": 0.0
+    }
+  },
+  "label_and_coordinate_checks": {
+    "label_rows": 48,
+    "class_counts": {
+      "AM-DSB": 8,
+      "FM": 8,
+      "OFDM": 8,
+      "2-FSK": 8,
+      "OOK": 8,
+      "PAM": 8
+    },
+    "max_abs_normalized_coordinate_error": 5.000000000837668E-09,
+    "class_mapping_matches_generator": true,
+    "coordinates_match_generator_parameters": true,
+    "image_orientation": "image columns are time and rows are shifted frequency, matching YOLO x/y box convention"
+  },
+  "training_box_dimensions": {
+    "box_count": 48,
+    "width_pixels_min_median_max": [
+      11.4055296,
+      42.772335999999996,
+      158.50678399999998
+    ],
+    "height_pixels_min_median_max": [
+      10.717363200000001,
+      19.289724800000002,
+      49.879475199999995
+    ],
+    "boxes_with_either_dimension_below_stride8": 0,
+    "yolov5_detection_strides": [
+      8,
+      16,
+      32
+    ]
+  },
+  "training_setup": {
+    "optimizer": "SGD",
+    "lr0": 0.01,
+    "batches_per_epoch": 2,
+    "micro_batches_total": 200,
+    "warmup_micro_batches": 101,
+    "nominal_batch_size": 64,
+    "micro_batch_size": 4,
+    "steady_state_accumulation": 16,
+    "optimizer_updates_expected_from_pinned_loop": 25,
+    "optimizer_updates_during_warmup": 18,
+    "fraction_optimizer_updates_during_warmup": 0.72,
+    "warmup_min_iterations": 100,
+    "loss_gains_after_pinned_yolov5_scaling": {
+      "box": 0.05000000000000001,
+      "cls": 0.0375,
+      "obj": 1.0
+    },
+    "augmentation": {
+      "mosaic": 0.0,
+      "mixup": 0.0,
+      "copy_paste": 0.0,
+      "geometry": 0.0,
+      "hsv": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "source_note": "The pinned train.py defaults to nbs=64 and a 100-iteration warmup floor. Non-default values are temporary, exact-string-checked diagnostic patches restored after training. YOLOv5 scales loss gains in train.py as box*3/nl, cls*nc/80*3/nl, and obj*(imgsz/640)^2*3/nl."
+  },
+  "yolo": {
+    "epochs_requested": 100,
+    "wall_seconds": null,
+    "checkpoint_reused_without_retraining": true,
+    "internal_validation_skipped_during_training_epochs": true,
+    "final_epoch_validation_scope": "same eight training images; not a held-out split; direct detect.py output is the reported memorization metric",
+    "same_image_confidence_threshold": 0.001,
+    "same_image_max_detections_per_image": 1000,
+    "prediction_directory_cleared_before_inference": true,
+    "model_parameters": 1772035,
+    "same_image_inference_seconds": 10.60639590001665,
+    "autoanchor_log_lines": [
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0m4.25 anchors/target, 1.000 Best Possible Recall (BPR). Current anchors are a good fit to dataset"
+    ],
+    "checkpoint": "training checkpoint used on the identical 8 training images",
+    "saved_class_names": [
+      "AM-DSB",
+      "FM",
+      "OFDM",
+      "2-FSK",
+      "OOK",
+      "PAM"
+    ],
+    "class_mapping_matches": true,
+    "prediction_count_at_conf_0_001": 4873,
+    "max_prediction_confidence": 0.00269399,
+    "mean_prediction_confidence": 0.002246987927354812,
+    "same_image_metrics_by_confidence_threshold": {
+      "0.001": {
+        "class_agnostic": {
+          "precision": 0.00020521239482864764,
+          "recall": 0.020833333333333332,
+          "mean_iou_true_positives": 0.6231356705039756,
+          "tp": 1,
+          "fp": 4872,
+          "fn": 47
+        },
+        "class_aware": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 4873,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1264
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 3130
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 400
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 79
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            }
+          }
+        }
+      },
+      "0.01": {
+        "class_agnostic": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_aware": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1264
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 3130
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 400
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 79
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            }
+          }
+        }
+      },
+      "0.1": {
+        "class_agnostic": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_aware": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1264
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 3130
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 400
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 79
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            }
+          }
+        }
+      },
+      "0.25": {
+        "class_agnostic": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_aware": {
+          "precision": null,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 0,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1264
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 3130
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 400
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 79
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            }
+          }
+        }
+      }
+    },
+    "memorization_pass": false,
+    "training_log": "work/overfit-larger-boxes/yolo_train.log (local log, not committed)",
+    "logged_training_completion": "100 epochs completed in 0.065 hours.",
+    "inference_log": "work/overfit-larger-boxes/yolo_detect.log (local log, not committed)"
+  },
+  "pam_cnn": null,
+  "note": "Thresholds shown here are diagnostic thresholds on train images; none were calibrated from validation or test data."
+}

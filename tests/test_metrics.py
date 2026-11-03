@@ -1,6 +1,9 @@
 import unittest
 
-from wideband_recognition.metrics import calibrate_confidence, detection_stats, iou_xyxy, match_image
+from wideband_recognition.metrics import (
+    calibrate_confidence, detection_stats, iou_xyxy, match_image,
+    recording_bootstrap_optional,
+)
 
 
 class MetricTests(unittest.TestCase):
@@ -24,6 +27,25 @@ class MetricTests(unittest.TestCase):
         }]
         stats = detection_stats(items, confidence_threshold=0.5, class_agnostic=False)
         self.assertEqual((stats["tp"], stats["fp"], stats["fn"]), (0, 1, 1))
+
+    def test_zero_predictions_have_unmeasured_precision_and_iou(self):
+        items = [{
+            "recording_id": "train-only",
+            "gt": [{"class": "PAM", "xyxy": [0, 0, 10, 10]}],
+            "pred": [],
+        }]
+        stats = detection_stats(items, confidence_threshold=0.001, class_agnostic=True)
+        self.assertIsNone(stats["precision"])
+        self.assertEqual(stats["recall"], 0.0)
+        self.assertIsNone(stats["mean_iou_true_positives"])
+        calibrated = calibrate_confidence(items, target_precision=0.8)
+        self.assertFalse(calibrated["attained_target"])
+        self.assertEqual(calibrated["threshold"], 1.01)
+        self.assertIsNone(calibrated["precision"])
+        self.assertEqual(
+            recording_bootstrap_optional([{"id": 1}], lambda _groups: None, iterations=10),
+            (None, None, None),
+        )
 
     def test_validation_calibration_is_bounded_and_reports_target_attainment(self):
         items = [{

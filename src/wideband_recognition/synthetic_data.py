@@ -21,11 +21,19 @@ def sample_specs(
     *,
     profile: str = "train",
     n_samples: int = N_SAMPLES,
+    min_bandwidth: float = MIN_BANDWIDTH,
+    min_duration: int = MIN_DURATION,
 ) -> tuple[list[SignalSpec], float]:
     """Make one signal from each detector class with a guard-safe frequency layout."""
     if profile not in {"train", "shifted"}:
         raise ValueError("profile must be 'train' or 'shifted'")
+    if min_bandwidth <= 0 or min_bandwidth > 0.08:
+        raise ValueError("min_bandwidth must be in (0, 0.08] for the main profile")
+    if min_duration < MIN_DURATION or min_duration > 250_000:
+        raise ValueError("min_duration must be in [8192, 250000]")
     covered_samples = (n_samples // 512) * 512
+    if min_duration > covered_samples:
+        raise ValueError("min_duration cannot exceed the STFT-covered recording length")
     if covered_samples < MIN_DURATION:
         raise ValueError("recording does not contain one fully covered minimum-duration signal")
     rng = np.random.default_rng(seed)
@@ -33,9 +41,9 @@ def sample_specs(
     widths = []
     for _ in DETECTOR_CLASSES:
         if profile == "train":
-            width = float(np.exp(rng.uniform(np.log(0.008), np.log(0.08))))
+            width = float(np.exp(rng.uniform(np.log(min_bandwidth), np.log(0.08))))
         else:
-            width = float(rng.uniform(0.02, 0.12))
+            width = float(rng.uniform(max(0.02, min_bandwidth), 0.12))
         widths.append(width)
 
     classes: list[str] = []
@@ -48,7 +56,7 @@ def sample_specs(
     order = np.argsort(widths)[::-1]
     for index in order:
         width = widths[int(index)]
-        duration = int(np.exp(rng.uniform(np.log(MIN_DURATION), np.log(250_000))))
+        duration = int(np.exp(rng.uniform(np.log(min_duration), np.log(250_000))))
         duration = min(duration, covered_samples)
         start = int(rng.integers(0, covered_samples - duration + 1))
         placed = None
@@ -81,7 +89,7 @@ def sample_specs(
         specs.append(placed)
     # Keep manifests and images in stable class order.
     specs.sort(key=lambda item: DETECTOR_CLASSES.index(item.detector_class))
-    if any(spec.end > covered_samples or spec.duration < MIN_DURATION for spec in specs):
+    if any(spec.end > covered_samples or spec.duration < min_duration for spec in specs):
         raise AssertionError("sampled signal falls outside the STFT-covered time range")
 
     if profile == "train":

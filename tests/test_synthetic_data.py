@@ -39,6 +39,20 @@ class SyntheticDataTests(unittest.TestCase):
         self.assertTrue(-5 <= train_snr <= 20)
         self.assertTrue(-5 <= shift_snr <= 5)
 
+    def test_larger_box_constraints_are_enforced_and_replayable(self):
+        first, snr1 = sample_specs(2026, profile="train", min_bandwidth=0.016, min_duration=16384)
+        second, snr2 = sample_specs(2026, profile="train", min_bandwidth=0.016, min_duration=16384)
+        self.assertEqual(first, second)
+        self.assertEqual(snr1, snr2)
+        self.assertTrue(all(item.bandwidth >= 0.016 for item in first))
+        self.assertTrue(all(item.duration >= 16384 for item in first))
+
+    def test_invalid_generator_minimums_are_rejected(self):
+        with self.assertRaises(ValueError):
+            sample_specs(1, min_bandwidth=0.081)
+        with self.assertRaises(ValueError):
+            sample_specs(1, min_duration=250001)
+
     def test_recordings_never_cross_splits(self):
         split = grouped_split()
         self.assertEqual(len(split), 90)

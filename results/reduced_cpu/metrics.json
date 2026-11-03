@@ -1644,10 +1644,10 @@
       }
     },
     "end_to_end": {
-      "precision": 0.0,
+      "precision": null,
       "precision_ci95": [
-        0.0,
-        0.0
+        null,
+        null
       ],
       "recall": 0.0,
       "recall_ci95": [
@@ -1663,10 +1663,10 @@
       "by_global_snr_with_recording_bootstrap": {
         "[0,5)": {
           "precision": {
-            "estimate": 0.0,
+            "estimate": null,
             "ci95": [
-              0.0,
-              0.0
+              null,
+              null
             ],
             "recordings": 1,
             "signals": 6,
@@ -1688,10 +1688,10 @@
         },
         "[10,15)": {
           "precision": {
-            "estimate": 0.0,
+            "estimate": null,
             "ci95": [
-              0.0,
-              0.0
+              null,
+              null
             ],
             "recordings": 1,
             "signals": 6,
@@ -1713,10 +1713,10 @@
         },
         "[15,20)": {
           "precision": {
-            "estimate": 0.0,
+            "estimate": null,
             "ci95": [
-              0.0,
-              0.0
+              null,
+              null
             ],
             "recordings": 2,
             "signals": 12,
@@ -2698,10 +2698,10 @@
       }
     },
     "end_to_end": {
-      "precision": 0.0,
+      "precision": null,
       "precision_ci95": [
-        0.0,
-        0.0
+        null,
+        null
       ],
       "recall": 0.0,
       "recall_ci95": [
@@ -2718,10 +2718,10 @@
     "end_to_end_by_global_snr_with_recording_bootstrap": {
       "[-5,0)": {
         "precision": {
-          "estimate": 0.0,
+          "estimate": null,
           "ci95": [
-            0.0,
-            0.0
+            null,
+            null
           ],
           "recordings": 2,
           "signals": 12,
@@ -2743,10 +2743,10 @@
       },
       "[0,5)": {
         "precision": {
-          "estimate": 0.0,
+          "estimate": null,
           "ci95": [
-            0.0,
-            0.0
+            null,
+            null
           ],
           "recordings": 2,
           "signals": 12,

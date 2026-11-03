@@ -1,0 +1,828 @@
+{
+  "scope": "same-image training-only cap sensitivity; no validation or test recordings",
+  "confidence_threshold": 0.001,
+  "variants": {
+    "1280": [
+      {
+        "max_detections_per_image": 100,
+        "predictions_at_confidence_0_001": 800,
+        "class_agnostic": {
+          "precision": 0.00375,
+          "recall": 0.0625,
+          "mean_iou_true_positives": 0.5834926886914723,
+          "tp": 3,
+          "fp": 797,
+          "fn": 45
+        },
+        "class_aware": {
+          "precision": 0.0025,
+          "recall": 0.041666666666666664,
+          "mean_iou_true_positives": 0.6073857033186141,
+          "tp": 2,
+          "fp": 798,
+          "fn": 46
+        },
+        "class_map50": {
+          "map50": 0.026041666666666668,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "FM": {
+              "ap50": 0.125,
+              "signals": 8,
+              "predictions": 785
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.03125,
+              "signals": 8,
+              "predictions": 13
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1
+            }
+          }
+        },
+        "inference_seconds": 21.93853660003515,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      },
+      {
+        "max_detections_per_image": 300,
+        "predictions_at_confidence_0_001": 2400,
+        "class_agnostic": {
+          "precision": 0.00125,
+          "recall": 0.0625,
+          "mean_iou_true_positives": 0.5834926886914723,
+          "tp": 3,
+          "fp": 2397,
+          "fn": 45
+        },
+        "class_aware": {
+          "precision": 0.0008333333333333334,
+          "recall": 0.041666666666666664,
+          "mean_iou_true_positives": 0.6073857033186141,
+          "tp": 2,
+          "fp": 2398,
+          "fn": 46
+        },
+        "class_map50": {
+          "map50": 0.026041666666666668,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "FM": {
+              "ap50": 0.125,
+              "signals": 8,
+              "predictions": 2381
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.03125,
+              "signals": 8,
+              "predictions": 16
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 2
+            }
+          }
+        },
+        "inference_seconds": 23.454695100022946,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      },
+      {
+        "max_detections_per_image": 1000,
+        "predictions_at_confidence_0_001": 8000,
+        "class_agnostic": {
+          "precision": 0.000625,
+          "recall": 0.10416666666666667,
+          "mean_iou_true_positives": 0.6075770816076975,
+          "tp": 5,
+          "fp": 7995,
+          "fn": 43
+        },
+        "class_aware": {
+          "precision": 0.000375,
+          "recall": 0.0625,
+          "mean_iou_true_positives": 0.6629718467675233,
+          "tp": 3,
+          "fp": 7997,
+          "fn": 45
+        },
+        "class_map50": {
+          "map50": 0.028356481481481483,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 772
+            },
+            "FM": {
+              "ap50": 0.125,
+              "signals": 8,
+              "predictions": 6770
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.03125,
+              "signals": 8,
+              "predictions": 119
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 309
+            },
+            "PAM": {
+              "ap50": 0.013888888888888888,
+              "signals": 8,
+              "predictions": 30
+            }
+          }
+        },
+        "inference_seconds": 29.313315899984445,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      },
+      {
+        "max_detections_per_image": 3000,
+        "predictions_at_confidence_0_001": 23363,
+        "class_agnostic": {
+          "precision": 0.0005564353892907589,
+          "recall": 0.2708333333333333,
+          "mean_iou_true_positives": 0.6058437992956349,
+          "tp": 13,
+          "fp": 23350,
+          "fn": 35
+        },
+        "class_aware": {
+          "precision": 0.0002568163335188118,
+          "recall": 0.125,
+          "mean_iou_true_positives": 0.6952736970321446,
+          "tp": 6,
+          "fp": 23357,
+          "fn": 42
+        },
+        "class_map50": {
+          "map50": 0.028548569043898877,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 7598
+            },
+            "FM": {
+              "ap50": 0.1250608223177358,
+              "signals": 8,
+              "predictions": 12367
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 136
+            },
+            "2-FSK": {
+              "ap50": 0.03125,
+              "signals": 8,
+              "predictions": 1286
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1700
+            },
+            "PAM": {
+              "ap50": 0.014980591945657446,
+              "signals": 8,
+              "predictions": 276
+            }
+          }
+        },
+        "inference_seconds": 18.726129700022284,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      }
+    ],
+    "larger-boxes": [
+      {
+        "max_detections_per_image": 100,
+        "predictions_at_confidence_0_001": 800,
+        "class_agnostic": {
+          "precision": 0.00125,
+          "recall": 0.020833333333333332,
+          "mean_iou_true_positives": 0.6231356705039756,
+          "tp": 1,
+          "fp": 799,
+          "fn": 47
+        },
+        "class_aware": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 800,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 499
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 301
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            }
+          }
+        },
+        "inference_seconds": 8.731634699972346,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      },
+      {
+        "max_detections_per_image": 300,
+        "predictions_at_confidence_0_001": 2400,
+        "class_agnostic": {
+          "precision": 0.0004166666666666667,
+          "recall": 0.020833333333333332,
+          "mean_iou_true_positives": 0.6231356705039756,
+          "tp": 1,
+          "fp": 2399,
+          "fn": 47
+        },
+        "class_aware": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 2400,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 2096
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 304
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            }
+          }
+        },
+        "inference_seconds": 9.452032900007907,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      },
+      {
+        "max_detections_per_image": 1000,
+        "predictions_at_confidence_0_001": 4873,
+        "class_agnostic": {
+          "precision": 0.00020521239482864764,
+          "recall": 0.020833333333333332,
+          "mean_iou_true_positives": 0.6231356705039756,
+          "tp": 1,
+          "fp": 4872,
+          "fn": 47
+        },
+        "class_aware": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 4873,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1264
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 3130
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 400
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 79
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            }
+          }
+        },
+        "inference_seconds": 10.60639590001665,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      },
+      {
+        "max_detections_per_image": 3000,
+        "predictions_at_confidence_0_001": 4873,
+        "class_agnostic": {
+          "precision": 0.00020521239482864764,
+          "recall": 0.020833333333333332,
+          "mean_iou_true_positives": 0.6231356705039756,
+          "tp": 1,
+          "fp": 4872,
+          "fn": 47
+        },
+        "class_aware": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 4873,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1264
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 3130
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 400
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 79
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 0
+            }
+          }
+        },
+        "inference_seconds": 10.523628900002223,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      }
+    ],
+    "yolov5s": [
+      {
+        "max_detections_per_image": 100,
+        "predictions_at_confidence_0_001": 800,
+        "class_agnostic": {
+          "precision": 0.0025,
+          "recall": 0.041666666666666664,
+          "mean_iou_true_positives": 0.5502928717465918,
+          "tp": 2,
+          "fp": 798,
+          "fn": 46
+        },
+        "class_aware": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 800,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 31
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 38
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 470
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 145
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 62
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 54
+            }
+          }
+        },
+        "inference_seconds": 9.364147800020874,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      },
+      {
+        "max_detections_per_image": 300,
+        "predictions_at_confidence_0_001": 2400,
+        "class_agnostic": {
+          "precision": 0.0008333333333333334,
+          "recall": 0.041666666666666664,
+          "mean_iou_true_positives": 0.5502928717465918,
+          "tp": 2,
+          "fp": 2398,
+          "fn": 46
+        },
+        "class_aware": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 2400,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 62
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 68
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1649
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 345
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 169
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 107
+            }
+          }
+        },
+        "inference_seconds": 10.153212099976372,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      },
+      {
+        "max_detections_per_image": 1000,
+        "predictions_at_confidence_0_001": 8000,
+        "class_agnostic": {
+          "precision": 0.000625,
+          "recall": 0.10416666666666667,
+          "mean_iou_true_positives": 0.5638080582127504,
+          "tp": 5,
+          "fp": 7995,
+          "fn": 43
+        },
+        "class_aware": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "mean_iou_true_positives": null,
+          "tp": 0,
+          "fp": 8000,
+          "fn": 48
+        },
+        "class_map50": {
+          "map50": 0.0,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 216
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 232
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 3286
+            },
+            "2-FSK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 2099
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1231
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 936
+            }
+          }
+        },
+        "inference_seconds": 11.982627599965781,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      },
+      {
+        "max_detections_per_image": 3000,
+        "predictions_at_confidence_0_001": 8673,
+        "class_agnostic": {
+          "precision": 0.0006918021445866483,
+          "recall": 0.125,
+          "mean_iou_true_positives": 0.560560670167673,
+          "tp": 6,
+          "fp": 8667,
+          "fn": 42
+        },
+        "class_aware": {
+          "precision": 0.00011530035743110804,
+          "recall": 0.020833333333333332,
+          "mean_iou_true_positives": 0.6767474953034509,
+          "tp": 1,
+          "fp": 8672,
+          "fn": 47
+        },
+        "class_map50": {
+          "map50": 9.552193183554944e-06,
+          "per_class": {
+            "AM-DSB": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 249
+            },
+            "FM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 253
+            },
+            "OFDM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 3385
+            },
+            "2-FSK": {
+              "ap50": 5.7313159101329664e-05,
+              "signals": 8,
+              "predictions": 2224
+            },
+            "OOK": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1367
+            },
+            "PAM": {
+              "ap50": 0.0,
+              "signals": 8,
+              "predictions": 1195
+            }
+          }
+        },
+        "inference_seconds": 12.375586599984672,
+        "prediction_directory_cleared_before_inference": true,
+        "recordings": [
+          "main-000",
+          "main-001",
+          "main-002",
+          "main-003",
+          "main-006",
+          "main-008",
+          "main-009",
+          "main-011"
+        ],
+        "signals": 48
+      }
+    ]
+  }
+}

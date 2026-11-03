@@ -1,0 +1,13 @@
+{
+  "scope": "same eight training images only; not validation/test split data",
+  "reported_images": 8,
+  "reported_instances": 48,
+  "reported_precision": 0.0013,
+  "reported_recall": 0.0208,
+  "reported_map50": 0.00231,
+  "reported_map50_95": 0.000231,
+  "nms_time_limit_warnings": 2,
+  "saved_prediction_label_files": 4,
+  "of_images": 8,
+  "assessment": "incomplete prediction files and NMS time-limit warnings; not used for model selection or performance claims"
+}

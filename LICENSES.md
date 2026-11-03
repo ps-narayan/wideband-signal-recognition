@@ -16,7 +16,7 @@ The pinned runtime helpers `ultralytics==8.4.164` and `ultralytics-thop==2.2.1` 
 
 ## Datasets
 
-The current milestone uses only generated synthetic signals and does not download or redistribute external recordings. The project owner will verify the Zenodo companion record's current file size and record-level license before use. The stated CC BY-SA version is not independently confirmed here because the record metadata endpoint was inaccessible; do not rely on it until the owner checks the record's Rights field. DeepSig access and licensing are also unverified and remain optional.
+The current milestone uses only generated synthetic signals and does not download or redistribute external recordings. The project owner will verify the Zenodo companion record's current file size and record-level license before use. The Zenodo record's Rights field is unverified in this repository. CC BY-SA 4.0 was mentioned in earlier planning but has not been confirmed against that record; do not treat it as an established license or use the data until the owner checks the current Rights field. DeepSig access and licensing are also unverified and remain optional.
 
 Zenodo's own documentation says licenses are record-specific and points users to each record's Rights section; a repository-wide default must not be assumed. See [Zenodo license guidance](https://help.zenodo.org/docs/deposit/describe-records/licenses/) and the [companion record DOI](https://doi.org/10.5281/zenodo.7799387).
 

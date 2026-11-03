@@ -1,0 +1,3 @@
+# Training-only diagnostic constraints; not used to alter validation or test recordings.
+min_bandwidth_cycles_per_sample: 0.016
+min_duration_samples: 16384

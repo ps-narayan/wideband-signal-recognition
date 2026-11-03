@@ -1,34 +1,25 @@
 # Decisions
 
-- Use the GNU AGPL version three for this project because the reproducible detector dependency is distributed under the same copyleft license.
-- Pin YOLOv5 to full commit `f9578796b8a64889aa9e66dc06914d19f40d338e` because its source license and the required train, detect, and AutoAnchor interfaces were verified at that exact revision.
-- Pin `ultralytics==8.4.164`, `ultralytics-thop==2.2.1`, and `ultralytics-platform==0.1.45` because the pinned YOLOv5 source imports these runtime helpers; pinning them fixes the missing-module startup failure.
-- Preflight write access by creating and deleting a unique temporary branch after tests pass; this verifies the built-in workflow token before spending time on visibility and model training.
-- Fast-forward the checkout immediately before publishing so results from a long run apply to the latest main branch without overwriting intervening documentation or code changes.
-- Rebase the generated result commit onto the latest main tip immediately before its push to handle a commit that lands between publication and push.
-- Upload the run's results directory and checkpoints as artifacts even after failure so a time-limited or interrupted run remains inspectable and recoverable.
-- Use YOLOv5n at the agreed image size because a small detector is more appropriate for a free T4 session; the measured detector metrics, not the architecture name, decide whether it is adequate.
-- Keep the energy detector as a geometry baseline and fallback because it cannot supply modulation labels and must not gate class predictions.
-- Keep labels derived only from generator parameters because raster-derived labels would bake image-processing errors into the ground truth.
-- Save spectrograms, YOLO labels, and replay metadata, then regenerate I/Q from the seed because retaining all recordings would waste storage.
-- Store normalized-frequency boxes because the synthetic sample rate is one sample per second; convert to hertz only when a real input supplies its sample rate.
-- Use synthetic-only training because DeepSig access is unconfirmed and the Zenodo record's size and license remain for the owner to verify.
-- Train the detector from scratch because no verified real-data source is available for a meaningful synthetic-pretrain/real-finetune phase.
-- Keep the primary synthetic test recording-disjoint and add a shifted parameter-range test because both leakage control and distribution shift matter for a portfolio claim.
-- Use recording-level bootstrap intervals because signals from one parent recording must not be treated as independent samples.
-- Keep the PAM classifier compact and include Others for the specified non-PAM signals because the extraction stage needs a rejection option.
-- Keep the minimum signal dimensions and 640-pixel resize because they pass the agreed visibility check; the small raster boxes remain a localization risk to measure.
-- Save outputs to Drive early and train from Colab local storage where possible because session loss should not erase the generated dataset or reports.
-- Make the Milestone 3 CLI read a real IQ/SigMF input and never call the generator or depend on a seed; deterministic extraction keeps deployment aligned with evaluation framing.
-- Process spectrograms in bounded 1,000,000-sample chunks and report covered and omitted sample counts because 512-sample non-overlap windows can leave a tail outside the image.
-- Support a documented SigMF datatype subset and fail explicitly on unsupported layouts so the CLI cannot silently misread multi-channel or discontinuous recordings.
-- Use 0.25 only as a runnable CLI confidence default; measured deployment must pass the threshold calibrated on validation, never select it from test results.
-- Keep measured result files empty until the reduced CPU workflow completes evaluation; it then publishes only values from that run.
-- Label the saved synthetic CLI example as a reduced CPU energy-geometry demonstration because no trained checkpoints or CUDA GPU are available in this environment.
-
-- Use 18 main and 4 shifted recordings, one 1M-sample segment each, 640-pixel images, 3 YOLO epochs, 5 PAM epochs, and 200 recording bootstraps for the hosted CPU run; this keeps the same pipeline and recording split while explicitly making results not comparable to full-scale targets.
-- Give the workflow a 4h30 hard limit and the model pipeline a 3h30 runtime budget; cap detector training so up to 15 minutes remains for PAM training and 45 minutes for inference/evaluation, then evaluate the latest saved detector checkpoint and mark any time-limited model training in the report.
-- Publish metrics only after evaluation completes, keep the test sets frozen, and mark every reduced-run target not comparable because the CPU subset is intentionally small and hosted timing is not the owner's laptop timing.
-- Use only GitHub's built-in GITHUB_TOKEN for the result commit; paths-ignore plus [skip ci] prevent the results commit from starting another reduced run.
-- Publish recording IDs by split and block result publication if any main or shifted recording IDs overlap, because this makes the no-leakage check reviewable and reproducible.
-- Add an opt-in 10-epoch CPU detector probe with the same dataset, split, image size, and validation precision target; keep the default push profile at 3 epochs so the diagnostic change is isolated and existing results are not silently relabelled.
+- Use AGPL-3.0 for this repository because the pinned YOLOv5 source is AGPL-3.0; the exact revision and required training, detection, and AutoAnchor APIs are checked at runtime.
+- Pin YOLOv5 to `f9578796b8a64889aa9e66dc06914d19f40d338e` and pin its installed runtime helpers because earlier missing-module startup failures made an unpinned environment unreliable.
+- Keep the current synthetic scope at six detector classes, including one merged PAM class and six PAM subtypes, because the project began as a scaled-down reproduction. The paper's full twelve-class detector remains an explicit limitation.
+- Keep the 640-pixel standard reduced profile for comparability with its already measured run. Use 1280-pixel images for the updated medium CPU profile because the smallest boxes measured 11.65 x 10.93 pixels there and the controlled detector overfit passed at this resolution.
+- Retain the minimum 0.008 cycles/sample bandwidth and 8,192-sample duration from the agreed visibility constraints. The 50-seed visibility check measures appearance, while the detector overfit check measures whether the model can localize and classify the boxes.
+- Keep generator-derived boxes and recording-disjoint splits. All segments from one recording stay in one split; test IDs remain frozen and thresholds are calibrated from validation only.
+- Generate synthetic signals because DeepSig access and licensing are unverified and the Zenodo record's Rights field remains unverified. Do not download external data until the record's current size and license are checked.
+- Do not retain all I/Q recordings; store spectrograms, YOLO labels, and replay metadata, then regenerate I/Q from the seed for training/evaluation. The deployment CLI reads the provided file and never uses a generator seed.
+- Keep the energy detector as a class-agnostic geometry baseline and fallback. It does not supply modulation labels and does not gate class predictions.
+- Use recording-level bootstrap intervals because signals within one recording are not independent observations. Mark any cell with fewer than 30 signals as low-support.
+- The original pinned YOLOv5 schedule used nominal batch 64 and a 100-iteration warm-up floor. For the eight-image, batch-4, 100-epoch check this yielded 25 optimizer updates, 18 during warm-up; for the original 3-epoch reduced workflow it yielded only 6 updates, all during warm-up.
+- Make the training schedule explicit: set nominal batch size equal to the physical batch and use a 10-iteration warm-up floor. In a controlled eight-image check, batch alignment raised mAP@0.5 from 2.85% to 29.81%; lowering only the warm-up floor raised it to 74.04%; extending only the duration to 200 epochs then produced 100.00% same-image mAP@0.5 and recall. These are training-only measurements, not held-out results.
+- Patch only exact pinned-source markers, restore YOLOv5's original source after each training call, and fail closed if the expected lines change. This makes optimizer overrides reversible and reviewable.
+- Set inference max-det to 3,000 per image and delete each previous prediction directory before running detection. Clean cap tests showed that the former 300-box cap clipped recall on the low-confidence training candidates.
+- Keep augmentation disabled for memorization tests so they can check whether the detector can fit the fixed images. The medium run uses the project's configured spectrogram-compatible augmentation; its impact on held-out data remains to be measured.
+- Use 1280-pixel images, batch 4, nominal batch 4, a 10-iteration warm-up floor, and 135 epochs in `medium_cpu`. Twelve training images at three batches per epoch give 405 expected updates, close to the 400-update memorization run.
+- The 200-epoch, 400-update overfit run measured 1,100.50 seconds locally. Scaling that rate to 405 updates gives about 1,114 seconds, an extrapolation for planning only. The hosted workflow measures a one-epoch timing probe before training and has a 210-minute pipeline budget inside a 270-minute job timeout; partial training is evaluated from the latest checkpoint.
+- Keep the medium profile at 18 main and 4 shifted recordings with one 1M-sample segment per recording, the same seed, and frozen test IDs. Use 125 PAM epochs, at most 16 frames per represented class, and 500 recording bootstraps. This is still a small CPU evaluation, labelled not comparable to the portfolio targets.
+- Make the CLI image size an explicit option because a YOLO checkpoint trained at 1280 must not silently receive a 640-pixel spectrogram. The CLI records the chosen size and max detection count in its JSON output.
+- Use 0.25 only as the runnable CLI default. For measured inference, use a confidence threshold calibrated on validation, never one selected from test results.
+- Keep the existing reduced CPU results attributed to their measured source run. New training-schedule changes remain unmeasured on held-out data until the updated Actions workflow completes.
+- Preflight GitHub Actions write access with the built-in token, run tests before model work, fast-forward before publishing, and add `[skip ci]` to automatic results commits.
+- Upload metrics, plots, checkpoints, generated dataset, and logs as workflow artifacts. Keep datasets and checkpoints out of Git.

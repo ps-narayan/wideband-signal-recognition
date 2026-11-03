@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import signal
@@ -31,11 +32,13 @@ from wideband_recognition.geometry import pixels_to_box
 from wideband_recognition.layout import resolution_statuses
 from wideband_recognition.metrics import (
     average_precision, calibrate_confidence, class_map50, detection_stats, iou_xyxy,
-    match_image, recording_bootstrap,
+    match_image, recording_bootstrap, recording_bootstrap_optional,
 )
 from wideband_recognition.pam_model import PAMCNN, PAM_LABELS
+from wideband_recognition.sampling import cap_frames_per_class
 from wideband_recognition.signals import DETECTOR_CLASSES, NON_PAM, PAM_SUBTYPES, generate_recording
 from wideband_recognition.synthetic_data import sample_specs
+from wideband_recognition.yolo_schedule import expected_optimizer_schedule, temporary_yolov5_schedule
 
 
 YOLOV5_REPOSITORY = "https://github.com/ultralytics/yolov5.git"
@@ -54,16 +57,20 @@ def _run(command, *, cwd=None, log_path=None, env=None, timeout_seconds=None, in
         popen_options["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
     process = subprocess.Popen(
         list(map(str, command)), cwd=cwd, env=env,
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+        encoding="utf-8", errors="replace", bufsize=1,
         **popen_options,
     )
-    handle = open(log_path, "w", encoding="utf-8") if log_path else None
+    handle = open(log_path, "w", encoding="utf-8", errors="replace") if log_path else None
     timed_out = False
 
     def forward_output():
         assert process.stdout is not None
         for line in process.stdout:
-            print(line, end="", flush=True)
+            encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+            safe_line = line.encode(encoding, errors="replace").decode(encoding, errors="replace")
+            sys.stdout.write(safe_line)
+            sys.stdout.flush()
             if handle:
                 handle.write(line)
                 handle.flush()
@@ -101,6 +108,25 @@ def _run(command, *, cwd=None, log_path=None, env=None, timeout_seconds=None, in
         raise subprocess.CalledProcessError(code, command)
     return timed_out
 
+
+def _run_yolo_training(
+    command,
+    *,
+    yolo_dir: Path,
+    log_path: Path,
+    env: dict,
+    timeout_seconds: float | None,
+    nominal_batch_size: int,
+    warmup_min_iterations: int,
+):
+    """Run pinned YOLO training with explicit, reversible accumulation settings."""
+    with temporary_yolov5_schedule(
+        yolo_dir / "train.py",
+        nominal_batch_size=nominal_batch_size,
+        warmup_min_iterations=warmup_min_iterations,
+    ):
+        return _run(command, cwd=yolo_dir, log_path=log_path, env=env, timeout_seconds=timeout_seconds)
+
 def _check_yolo(yolo_dir: Path) -> dict:
     sha = subprocess.check_output(
         ["git", "-C", str(yolo_dir), "rev-parse", "HEAD"], text=True
@@ -128,7 +154,7 @@ def _check_yolo(yolo_dir: Path) -> dict:
     for option in (
         "--cfg", "--weights", "--epochs", "--img", "--hyp", "--noautoanchor",
         "--batch-size", "--data", "--device", "--workers", "--project",
-        "--name", "--exist-ok", "--seed", "--save-period",
+        "--name", "--exist-ok", "--seed", "--save-period", "--noval",
     ):
         if option not in train_help.stdout:
             raise RuntimeError(f"Pinned train.py is missing {option}")
@@ -341,20 +367,16 @@ def _bootstrap_detection(items, metric, threshold, iterations):
         fn = sum(row["fn"] for row in sample)
         iou_sum = sum(row["iou_sum"] for row in sample)
         if metric == "precision":
-            return tp / (tp + fp) if tp + fp else 0.0
+            return tp / (tp + fp) if tp + fp else None
         if metric == "recall":
-            return tp / (tp + fn) if tp + fn else 0.0
-        return iou_sum / tp if tp else 0.0
+            return tp / (tp + fn) if tp + fn else None
+        return iou_sum / tp if tp else None
 
-    estimate = statistic(groups)
-    rng = np.random.default_rng(2026)
-    samples = np.empty(iterations, dtype=np.float64)
-    for index in range(iterations):
-        sample_ids = rng.integers(0, len(groups), size=len(groups)) if groups else []
-        samples[index] = statistic([groups[int(i)] for i in sample_ids])
-    low, high = np.quantile(samples, [0.025, 0.975]) if iterations else (estimate, estimate)
+    estimate, low, high = recording_bootstrap_optional(
+        groups, statistic, iterations=iterations
+    )
     return {
-        "estimate": estimate, "ci95": [float(low), float(high)],
+        "estimate": estimate, "ci95": [low, high],
         "recordings": len(groups), "signals": count, "low_support": count < 30,
     }
 
@@ -402,7 +424,7 @@ def _accuracy_summary(rows, *, snr_bin=None, label_filter=None, iterations=500):
         "signals": len(selected), "low_support": len(selected) < 30,
     }
 
-def _build_frame_set(rows, data_dir: Path, *, jitter: bool):
+def _build_frame_set(rows, data_dir: Path, *, jitter: bool, max_frames_per_class=None, seed=2026):
     frames, labels, frame_rows = [], [], []
     for row in rows:
         metadata = _load_metadata(data_dir / "metadata" / row["split"] / f"{row['segment_id']}.json")
@@ -438,7 +460,11 @@ def _build_frame_set(rows, data_dir: Path, *, jitter: bool):
                 })
     if not frames:
         raise RuntimeError("PAM frame set is empty")
-    return np.asarray(frames, dtype=np.float32), np.asarray(labels, dtype=np.int64), frame_rows
+    frames, labels, frame_rows = cap_frames_per_class(
+        np.asarray(frames, dtype=np.float32), np.asarray(labels, dtype=np.int64),
+        frame_rows, max_frames_per_class, seed=seed,
+    )
+    return frames, labels, frame_rows
 
 
 def _train_pam(
@@ -792,13 +818,13 @@ def _score_test_pipeline(
     def ratio(sample, numerator, denominator):
         rows = [row for group in sample for row in group["rows"]]
         top, bottom = sum(row[numerator] for row in rows), sum(row[denominator] for row in rows)
-        return top / bottom if bottom else 0.0
+        return top / bottom if bottom else None
 
-    precision_ci = recording_bootstrap(
+    precision_ci = recording_bootstrap_optional(
         groups, lambda sample: ratio(sample, "correct", "predictions"), iterations=iterations
     )
     recall_ci = recording_bootstrap(
-        groups, lambda sample: ratio(sample, "correct", "ground_truth"), iterations=iterations
+        groups, lambda sample: ratio(sample, "correct", "ground_truth") or 0.0, iterations=iterations
     )
     others = sum(value[0] for value in false_counts.values())
     nonpam = sum(value[1] for value in false_counts.values())
@@ -819,7 +845,7 @@ def _score_test_pipeline(
             },
         },
         "end_to_end": {
-            "precision": total_correct / total_pred if total_pred else 0.0,
+            "precision": total_correct / total_pred if total_pred else None,
             "precision_ci95": list(precision_ci[1:]),
             "recall": total_correct / total_gt if total_gt else 0.0,
             "recall_ci95": list(recall_ci[1:]),
@@ -879,6 +905,10 @@ def _save_pam_snr_plot(oracle_by_snr, detector_by_snr, path: Path):
         upper = np.maximum(0.0, np.asarray([interval[1] for interval in intervals], dtype=float) - estimates)
         ax.errorbar(bins, estimates, yerr=np.vstack((lower, upper)), marker=marker, capsize=3, label=label)
     ax.set_ylim(0, 1)
+    ax.axhline(
+        1 / 7, color="black", linestyle="--", linewidth=1,
+        label="uniform seven-class chance (1/7 = 14.29%)",
+    )
     ax.set_xlabel("Global SNR bin (dB)")
     ax.set_ylabel("PAM subtype accuracy")
     ax.set_title(
@@ -903,12 +933,12 @@ def _end_to_end_by_snr(rows, iterations):
         def precision(sample):
             flat = [r for g in sample for r in g["rows"]]
             denom = sum(r["predictions"] for r in flat)
-            return sum(r["correct"] for r in flat) / denom if denom else 0.0
+            return sum(r["correct"] for r in flat) / denom if denom else None
         def recall(sample):
             flat = [r for g in sample for r in g["rows"]]
             denom = sum(r["ground_truth"] for r in flat)
             return sum(r["correct"] for r in flat) / denom if denom else 0.0
-        p = recording_bootstrap(groups, precision, iterations=iterations)
+        p = recording_bootstrap_optional(groups, precision, iterations=iterations)
         r = recording_bootstrap(groups, recall, iterations=iterations)
         signal_count = sum(row["ground_truth"] for row in selected)
         support = {
@@ -944,6 +974,10 @@ def _check_config(config: dict) -> None:
         raise ValueError("data.image_size must be a positive multiple of 32 for YOLOv5")
     if int(config["detector"]["image_size"]) != int(config["data"]["image_size"]):
         raise ValueError("detector.image_size must match data.image_size")
+    detector = config["detector"]
+    for key in ("nominal_batch_size", "warmup_min_iterations", "max_detections_per_image"):
+        if key in detector and int(detector[key]) < 1:
+            raise ValueError(f"detector.{key} must be positive")
     if int(config["pam_classifier"]["frame_samples"]) != FRAME_SAMPLES:
         raise ValueError(
             f"pam_classifier.frame_samples must remain {FRAME_SAMPLES} to match extraction and PAMCNN"
@@ -954,13 +988,20 @@ def _write_summary(metrics, path: Path):
     shifted = metrics["shifted_test"]
 
     def fmt(value):
-        return "n/a" if value is None else f"{float(value):.4f}"
+        return "not measured" if value is None else f"{float(value):.4f}"
+
+    def fmt_ci(values):
+        if not values or len(values) != 2 or any(value is None for value in values):
+            return "[not measured, not measured]"
+        return f"[{fmt(values[0])}, {fmt(values[1])}]"
 
     def estimate_line(name, row):
-        ci = row.get("ci95", [None, None])
+        ci_values = row.get("ci95", [None, None])
+        lower_name = name.lower()
+        chance = " (PAM chance level 1/7 = 14.29%)" if ("accuracy" in lower_name or "subtype" in lower_name) and ("pam" in lower_name or "subtype" in lower_name or "all-signal classifier" in lower_name) else ""
         return (
-            f"{name}: {fmt(row.get('estimate', row.get('accuracy', row.get('rate'))))}; "
-            f"CI95=[{fmt(ci[0])}, {fmt(ci[1])}]; "
+            f"{name}{chance}: {fmt(row.get('estimate', row.get('accuracy', row.get('rate'))))}; "
+            f"CI95={fmt_ci(ci_values)}; "
             f"recordings={row.get('recordings', 'n/a')}; signals={row.get('signals', 'n/a')}; "
             f"low_support={row.get('low_support', 'n/a')}"
         )
@@ -996,10 +1037,10 @@ def _write_summary(metrics, path: Path):
     lines.append("YOLO per-class precision, recall, mean IoU, and AP@0.5:")
     for name, row in main["yolo"]["per_class_with_recording_bootstrap"].items():
         lines.append(
-            f"  {name}: P={fmt(row['precision']['estimate'])} CI95={row['precision']['ci95']}; "
-            f"R={fmt(row['recall']['estimate'])} CI95={row['recall']['ci95']}; "
-            f"IoU={fmt(row['mean_iou_true_positives']['estimate'])} CI95={row['mean_iou_true_positives']['ci95']}; "
-            f"AP50={fmt(row['ap50']['estimate'])} CI95={row['ap50']['ci95']}; "
+            f"  {name}: P={fmt(row['precision']['estimate'])} CI95={fmt_ci(row['precision']['ci95'])}; "
+            f"R={fmt(row['recall']['estimate'])} CI95={fmt_ci(row['recall']['ci95'])}; "
+            f"IoU={fmt(row['mean_iou_true_positives']['estimate'])} CI95={fmt_ci(row['mean_iou_true_positives']['ci95'])}; "
+            f"AP50={fmt(row['ap50']['estimate'])} CI95={fmt_ci(row['ap50']['ci95'])}; "
             f"recordings={row['ap50']['recordings']}; signals={row['ap50']['signals']}; "
             f"low_support={row['ap50']['low_support']}"
         )
@@ -1129,6 +1170,12 @@ def run(args):
     IMAGE_SIZE = int(config["data"]["image_size"])
     N_SAMPLES = int(config["data"]["segment_samples"])
     _check_config(config)
+    detector_config = config.get("detector", {})
+    nominal_batch_size = int(detector_config.get("nominal_batch_size", args.yolo_batch))
+    warmup_min_iterations = int(detector_config.get("warmup_min_iterations", 10))
+    max_detections_per_image = int(detector_config.get("max_detections_per_image", 3000))
+    if min(nominal_batch_size, warmup_min_iterations, max_detections_per_image) < 1:
+        raise ValueError("YOLO nominal batch size, warmup floor, and max detections must be positive")
     yolo_dir = Path(args.yolo_dir).resolve()
     out_dir = Path(args.out_dir).resolve()
     data_work = Path(args.data_work).resolve()
@@ -1145,6 +1192,32 @@ def run(args):
 
     for directory in (out_dir / "results", out_dir / "plots", out_dir / "checkpoints"):
         directory.mkdir(parents=True, exist_ok=True)
+    # YOLOv5's pinned helper libraries create settings/font caches during the
+    # CLI preflight. Keep those writes inside this run instead of the user's
+    # home directory so local and hosted runs behave the same way.
+    appdata = out_dir / "appdata"
+    config_dir = out_dir / "ultralytics-config"
+    mpl_config_dir = out_dir / "mpl-config"
+    for directory in (appdata, config_dir, mpl_config_dir):
+        directory.mkdir(parents=True, exist_ok=True)
+    os.environ["APPDATA"] = str(appdata)
+    os.environ["YOLO_CONFIG_DIR"] = str(config_dir)
+    os.environ["YOLOV5_CONFIG_DIR"] = str(config_dir)
+    os.environ["MPLCONFIGDIR"] = str(mpl_config_dir)
+    font_path = config_dir / "Arial.ttf"
+    if not font_path.exists():
+        from PIL import ImageFont
+
+        font_candidates = [
+            Path("C:/Windows/Fonts/arial.ttf"),
+            Path("/usr/share/fonts/truetype/msttcorefonts/Arial.ttf"),
+            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+            Path(ImageFont.__file__).parent / "fonts" / "DejaVuSans.ttf",
+        ]
+        local_font = next((candidate for candidate in font_candidates if candidate.is_file()), None)
+        if local_font is None:
+            raise RuntimeError("YOLOv5 requires an ASCII label font; install Arial or DejaVu Sans")
+        shutil.copyfile(local_font, font_path)
     yolo_info = _check_yolo(yolo_dir)
     _save_json(out_dir / "results" / "yolov5_api_check.json", yolo_info)
     print(
@@ -1207,10 +1280,57 @@ def run(args):
         "--device", yolo_device, "--workers", "0" if yolo_device == "cpu" else "2",
         "--project", str(yolo_project),
         "--name", "milestone2", "--exist-ok", "--seed", str(args.seed),
-        "--save-period", str(max(1, args.yolo_epochs // 5)),
+        "--save-period", str(max(1, args.yolo_epochs // 5)), "--noval",
     ]
+    hyp_settings = yaml.safe_load(hyp_path.read_text(encoding="utf-8"))
+    training_image_count = len([row for row in main_rows if row["split"] == "train"])
+    batches_per_epoch = int(math.ceil(training_image_count / args.yolo_batch))
+    yolo_info["optimizer_schedule"] = expected_optimizer_schedule(
+        epochs=args.yolo_epochs,
+        batches_per_epoch=batches_per_epoch,
+        batch_size=args.yolo_batch,
+        nominal_batch_size=nominal_batch_size,
+        warmup_epochs=float(hyp_settings["warmup_epochs"]),
+        warmup_min_iterations=warmup_min_iterations,
+    )
+    yolo_info["optimizer_schedule"]["warmup_min_iterations"] = warmup_min_iterations
+    yolo_info["optimizer_schedule"]["warmup_epochs"] = float(hyp_settings["warmup_epochs"])
+    yolo_info["inference_max_detections_per_image"] = max_detections_per_image
     yolo_env = os.environ.copy()
     yolo_env["WANDB_MODE"] = "disabled"
+    timing_probe_metrics = None
+    if args.timing_probe:
+        probe_command = list(train_command)
+        for option, value in (
+            ("--epochs", "1"),
+            ("--project", str(out_dir / "checkpoints" / "yolo_timing_probe")),
+            ("--name", "one_epoch"),
+            ("--save-period", "1"),
+        ):
+            option_index = probe_command.index(option)
+            probe_command[option_index + 1] = value
+        probe_started = time.perf_counter()
+        _run_yolo_training(
+            probe_command,
+            yolo_dir=yolo_dir,
+            log_path=out_dir / "results" / "yolo_timing_probe.log",
+            env=yolo_env,
+            timeout_seconds=None,
+            nominal_batch_size=nominal_batch_size,
+            warmup_min_iterations=warmup_min_iterations,
+        )
+        probe_seconds = time.perf_counter() - probe_started
+        timing_probe_metrics = {
+            "probe_epochs": 1,
+            "training_images": training_image_count,
+            "batch_size": args.yolo_batch,
+            "batches_per_epoch": int(math.ceil(training_image_count / args.yolo_batch)),
+            "wall_seconds": probe_seconds,
+            "scope": "measured on generated training images immediately before the full fit; not used to select thresholds or inspect held-out test performance",
+        }
+        _save_json(out_dir / "results" / "yolo_timing_probe.json", timing_probe_metrics)
+        print("Measured YOLO one-epoch timing probe: " + json.dumps(timing_probe_metrics), flush=True)
+
     train_timeout = None
     if args.runtime_budget_minutes > 0:
         elapsed = time.monotonic() - pipeline_started
@@ -1224,10 +1344,14 @@ def run(args):
             raise RuntimeError(
                 "Runtime budget expired before detector training; no trained checkpoint is available to evaluate."
             )
-    detector_training_partial = _run(
-        train_command, cwd=yolo_dir,
-        log_path=out_dir / "results" / "yolo_training.log", env=yolo_env,
+    detector_training_partial = _run_yolo_training(
+        train_command,
+        yolo_dir=yolo_dir,
+        log_path=out_dir / "results" / "yolo_training.log",
+        env=yolo_env,
         timeout_seconds=train_timeout,
+        nominal_batch_size=nominal_batch_size,
+        warmup_min_iterations=warmup_min_iterations,
     )
     training_log = (out_dir / "results" / "yolo_training.log").read_text(encoding="utf-8")
     autoanchor_lines = [
@@ -1257,15 +1381,19 @@ def run(args):
     for split in ("val", "test", "shifted"):
         source = data_dir / "images" / split
         result_dir = out_dir / "inference" / split
+        if result_dir.exists():
+            shutil.rmtree(result_dir)
         command = [
             sys.executable, "detect.py", "--weights", str(weights), "--source", str(source),
             "--img", str(IMAGE_SIZE), "--conf-thres", "0.001", "--iou-thres", "0.6",
-            "--max-det", "300", "--device", yolo_device, "--save-txt", "--save-conf",
+            "--max-det", str(max_detections_per_image), "--device", yolo_device, "--save-txt", "--save-conf",
             "--project", str(result_dir.parent), "--name", result_dir.name,
             "--exist-ok", "--nosave",
         ]
         _run(command, cwd=yolo_dir, log_path=out_dir / "results" / f"yolo_detect_{split}.log", env=yolo_env)
         prediction_dirs[split] = result_dir / "labels"
+    yolo_info["prediction_directories_cleared_before_inference"] = ["val", "test", "shifted"]
+    _save_json(out_dir / "results" / "yolov5_api_check.json", yolo_info)
 
     val_rows = [row for row in main_rows if row["split"] == "val"]
     train_rows = [row for row in main_rows if row["split"] == "train"]
@@ -1279,7 +1407,14 @@ def run(args):
     shifted_energy = _energy_items(shifted_items, data_dir, mask_threshold=energy_mask_threshold)
 
     print("Regenerating seed-based I/Q for PAM frame training and evaluation.", flush=True)
-    train_data = _build_frame_set(train_rows, data_dir, jitter=True)
+    pam_frame_cap = args.pam_frames_per_class
+    if not pam_frame_cap:
+        pam_frame_cap = config["pam_classifier"].get("max_frames_per_class")
+    if pam_frame_cap is not None and pam_frame_cap < 1:
+        raise ValueError("pam_frames_per_class must be positive when supplied")
+    train_data = _build_frame_set(
+        train_rows, data_dir, jitter=True, max_frames_per_class=pam_frame_cap, seed=args.seed,
+    )
     val_data = _build_frame_set(val_rows, data_dir, jitter=False)
     pam_model, pam_history = _train_pam(
         train_data, val_data, out_dir / "checkpoints" / "pam_cnn.pt",
@@ -1638,6 +1773,15 @@ def run(args):
         },
         "device": device,
         "config": config,
+        "pam_training_data": {
+            "max_frames_per_class": pam_frame_cap,
+            "frames_total": int(len(train_data[1])),
+            "frames_by_class": {
+                PAM_LABELS[int(class_id)]: int(count)
+                for class_id, count in zip(*np.unique(train_data[1], return_counts=True))
+            },
+        },
+        "timing_probe": timing_probe_metrics,
         "seed": args.seed,
         "yolo": yolo_info,
         "snr_definition": "10*log10(total clean signal power / total added noise power over the full I/Q segment)",
@@ -1805,6 +1949,8 @@ def parse_args():
     parser.add_argument("--yolo-batch", type=int, default=defaults["detector"]["batch_size"])
     parser.add_argument("--pam-epochs", type=int, default=defaults["pam_classifier"]["epochs"])
     parser.add_argument("--pam-batch", type=int, default=defaults["pam_classifier"]["batch_size"])
+    parser.add_argument("--pam-frames-per-class", type=int, default=None)
+    parser.add_argument("--timing-probe", action="store_true", help="time one YOLO epoch on generated training images before fitting the configured model")
     parser.add_argument("--bootstrap-iterations", type=int, default=defaults["evaluation"]["bootstrap_iterations"])
     parser.add_argument("--device", choices=("auto", "cpu", "cuda", "cuda:0"), default="auto")
     parser.add_argument("--runtime-budget-minutes", type=float, default=0.0)

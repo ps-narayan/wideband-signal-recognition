@@ -12,7 +12,7 @@ from .geometry import SignalBox, to_yolo
 from .layout import resolution_statuses
 from .signals import DETECTOR_CLASSES, GeneratedRecording, SignalSpec, generate_recording
 from .spectrogram import log_spectrogram, resize_spectrogram
-from .synthetic_data import approximate_inband_snr_db, sample_specs
+from .synthetic_data import MIN_BANDWIDTH, MIN_DURATION, approximate_inband_snr_db, sample_specs
 
 
 def grouped_split(
@@ -55,10 +55,15 @@ def write_segment_artifacts(
     *,
     n_samples: int = 1_000_000,
     image_size: int = 640,
+    min_bandwidth: float = MIN_BANDWIDTH,
+    min_duration: int = MIN_DURATION,
 ) -> dict:
     """Regenerate one segment and write only image, YOLO labels, and replay JSON."""
     root = Path(root)
-    specs, requested_snr = sample_specs(seed, profile=profile, n_samples=n_samples)
+    specs, requested_snr = sample_specs(
+        seed, profile=profile, n_samples=n_samples,
+        min_bandwidth=min_bandwidth, min_duration=min_duration,
+    )
     generated = generate_recording(specs, n_samples, seed, requested_snr)
     normalized, covered = log_spectrogram(generated.iq)
     resized = resize_spectrogram(normalized, image_size, image_size)
