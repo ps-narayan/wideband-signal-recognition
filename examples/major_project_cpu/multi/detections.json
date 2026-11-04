@@ -1,0 +1,392 @@
+{
+  "schema_version": 1,
+  "run_notice": null,
+  "input": {
+    "input_path": "demo_multi.sigmf-meta",
+    "format": "SigMF",
+    "sigmf_datatype": "cf32_le",
+    "metadata_path": "demo_multi.sigmf-meta",
+    "data_path": "demo_multi.sigmf-data",
+    "center_frequency_hz": 915000000.0,
+    "sample_rate_hz": 1000000.0,
+    "samples": 1000000
+  },
+  "sample_rate_hz": 1000000.0,
+  "time_convention": "Sample ranges use indices relative to the input file; seconds are elapsed from the start of that file.",
+  "frequency_convention": "Normalized baseband cycles/sample is in [-0.5, 0.5]. Hz values are offsets from baseband center; absolute_hz requires SigMF core:frequency.",
+  "detector": {
+    "backend": "yolo",
+    "architecture": "YOLOv5n + PAM CNN",
+    "class_names": [
+      "AM-DSB",
+      "AM-SSB",
+      "FM",
+      "PAM",
+      "OFDM",
+      "2-FSK",
+      "2-CPFSK",
+      "4-FSK",
+      "4-CPFSK",
+      "OOK",
+      "GMSK1",
+      "GMSK2"
+    ],
+    "source_commit": "f9578796b8a64889aa9e66dc06914d19f40d338e",
+    "weights": "yolov5n_best.pt",
+    "confidence_threshold": 0.21875284,
+    "max_detections_per_image": 3000,
+    "energy_mask_threshold": null
+  },
+  "pam_classifier": {
+    "enabled": true,
+    "weights": "pam_cnn.pt",
+    "labels": [
+      "2-PSK",
+      "4-PSK",
+      "8-PSK",
+      "16-QAM",
+      "64-QAM",
+      "256-QAM",
+      "Others"
+    ]
+  },
+  "segment_samples": 1000000,
+  "detector_image_size": 640,
+  "segments_processed": 1,
+  "covered_samples_per_segment": [
+    999936
+  ],
+  "samples_processed": 999936,
+  "samples_not_processed": 64,
+  "processing_runtime_seconds": {
+    "total": 29.89102229999844,
+    "per_segment": 29.89102229999844,
+    "scope": "Measured CLI wall time from input validation through spectrogram rendering, detector inference, PAM extraction/classification, and annotated-image writes; excludes JSON serialization.",
+    "execution_device": "CPU"
+  },
+  "annotated_images": [
+    "annotated_segment_00000.png"
+  ],
+  "detections": [
+    {
+      "detector_class": "FM",
+      "confidence": 0.22494,
+      "time_sample_range": [
+        107806.09996800001,
+        321854.4
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.09843725000000003,
+          -0.07187474999999999
+        ],
+        "offset_hz_from_baseband_center": [
+          -98437.25000000003,
+          -71874.74999999999
+        ],
+        "absolute_hz": [
+          914901562.75,
+          914928125.25
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.10780609996800002,
+        0.32185440000000004
+      ]
+    },
+    {
+      "detector_class": "GMSK1",
+      "confidence": 0.233808,
+      "time_sample_range": [
+        678081.6,
+        857758.099968
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.29843699999999995,
+          -0.26718699999999995
+        ],
+        "offset_hz_from_baseband_center": [
+          -298436.99999999994,
+          -267186.99999999994
+        ],
+        "absolute_hz": [
+          914701563.0,
+          914732813.0
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.6780816,
+        0.857758099968
+      ]
+    },
+    {
+      "detector_class": "4-CPFSK",
+      "confidence": 0.244213,
+      "time_sample_range": [
+        559339.6999680001,
+        681206.899968
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.17031224999999994,
+          -0.13749975000000003
+        ],
+        "offset_hz_from_baseband_center": [
+          -170312.24999999994,
+          -137499.75000000003
+        ],
+        "absolute_hz": [
+          914829687.75,
+          914862500.25
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.559339699968,
+        0.681206899968
+      ]
+    },
+    {
+      "detector_class": "FM",
+      "confidence": 0.251279,
+      "time_sample_range": [
+        237484.30003200003,
+        428097.10003200005
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.4796877500000001,
+          -0.4500002500000001
+        ],
+        "offset_hz_from_baseband_center": [
+          -479687.75000000006,
+          -450000.2500000001
+        ],
+        "absolute_hz": [
+          914520312.25,
+          914549999.75
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.23748430003200002,
+        0.428097100032
+      ]
+    },
+    {
+      "detector_class": "FM",
+      "confidence": 0.274794,
+      "time_sample_range": [
+        721829.299968,
+        889005.6
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.3624995,
+          0.3906245
+        ],
+        "offset_hz_from_baseband_center": [
+          362499.5,
+          390624.5
+        ],
+        "absolute_hz": [
+          915362499.5,
+          915390624.5
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.721829299968,
+        0.8890056
+      ]
+    },
+    {
+      "detector_class": "2-CPFSK",
+      "confidence": 0.280551,
+      "time_sample_range": [
+        749952.0,
+        942127.6999680001
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.17031249999999998,
+          0.20468750000000002
+        ],
+        "offset_hz_from_baseband_center": [
+          170312.49999999997,
+          204687.50000000003
+        ],
+        "absolute_hz": [
+          915170312.5,
+          915204687.5
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.749952,
+        0.942127699968
+      ]
+    },
+    {
+      "detector_class": "2-FSK",
+      "confidence": 0.450409,
+      "time_sample_range": [
+        190612.300032,
+        299980.300032
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.19374999999999998,
+          0.22499999999999998
+        ],
+        "offset_hz_from_baseband_center": [
+          193749.99999999997,
+          224999.99999999997
+        ],
+        "absolute_hz": [
+          915193750.0,
+          915225000.0
+        ]
+      },
+      "resolution_status": "unresolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.190612300032,
+        0.299980300032
+      ]
+    },
+    {
+      "detector_class": "4-FSK",
+      "confidence": 0.458092,
+      "time_sample_range": [
+        190613.299968,
+        301543.2
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.192187,
+          0.223437
+        ],
+        "offset_hz_from_baseband_center": [
+          192187.0,
+          223437.0
+        ],
+        "absolute_hz": [
+          915192187.0,
+          915223437.0
+        ]
+      },
+      "resolution_status": "unresolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.190613299968,
+        0.3015432
+      ]
+    },
+    {
+      "detector_class": "AM-DSB",
+      "confidence": 0.516872,
+      "time_sample_range": [
+        256233.10003200002,
+        409348.30003200006
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.073438,
+          0.09843799999999997
+        ],
+        "offset_hz_from_baseband_center": [
+          73438.0,
+          98437.99999999997
+        ],
+        "absolute_hz": [
+          915073438.0,
+          915098438.0
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.256233100032,
+        0.40934830003200007
+      ]
+    },
+    {
+      "detector_class": "2-FSK",
+      "confidence": 0.550923,
+      "time_sample_range": [
+        545277.100032,
+        782761.900032
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          0.42499995,
+          0.46093744999999997
+        ],
+        "offset_hz_from_baseband_center": [
+          424999.95,
+          460937.44999999995
+        ],
+        "absolute_hz": [
+          915424999.95,
+          915460937.45
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.545277100032,
+        0.7827619000320001
+      ]
+    },
+    {
+      "detector_class": "AM-SSB",
+      "confidence": 0.918375,
+      "time_sample_range": [
+        278107.19999999995,
+        453096.0
+      ],
+      "frequency_range": {
+        "normalized_cycles_per_sample": [
+          -0.334375,
+          -0.303125
+        ],
+        "offset_hz_from_baseband_center": [
+          -334375.0,
+          -303125.0
+        ],
+        "absolute_hz": [
+          914665625.0,
+          914696875.0
+        ]
+      },
+      "resolution_status": "resolved",
+      "pam_subtype": null,
+      "pam_classifier_status": "not_run",
+      "time_seconds": [
+        0.27810719999999994,
+        0.453096
+      ]
+    }
+  ],
+  "seed_dependent": false
+}

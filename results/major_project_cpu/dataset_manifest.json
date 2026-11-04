@@ -1,0 +1,1244 @@
+{
+  "main": [
+    {
+      "segment_id": "main-000-s00",
+      "recording_id": "main-000",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600000,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-001-s00",
+      "recording_id": "main-001",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600001,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-002-s00",
+      "recording_id": "main-002",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600002,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-003-s00",
+      "recording_id": "main-003",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600003,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-004-s00",
+      "recording_id": "main-004",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600004,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-005-s00",
+      "recording_id": "main-005",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600005,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-006-s00",
+      "recording_id": "main-006",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600006,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-007-s00",
+      "recording_id": "main-007",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600007,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-008-s00",
+      "recording_id": "main-008",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600008,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-009-s00",
+      "recording_id": "main-009",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600009,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-010-s00",
+      "recording_id": "main-010",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600010,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-011-s00",
+      "recording_id": "main-011",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600011,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-012-s00",
+      "recording_id": "main-012",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600012,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-013-s00",
+      "recording_id": "main-013",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600013,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-014-s00",
+      "recording_id": "main-014",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600014,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-015-s00",
+      "recording_id": "main-015",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600015,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-016-s00",
+      "recording_id": "main-016",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600016,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-017-s00",
+      "recording_id": "main-017",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600017,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-018-s00",
+      "recording_id": "main-018",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600018,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-019-s00",
+      "recording_id": "main-019",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600019,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-020-s00",
+      "recording_id": "main-020",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600020,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-021-s00",
+      "recording_id": "main-021",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600021,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-022-s00",
+      "recording_id": "main-022",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600022,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-023-s00",
+      "recording_id": "main-023",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600023,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-024-s00",
+      "recording_id": "main-024",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600024,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-025-s00",
+      "recording_id": "main-025",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600025,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-026-s00",
+      "recording_id": "main-026",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600026,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-027-s00",
+      "recording_id": "main-027",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600027,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-028-s00",
+      "recording_id": "main-028",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600028,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-029-s00",
+      "recording_id": "main-029",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600029,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-030-s00",
+      "recording_id": "main-030",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600030,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-031-s00",
+      "recording_id": "main-031",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600031,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-032-s00",
+      "recording_id": "main-032",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600032,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-033-s00",
+      "recording_id": "main-033",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600033,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-034-s00",
+      "recording_id": "main-034",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600034,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-035-s00",
+      "recording_id": "main-035",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600035,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-036-s00",
+      "recording_id": "main-036",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600036,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-037-s00",
+      "recording_id": "main-037",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600037,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-038-s00",
+      "recording_id": "main-038",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600038,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-039-s00",
+      "recording_id": "main-039",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600039,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-040-s00",
+      "recording_id": "main-040",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600040,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-041-s00",
+      "recording_id": "main-041",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600041,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-042-s00",
+      "recording_id": "main-042",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600042,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-043-s00",
+      "recording_id": "main-043",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600043,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-044-s00",
+      "recording_id": "main-044",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600044,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-045-s00",
+      "recording_id": "main-045",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600045,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-046-s00",
+      "recording_id": "main-046",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600046,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-047-s00",
+      "recording_id": "main-047",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600047,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-048-s00",
+      "recording_id": "main-048",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600048,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-049-s00",
+      "recording_id": "main-049",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600049,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-050-s00",
+      "recording_id": "main-050",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600050,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-051-s00",
+      "recording_id": "main-051",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600051,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-052-s00",
+      "recording_id": "main-052",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600052,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-053-s00",
+      "recording_id": "main-053",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600053,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-054-s00",
+      "recording_id": "main-054",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600054,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-055-s00",
+      "recording_id": "main-055",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600055,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-056-s00",
+      "recording_id": "main-056",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600056,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-057-s00",
+      "recording_id": "main-057",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600057,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-058-s00",
+      "recording_id": "main-058",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600058,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-059-s00",
+      "recording_id": "main-059",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600059,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-060-s00",
+      "recording_id": "main-060",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600060,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-061-s00",
+      "recording_id": "main-061",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600061,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 0.5
+    },
+    {
+      "segment_id": "main-062-s00",
+      "recording_id": "main-062",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600062,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-063-s00",
+      "recording_id": "main-063",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600063,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-064-s00",
+      "recording_id": "main-064",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600064,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-065-s00",
+      "recording_id": "main-065",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600065,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-066-s00",
+      "recording_id": "main-066",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600066,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-067-s00",
+      "recording_id": "main-067",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600067,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-068-s00",
+      "recording_id": "main-068",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600068,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-069-s00",
+      "recording_id": "main-069",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600069,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-070-s00",
+      "recording_id": "main-070",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600070,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-071-s00",
+      "recording_id": "main-071",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600071,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-072-s00",
+      "recording_id": "main-072",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600072,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-073-s00",
+      "recording_id": "main-073",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600073,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-074-s00",
+      "recording_id": "main-074",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600074,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-075-s00",
+      "recording_id": "main-075",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600075,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-076-s00",
+      "recording_id": "main-076",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600076,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-077-s00",
+      "recording_id": "main-077",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600077,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-078-s00",
+      "recording_id": "main-078",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600078,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-079-s00",
+      "recording_id": "main-079",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600079,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-080-s00",
+      "recording_id": "main-080",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600080,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-081-s00",
+      "recording_id": "main-081",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600081,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-082-s00",
+      "recording_id": "main-082",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600082,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-083-s00",
+      "recording_id": "main-083",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600083,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-084-s00",
+      "recording_id": "main-084",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600084,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-085-s00",
+      "recording_id": "main-085",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600085,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-086-s00",
+      "recording_id": "main-086",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600086,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-087-s00",
+      "recording_id": "main-087",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600087,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-088-s00",
+      "recording_id": "main-088",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600088,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-089-s00",
+      "recording_id": "main-089",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600089,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-090-s00",
+      "recording_id": "main-090",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600090,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-091-s00",
+      "recording_id": "main-091",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600091,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-092-s00",
+      "recording_id": "main-092",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600092,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-093-s00",
+      "recording_id": "main-093",
+      "split": "val",
+      "profile": "train",
+      "seed": 202600093,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-094-s00",
+      "recording_id": "main-094",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600094,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-095-s00",
+      "recording_id": "main-095",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600095,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-096-s00",
+      "recording_id": "main-096",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600096,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-097-s00",
+      "recording_id": "main-097",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600097,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-098-s00",
+      "recording_id": "main-098",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600098,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-099-s00",
+      "recording_id": "main-099",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600099,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-100-s00",
+      "recording_id": "main-100",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600100,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-101-s00",
+      "recording_id": "main-101",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600101,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-102-s00",
+      "recording_id": "main-102",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600102,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-103-s00",
+      "recording_id": "main-103",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600103,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-104-s00",
+      "recording_id": "main-104",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600104,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-105-s00",
+      "recording_id": "main-105",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600105,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-106-s00",
+      "recording_id": "main-106",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600106,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-107-s00",
+      "recording_id": "main-107",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600107,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "main-108-s00",
+      "recording_id": "main-108",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600108,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "main-109-s00",
+      "recording_id": "main-109",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600109,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-110-s00",
+      "recording_id": "main-110",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600110,
+      "pam_subtype_index": 0,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-111-s00",
+      "recording_id": "main-111",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600111,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "main-112-s00",
+      "recording_id": "main-112",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600112,
+      "pam_subtype_index": 1,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-113-s00",
+      "recording_id": "main-113",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600113,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "main-114-s00",
+      "recording_id": "main-114",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600114,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "main-115-s00",
+      "recording_id": "main-115",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600115,
+      "pam_subtype_index": 2,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-116-s00",
+      "recording_id": "main-116",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600116,
+      "pam_subtype_index": 3,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-117-s00",
+      "recording_id": "main-117",
+      "split": "train",
+      "profile": "train",
+      "seed": 202600117,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "main-118-s00",
+      "recording_id": "main-118",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600118,
+      "pam_subtype_index": 4,
+      "global_snr_db_override": 15.0
+    },
+    {
+      "segment_id": "main-119-s00",
+      "recording_id": "main-119",
+      "split": "test",
+      "profile": "train",
+      "seed": 202600119,
+      "pam_subtype_index": 5,
+      "global_snr_db_override": 15.0
+    }
+  ],
+  "shifted": [
+    {
+      "segment_id": "shift-000-s00",
+      "recording_id": "shift-000",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200000,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "shift-001-s00",
+      "recording_id": "shift-001",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200001,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "shift-002-s00",
+      "recording_id": "shift-002",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200002,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "shift-003-s00",
+      "recording_id": "shift-003",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200003,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "shift-004-s00",
+      "recording_id": "shift-004",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200004,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "shift-005-s00",
+      "recording_id": "shift-005",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200005,
+      "pam_subtype_index": 5
+    },
+    {
+      "segment_id": "shift-006-s00",
+      "recording_id": "shift-006",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200006,
+      "pam_subtype_index": 0
+    },
+    {
+      "segment_id": "shift-007-s00",
+      "recording_id": "shift-007",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200007,
+      "pam_subtype_index": 1
+    },
+    {
+      "segment_id": "shift-008-s00",
+      "recording_id": "shift-008",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200008,
+      "pam_subtype_index": 2
+    },
+    {
+      "segment_id": "shift-009-s00",
+      "recording_id": "shift-009",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200009,
+      "pam_subtype_index": 3
+    },
+    {
+      "segment_id": "shift-010-s00",
+      "recording_id": "shift-010",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200010,
+      "pam_subtype_index": 4
+    },
+    {
+      "segment_id": "shift-011-s00",
+      "recording_id": "shift-011",
+      "split": "shifted",
+      "profile": "shifted",
+      "seed": 495200011,
+      "pam_subtype_index": 5
+    }
+  ],
+  "recording_split": {
+    "main-025": "train",
+    "main-033": "train",
+    "main-029": "train",
+    "main-070": "train",
+    "main-019": "train",
+    "main-010": "train",
+    "main-114": "train",
+    "main-048": "train",
+    "main-088": "train",
+    "main-089": "train",
+    "main-017": "train",
+    "main-012": "train",
+    "main-107": "train",
+    "main-111": "train",
+    "main-051": "train",
+    "main-016": "train",
+    "main-055": "train",
+    "main-067": "train",
+    "main-105": "train",
+    "main-096": "train",
+    "main-091": "train",
+    "main-031": "train",
+    "main-046": "train",
+    "main-014": "train",
+    "main-100": "train",
+    "main-113": "train",
+    "main-068": "train",
+    "main-060": "train",
+    "main-072": "train",
+    "main-108": "train",
+    "main-090": "train",
+    "main-075": "train",
+    "main-003": "train",
+    "main-117": "train",
+    "main-069": "train",
+    "main-080": "train",
+    "main-015": "train",
+    "main-002": "train",
+    "main-035": "train",
+    "main-047": "train",
+    "main-085": "train",
+    "main-009": "train",
+    "main-022": "train",
+    "main-098": "train",
+    "main-008": "train",
+    "main-052": "train",
+    "main-074": "train",
+    "main-076": "train",
+    "main-093": "val",
+    "main-058": "val",
+    "main-062": "val",
+    "main-018": "val",
+    "main-087": "val",
+    "main-082": "val",
+    "main-005": "val",
+    "main-039": "val",
+    "main-044": "val",
+    "main-032": "val",
+    "main-043": "val",
+    "main-041": "val",
+    "main-073": "test",
+    "main-083": "test",
+    "main-038": "test",
+    "main-030": "test",
+    "main-037": "test",
+    "main-077": "test",
+    "main-064": "test",
+    "main-007": "test",
+    "main-081": "test",
+    "main-057": "test",
+    "main-028": "test",
+    "main-104": "test",
+    "main-006": "test",
+    "main-094": "test",
+    "main-116": "test",
+    "main-061": "test",
+    "main-045": "test",
+    "main-059": "test",
+    "main-001": "test",
+    "main-097": "test",
+    "main-011": "test",
+    "main-118": "test",
+    "main-112": "test",
+    "main-056": "test",
+    "main-065": "test",
+    "main-021": "test",
+    "main-115": "test",
+    "main-119": "test",
+    "main-102": "test",
+    "main-054": "test",
+    "main-027": "test",
+    "main-066": "test",
+    "main-020": "test",
+    "main-036": "test",
+    "main-053": "test",
+    "main-086": "test",
+    "main-000": "test",
+    "main-099": "test",
+    "main-024": "test",
+    "main-084": "test",
+    "main-050": "test",
+    "main-049": "test",
+    "main-013": "test",
+    "main-034": "test",
+    "main-079": "test",
+    "main-078": "test",
+    "main-023": "test",
+    "main-110": "test",
+    "main-109": "test",
+    "main-092": "test",
+    "main-040": "test",
+    "main-071": "test",
+    "main-026": "test",
+    "main-095": "test",
+    "main-101": "test",
+    "main-106": "test",
+    "main-103": "test",
+    "main-063": "test",
+    "main-004": "test",
+    "main-042": "test"
+  }
+}

@@ -118,8 +118,8 @@ class SigMFDatasetTests(unittest.TestCase):
             labels = root / "processed" / "labels" / "train"
             rows0 = (labels / "record-01-seg-00000.txt").read_text(encoding="utf-8").splitlines()
             rows1 = (labels / "record-01-seg-00001.txt").read_text(encoding="utf-8").splitlines()
-            self.assertTrue(rows0[0].startswith("11 "))
-            self.assertTrue(rows1[0].startswith("11 "))
+            self.assertTrue(rows0[0].startswith("3 "))
+            self.assertTrue(rows1[0].startswith("3 "))
             manifest = json.loads((
                 root / "processed" / "metadata" / "train" / "record-01-seg-00001.json"
             ).read_text(encoding="utf-8"))

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 import math
 from pathlib import Path
@@ -10,7 +10,10 @@ from pathlib import Path
 import numpy as np
 
 from .geometry import SignalBox
-from .layout import assert_main_layout, resolution_statuses, unresolved_pairs
+from .layout import (
+    assert_main_layout, pair_remains_resolved_after_edge_jitter,
+    resolution_statuses, unresolved_pairs,
+)
 
 PAM_SUBTYPES = (
     "2-PSK",
@@ -20,15 +23,11 @@ PAM_SUBTYPES = (
     "64-QAM",
     "256-QAM",
 )
-NON_PAM = ("AM-DSB", "FM", "2-FSK", "OOK")
-DETECTOR_CLASSES = ("AM-DSB", "FM", "OFDM", "2-FSK", "OOK", "PAM")
-# Full detector taxonomy from the reference paper.  The reduced-CPU training
-# profile remains on DETECTOR_CLASSES so its already measured test results stay
-# tied to the exact six-class model and frozen test set.
 PAPER_DETECTOR_CLASSES = (
     "AM-DSB",
     "AM-SSB",
     "FM",
+    "PAM",
     "OFDM",
     "2-FSK",
     "2-CPFSK",
@@ -37,7 +36,12 @@ PAPER_DETECTOR_CLASSES = (
     "OOK",
     "GMSK1",
     "GMSK2",
-    "PAM",
+)
+DETECTOR_CLASSES = PAPER_DETECTOR_CLASSES
+REDUCED_DETECTOR_CLASSES = ("AM-DSB", "FM", "OFDM", "2-FSK", "OOK", "PAM")
+NON_PAM = (
+    "AM-DSB", "AM-SSB", "FM", "OFDM", "2-FSK", "2-CPFSK",
+    "4-FSK", "4-CPFSK", "OOK", "GMSK1", "GMSK2",
 )
 
 
@@ -88,32 +92,40 @@ class GeneratedRecording:
 
 
 def make_visibility_specs(seed: int, n_samples: int = 1_000_000) -> list[SignalSpec]:
-    """Six simultaneous, frequency-separated signals, including the minimum box."""
-    rng = np.random.default_rng(seed)
-    rolloff = float(rng.uniform(0.2, 0.5))
-    sps = max(2, int((1.0 + rolloff) / 0.008))
-    start = 100_000
-    specs = [
-        SignalSpec(
-            "2-PSK", start + int(rng.integers(0, 513)), 8192, -0.400, 0.008,
-            carrier_phase=float(rng.uniform(-math.pi, math.pi)),
-            symbol_timing=int(rng.integers(0, sps)),
-            rolloff=rolloff,
-        ),
-        SignalSpec("AM-DSB", start, 240_000, -0.220, 0.040,
-                   carrier_phase=float(rng.uniform(-math.pi, math.pi))),
-        SignalSpec("FM", start, 320_000, -0.060, 0.040,
-                   carrier_phase=float(rng.uniform(-math.pi, math.pi))),
-        SignalSpec("OFDM", start, 260_000, 0.100, 0.040,
-                   carrier_phase=float(rng.uniform(-math.pi, math.pi))),
-        SignalSpec("2-FSK", start, 220_000, 0.260, 0.040,
-                   carrier_phase=float(rng.uniform(-math.pi, math.pi))),
-        SignalSpec("OOK", start, 280_000, 0.420, 0.040,
-                   carrier_phase=float(rng.uniform(-math.pi, math.pi))),
-    ]
-    if n_samples < max(spec.end for spec in specs):
-        raise ValueError("recording is too short for the visibility layout")
-    assert_main_layout([_as_box(s) for s in specs])
+    """Twelve-class layout with one exact active-minimum PAM visibility target."""
+    from .synthetic_data import MIN_BANDWIDTH, MIN_DURATION, sample_specs
+
+    specs, _ = sample_specs(
+        seed,
+        profile="train",
+        n_samples=n_samples,
+        min_bandwidth=MIN_BANDWIDTH,
+        min_duration=MIN_DURATION,
+    )
+    rng = np.random.default_rng(seed + 731)
+    pam_index = next(index for index, spec in enumerate(specs) if spec.detector_class == "PAM")
+    pam = specs[pam_index]
+    covered = (n_samples // 512) * 512
+    other_boxes = [_as_box(spec) for index, spec in enumerate(specs) if index != pam_index]
+    minimum_spec = None
+    for _attempt in range(2000):
+        start = int(rng.integers(0, covered - MIN_DURATION + 1))
+        center = float(rng.uniform(-0.5 + MIN_BANDWIDTH / 2, 0.5 - MIN_BANDWIDTH / 2))
+        candidate = replace(
+            pam, start=start, duration=MIN_DURATION,
+            center_frequency=center, bandwidth=MIN_BANDWIDTH,
+        )
+        candidate_box = _as_box(candidate)
+        if all(
+            pair_remains_resolved_after_edge_jitter(other, candidate_box)
+            for other in other_boxes
+        ):
+            minimum_spec = candidate
+            break
+    if minimum_spec is None:
+        raise RuntimeError("could not place the minimum-size visibility signal")
+    specs[pam_index] = minimum_spec
+    assert_main_layout([_as_box(spec) for spec in specs])
     return specs
 
 
@@ -204,18 +216,51 @@ def _make_baseband(spec: SignalSpec, rng: np.random.Generator) -> np.ndarray:
     if spec.modulation == "AM-DSB":
         tone = np.cos(2 * np.pi * (b / 4.0) * t + rng.uniform(-np.pi, np.pi))
         return (1.0 + 0.8 * tone).astype(np.complex128)
+    if spec.modulation == "AM-SSB":
+        from scipy.signal import hilbert
+
+        tone = np.cos(2 * np.pi * (b / 4.0) * t + rng.uniform(-np.pi, np.pi))
+        return hilbert(tone).astype(np.complex128)
     if spec.modulation == "FM":
         message_frequency = b / 12.0
         message = np.sin(2 * np.pi * message_frequency * t + rng.uniform(-np.pi, np.pi))
         instantaneous_offset = (b / 4.0) * message
         phase = 2 * np.pi * np.cumsum(instantaneous_offset)
         return np.exp(1j * phase)
-    if spec.modulation == "2-FSK":
+    if spec.modulation in {"2-FSK", "2-CPFSK", "4-FSK", "4-CPFSK"}:
+        order = int(spec.modulation[0])
+        continuous_phase = "CPFSK" in spec.modulation
         sps = max(2, int(1.0 / b))
-        bit_count = math.ceil(n / sps)
-        offsets = rng.choice(np.array([-b / 4.0, b / 4.0]), bit_count)
-        frequency = np.repeat(offsets, sps)[:n]
-        return np.exp(1j * 2 * np.pi * np.cumsum(frequency))
+        symbol_count = math.ceil(n / sps)
+        levels = np.linspace(-b / 3.0, b / 3.0, order)
+        symbol_frequency = rng.choice(levels, symbol_count)
+        frequency = np.repeat(symbol_frequency, sps)[:n]
+        if continuous_phase:
+            phase = 2.0 * np.pi * np.cumsum(frequency)
+        else:
+            symbol_phase = rng.uniform(-np.pi, np.pi, symbol_count)
+            phase_offset = np.repeat(symbol_phase, sps)[:n]
+            within_symbol = np.arange(n) % sps
+            phase = 2.0 * np.pi * frequency * within_symbol + phase_offset
+        return np.exp(1j * phase)
+    if spec.modulation in {"GMSK1", "GMSK2"}:
+        sps = max(4, int(1.0 / b))
+        bit_count = math.ceil(n / sps) + 8
+        bits = rng.choice(np.array([-1.0, 1.0]), bit_count)
+        # Smooth a rectangular NRZ waveform. Impulse-only input attenuates the
+        # modulation by another factor of samples-per-symbol and collapses its spectrum.
+        nrz = np.repeat(bits, sps)
+        time_axis = np.arange(-4 * sps, 4 * sps + 1, dtype=np.float64) / sps
+        bt = 0.3 if spec.modulation == "GMSK1" else 0.7
+        sigma = np.sqrt(np.log(2.0)) / (2.0 * np.pi * bt)
+        gaussian = np.exp(-0.5 * (time_axis / sigma) ** 2)
+        gaussian /= gaussian.sum()
+        shaped = _fft_convolve(nrz, gaussian)
+        delay = (gaussian.size - 1) // 2
+        frequency = shaped[delay : delay + n] * (0.25 / sps)
+        if frequency.size < n:
+            frequency = np.pad(frequency, (0, n - frequency.size))
+        return np.exp(1j * 2.0 * np.pi * np.cumsum(frequency))
     if spec.modulation == "OFDM":
         nfft = 4096
         n_active = max(8, int(np.floor(b * nfft)))

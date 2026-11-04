@@ -1,0 +1,51 @@
+# Synthetic-only 12-class detector / 7-class PAM profile.
+# The held-out recording IDs and their two target SNR strata are fixed by seed.
+seed: 2026
+data:
+  segment_samples: 1000000
+  main_recordings: 120
+  shifted_recordings: 12
+  segments_per_recording: 1
+  train_fraction: 0.4
+  validation_fraction: 0.1
+  image_size: 640
+  minimum_bandwidth_cycles_per_sample: 0.025
+  minimum_duration_samples: 100000
+  main_profile:
+    bandwidth_cycles_per_sample: [0.025, 0.04]
+    bandwidth_distribution: log_uniform
+    global_snr_db: [-5, 20]
+  shifted_profile:
+    bandwidth_cycles_per_sample: [0.03, 0.05]
+    bandwidth_distribution: uniform
+    global_snr_db: [-5, 5]
+  test_snr_strata:
+    - global_snr_db: 0.5
+      recordings: 30
+    - global_snr_db: 15.0
+      recordings: 30
+detector:
+  framework: YOLOv5n
+  repository: https://github.com/ultralytics/yolov5.git
+  commit: f9578796b8a64889aa9e66dc06914d19f40d338e
+  epochs: 80
+  batch_size: 8
+  nominal_batch_size: 8
+  warmup_min_iterations: 10
+  max_detections_per_image: 3000
+  image_size: 640
+  matched_precision: 0.80
+  iou_threshold: 0.50
+  initialization: random
+pam_classifier:
+  frame_samples: 1024
+  frames_per_signal: 4
+  epochs: 60
+  batch_size: 32
+  max_frames_per_class: 64
+  learning_rate: 0.001
+  early_stopping_patience: 10
+  loss: inverse_frequency_weighted_cross_entropy
+evaluation:
+  bootstrap_iterations: 500
+  bootstrap_unit: parent_recording

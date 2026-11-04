@@ -12,8 +12,8 @@ from .signals import DETECTOR_CLASSES, PAM_SUBTYPES, SignalSpec
 
 
 N_SAMPLES = 1_000_000
-MIN_BANDWIDTH = 0.008
-MIN_DURATION = 8192
+MIN_BANDWIDTH = 0.025
+MIN_DURATION = 100_000
 
 
 def sample_specs(
@@ -23,34 +23,43 @@ def sample_specs(
     n_samples: int = N_SAMPLES,
     min_bandwidth: float = MIN_BANDWIDTH,
     min_duration: int = MIN_DURATION,
+    snr_override_db: float | None = None,
+    pam_subtype_index: int | None = None,
 ) -> tuple[list[SignalSpec], float]:
     """Make one signal from each detector class with a guard-safe frequency layout."""
     if profile not in {"train", "shifted"}:
         raise ValueError("profile must be 'train' or 'shifted'")
-    if min_bandwidth <= 0 or min_bandwidth > 0.08:
-        raise ValueError("min_bandwidth must be in (0, 0.08] for the main profile")
+    if min_bandwidth <= 0 or min_bandwidth > 0.04:
+        raise ValueError("min_bandwidth must be in (0, 0.04] for the main profile")
     if min_duration < MIN_DURATION or min_duration > 250_000:
-        raise ValueError("min_duration must be in [8192, 250000]")
+        raise ValueError("min_duration must be in [100000, 250000]")
     covered_samples = (n_samples // 512) * 512
     if min_duration > covered_samples:
         raise ValueError("min_duration cannot exceed the STFT-covered recording length")
     if covered_samples < MIN_DURATION:
         raise ValueError("recording does not contain one fully covered minimum-duration signal")
     rng = np.random.default_rng(seed)
+    if pam_subtype_index is not None and not 0 <= pam_subtype_index < len(PAM_SUBTYPES):
+        raise ValueError(f"pam_subtype_index must be in [0, {len(PAM_SUBTYPES) - 1}]")
     specs: list[SignalSpec] = []
     widths = []
     for _ in DETECTOR_CLASSES:
         if profile == "train":
-            width = float(np.exp(rng.uniform(np.log(min_bandwidth), np.log(0.08))))
+            width = float(np.exp(rng.uniform(np.log(min_bandwidth), np.log(0.04))))
         else:
-            width = float(rng.uniform(max(0.02, min_bandwidth), 0.12))
+            width = float(rng.uniform(max(0.03, min_bandwidth), 0.05))
         widths.append(width)
 
     classes: list[str] = []
     for detector_class in DETECTOR_CLASSES:
-        classes.append(
-            str(rng.choice(PAM_SUBTYPES)) if detector_class == "PAM" else detector_class
-        )
+        if detector_class == "PAM":
+            subtype = (
+                PAM_SUBTYPES[pam_subtype_index]
+                if pam_subtype_index is not None else str(rng.choice(PAM_SUBTYPES))
+            )
+            classes.append(subtype)
+        else:
+            classes.append(detector_class)
 
     # Place widest signals first so rejection sampling remains reliable.
     order = np.argsort(widths)[::-1]
@@ -92,7 +101,12 @@ def sample_specs(
     if any(spec.end > covered_samples or spec.duration < min_duration for spec in specs):
         raise AssertionError("sampled signal falls outside the STFT-covered time range")
 
-    if profile == "train":
+    if snr_override_db is not None:
+        low_snr, high_snr = (-5.0, 20.0) if profile == "train" else (-5.0, 5.0)
+        if not low_snr <= snr_override_db <= high_snr:
+            raise ValueError(f"snr_override_db must be in [{low_snr}, {high_snr}] for {profile} profile")
+        global_snr_db = float(snr_override_db)
+    elif profile == "train":
         global_snr_db = float(rng.uniform(-5.0, 20.0))
     else:
         global_snr_db = float(rng.uniform(-5.0, 5.0))

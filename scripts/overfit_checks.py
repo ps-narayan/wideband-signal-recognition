@@ -223,16 +223,16 @@ def main() -> None:
     parser.add_argument("--max-det", type=int, default=3000, help="Maximum detections per image for the same-image diagnostic; high cap avoids truncating low-confidence candidates.")
     parser.add_argument("--save-period", type=int, default=20, help="YOLO checkpoint save period in epochs; use 0 to keep only best/last checkpoints.")
     parser.add_argument("--model-size", choices=("n", "s", "m", "l"), default="n")
-    parser.add_argument("--min-bandwidth", type=float, default=0.008)
-    parser.add_argument("--min-duration", type=int, default=8192)
+    parser.add_argument("--min-bandwidth", type=float, default=0.025)
+    parser.add_argument("--min-duration", type=int, default=100_000)
     parser.add_argument("--generator-config", type=Path, help="YAML file containing optional min_bandwidth_cycles_per_sample and min_duration_samples constraints.")
     parser.add_argument("--optimizer", choices=("SGD", "Adam", "AdamW"), default="SGD")
-    parser.add_argument("--nominal-batch-size", type=int, default=64,
-                        help="YOLOv5 nominal batch size; values below 64 reduce gradient accumulation for small-set diagnostics.")
-    parser.add_argument("--warmup-min-iterations", type=int, default=100,
-                        help="Pinned YOLOv5 floor for warmup iterations; override only for train-only diagnostics.")
+    parser.add_argument("--nominal-batch-size", type=int, default=4,
+                        help="Keep YOLOv5 nominal batch size equal to the four-image diagnostic micro-batch.")
+    parser.add_argument("--warmup-min-iterations", type=int, default=2,
+                        help="Short YOLOv5 warmup floor so the tiny-set fit receives optimizer updates after warmup.")
     parser.add_argument("--lr0", type=float, default=0.01)
-    parser.add_argument("--warmup-epochs", type=float, default=3.0)
+    parser.add_argument("--warmup-epochs", type=float, default=1.0)
     parser.add_argument("--skip-pam", action="store_true", help="Skip the independent PAM check for detector-only experiment variants.")
     parser.add_argument("--reuse-yolo-checkpoint", action="store_true", help="Evaluate an existing 8-image training checkpoint without retraining it.")
     args = parser.parse_args()
@@ -278,6 +278,7 @@ def main() -> None:
             data_dir, row["segment_id"], row["recording_id"], "train", row["seed"], "train",
             n_samples=1_000_000, image_size=args.image_size,
             min_bandwidth=args.min_bandwidth, min_duration=args.min_duration,
+            pam_subtype_index=row.get("pam_subtype_index"),
         )
     results_dir.mkdir(parents=True, exist_ok=True)
     overlay_index = _draw_gt_overlays(data_dir, train_rows, results_dir)

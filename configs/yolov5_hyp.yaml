@@ -1,5 +1,5 @@
-# Spectrogram-friendly augmentation for the pinned YOLOv5 source revision.
-# Geometric transforms preserve box geometry; color transforms are disabled for grayscale power images.
+# Spectrogram-friendly hyperparameters for the pinned YOLOv5 source revision.
+# Mosaic shrinks the 16-pixel minimum frequency boxes below the default stride-8 head scale.
 lr0: 0.01
 lrf: 0.01
 momentum: 0.937
@@ -25,6 +25,6 @@ shear: 0.0
 perspective: 0.0
 flipud: 0.0
 fliplr: 0.5
-mosaic: 0.7
-mixup: 0.1
+mosaic: 0.0
+mixup: 0.0
 copy_paste: 0.0

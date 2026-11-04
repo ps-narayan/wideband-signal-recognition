@@ -1,4 +1,6 @@
-# Training-only memorization diagnostics
+# Historical training-only memorization diagnostics
+
+This folder contains earlier six-class experiments and is retained for audit history. The active full-taxonomy, eight-recording train-only check is [results/major_project_overfit](../major_project_overfit/README.md), and the current held-out results are in [RESULTS.md](../../RESULTS.md).
 
 All memorization checks use eight recordings from the training split. Validation and test recordings are excluded.
 

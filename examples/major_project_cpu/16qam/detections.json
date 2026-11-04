@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "run_notice": null,
+  "input": {
+    "input_path": "demo_16qam.sigmf-meta",
+    "format": "SigMF",
+    "sigmf_datatype": "cf32_le",
+    "metadata_path": "demo_16qam.sigmf-meta",
+    "data_path": "demo_16qam.sigmf-data",
+    "center_frequency_hz": 915000000.0,
+    "sample_rate_hz": 1000000.0,
+    "samples": 1000000
+  },
+  "sample_rate_hz": 1000000.0,
+  "time_convention": "Sample ranges use indices relative to the input file; seconds are elapsed from the start of that file.",
+  "frequency_convention": "Normalized baseband cycles/sample is in [-0.5, 0.5]. Hz values are offsets from baseband center; absolute_hz requires SigMF core:frequency.",
+  "detector": {
+    "backend": "yolo",
+    "architecture": "YOLOv5n + PAM CNN",
+    "class_names": [
+      "AM-DSB",
+      "AM-SSB",
+      "FM",
+      "PAM",
+      "OFDM",
+      "2-FSK",
+      "2-CPFSK",
+      "4-FSK",
+      "4-CPFSK",
+      "OOK",
+      "GMSK1",
+      "GMSK2"
+    ],
+    "source_commit": "f9578796b8a64889aa9e66dc06914d19f40d338e",
+    "weights": "yolov5n_best.pt",
+    "confidence_threshold": 0.21875284,
+    "max_detections_per_image": 3000,
+    "energy_mask_threshold": null
+  },
+  "pam_classifier": {
+    "enabled": true,
+    "weights": "pam_cnn.pt",
+    "labels": [
+      "2-PSK",
+      "4-PSK",
+      "8-PSK",
+      "16-QAM",
+      "64-QAM",
+      "256-QAM",
+      "Others"
+    ]
+  },
+  "segment_samples": 1000000,
+  "detector_image_size": 640,
+  "segments_processed": 1,
+  "covered_samples_per_segment": [
+    999936
+  ],
+  "samples_processed": 999936,
+  "samples_not_processed": 64,
+  "processing_runtime_seconds": {
+    "total": 29.652594599989243,
+    "per_segment": 29.652594599989243,
+    "scope": "Measured CLI wall time from input validation through spectrogram rendering, detector inference, PAM extraction/classification, and annotated-image writes; excludes JSON serialization.",
+    "execution_device": "CPU"
+  },
+  "annotated_images": [
+    "annotated_segment_00000.png"
+  ],
+  "detections": [],
+  "seed_dependent": false
+}

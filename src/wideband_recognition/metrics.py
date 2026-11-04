@@ -92,9 +92,17 @@ def calibrate_confidence(items, *, target_precision=0.8, class_agnostic=True, io
         evaluated.append((threshold, stats))
     feasible = [entry for entry in evaluated if entry[1]["precision"] is not None and entry[1]["precision"] >= target_precision]
     if feasible:
-        closest_precision = min(abs(row[1]["precision"] - target_precision) for row in feasible)
-        closest = [row for row in feasible if abs(row[1]["precision"] - target_precision) <= closest_precision + 1e-12]
-        threshold, stats = max(closest, key=lambda row: row[1]["recall"])
+        # The operating constraint is minimum precision. Among all thresholds
+        # meeting it, maximize recall; aiming for precision closest to the
+        # target can unnecessarily discard correct detections.
+        threshold, stats = max(
+            feasible,
+            key=lambda row: (
+                row[1]["recall"] or 0.0,
+                row[1]["precision"] or 0.0,
+                float(row[0]),
+            ),
+        )
         return {"threshold": threshold, "attained_target": True, **stats}
     measured = [row for row in evaluated if row[1]["precision"] is not None]
     if not measured:

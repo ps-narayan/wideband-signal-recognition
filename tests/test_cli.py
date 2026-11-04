@@ -106,7 +106,7 @@ class CliInputTests(unittest.TestCase):
     def test_yolo_labels_are_mapped_to_named_detector_classes(self):
         with tempfile.TemporaryDirectory() as temporary:
             labels = Path(temporary) / "labels.txt"
-            labels.write_text("5 0.5 0.5 0.25 0.5 0.9\n", encoding="utf-8")
+            labels.write_text("3 0.5 0.5 0.25 0.5 0.9\n", encoding="utf-8")
             result = _read_yolo_labels(labels)
         self.assertEqual(result[0]["class"], "PAM")
         self.assertAlmostEqual(result[0]["confidence"], 0.9)
@@ -115,21 +115,21 @@ class CliInputTests(unittest.TestCase):
     def test_yolo_label_pixels_follow_training_image_size(self):
         with tempfile.TemporaryDirectory() as temporary:
             labels = Path(temporary) / "labels.txt"
-            labels.write_text("5 0.5 0.5 0.25 0.5 0.9\n", encoding="utf-8")
+            labels.write_text("3 0.5 0.5 0.25 0.5 0.9\n", encoding="utf-8")
             result = _read_yolo_labels(labels, image_size=1280)
         self.assertEqual(result[0]["xyxy"], (480.0, 320.0, 800.0, 960.0))
 
     def test_yolo_label_rounding_overshoot_is_clamped_at_image_edge(self):
         with tempfile.TemporaryDirectory() as temporary:
             labels = Path(temporary) / "labels.txt"
-            labels.write_text("5 0.937891 0.5 0.124219 0.1 0.9\n", encoding="utf-8")
+            labels.write_text("3 0.937891 0.5 0.124219 0.1 0.9\n", encoding="utf-8")
             result = _read_yolo_labels(labels, image_size=1280)
         self.assertEqual(result[0]["xyxy"][2], 1280.0)
 
     def test_yolo_label_rejects_materially_out_of_frame_box(self):
         with tempfile.TemporaryDirectory() as temporary:
             labels = Path(temporary) / "labels.txt"
-            labels.write_text("5 0.95 0.5 0.2 0.1 0.9\n", encoding="utf-8")
+            labels.write_text("3 0.95 0.5 0.2 0.1 0.9\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "falls outside image"):
                 _read_yolo_labels(labels, image_size=1280)
 
@@ -170,12 +170,13 @@ class CliInputTests(unittest.TestCase):
                 self.assertTrue(kwargs["capture_output"])
                 self.assertEqual(kwargs["encoding"], "utf-8")
                 self.assertEqual(kwargs["errors"], "replace")
+                self.assertEqual(command[command.index("--conf-thres") + 1], "0.25")
                 project = Path(command[command.index("--project") + 1])
                 name = command[command.index("--name") + 1]
                 labels = project / name / "labels"
                 labels.mkdir(parents=True)
                 (labels / "segment_00000.txt").write_text(
-                    "5 0.5 0.5 0.25 0.25 0.9\n", encoding="utf-8"
+                    "3 0.5 0.5 0.25 0.25 0.9\n", encoding="utf-8"
                 )
                 return SimpleNamespace(returncode=0, stdout="detect ok\n", stderr="")
 
@@ -195,6 +196,7 @@ class CliInputTests(unittest.TestCase):
             self.assertEqual(report["samples_processed"], 8192)
             self.assertEqual(report["samples_not_processed"], 7)
             self.assertEqual(report["detections"][0]["detector_class"], "PAM")
+            self.assertGreaterEqual(report["processing_runtime_seconds"]["total"], 0.0)
             self.assertEqual(len(report["detections"][0]["frequency_range"]["normalized_cycles_per_sample"]), 2)
             self.assertTrue((output_dir / "detections.json").is_file())
             self.assertTrue((output_dir / "annotated_segment_00000.png").is_file())
@@ -219,9 +221,10 @@ class CliInputTests(unittest.TestCase):
             path.write_text(json.dumps({"names": list(PAPER_DETECTOR_CLASSES)}), encoding="utf-8")
             self.assertEqual(_load_detector_classes(path), PAPER_DETECTOR_CLASSES)
             labels = Path(temporary) / "labels.txt"
-            labels.write_text("11 0.5 0.5 0.25 0.25 0.9\n", encoding="utf-8")
+            labels.write_text("3 0.5 0.5 0.25 0.25 0.9\n", encoding="utf-8")
             result = _read_yolo_labels(labels, class_names=PAPER_DETECTOR_CLASSES)
         self.assertEqual(result[0]["class"], "PAM")
+        self.assertEqual(PAPER_DETECTOR_CLASSES[11], "GMSK2")
 
 
 if __name__ == "__main__":

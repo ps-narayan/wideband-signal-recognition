@@ -1,0 +1,510 @@
+[
+  {
+    "recording_id": "main-000",
+    "segment_id": "main-000-s00",
+    "file": "main-000-s00.png",
+    "boxes": [
+      {
+        "class_id": 0,
+        "class": "AM-DSB",
+        "xyxy_pixels": [
+          113.25,
+          174.64,
+          196.75,
+          199.25
+        ]
+      },
+      {
+        "class_id": 1,
+        "class": "AM-SSB",
+        "xyxy_pixels": [
+          303.78,
+          129.29,
+          415.84,
+          154.7
+        ]
+      },
+      {
+        "class_id": 2,
+        "class": "FM",
+        "xyxy_pixels": [
+          103.93,
+          606.43,
+          173.42,
+          624.62
+        ]
+      },
+      {
+        "class_id": 3,
+        "class": "PAM",
+        "xyxy_pixels": [
+          375.02,
+          458.65,
+          459.87,
+          475.76
+        ]
+      },
+      {
+        "class_id": 4,
+        "class": "OFDM",
+        "xyxy_pixels": [
+          81.2,
+          127.64,
+          159.61,
+          146.18
+        ]
+      },
+      {
+        "class_id": 5,
+        "class": "2-FSK",
+        "xyxy_pixels": [
+          442.2,
+          105.68,
+          599.15,
+          124.95
+        ]
+      },
+      {
+        "class_id": 6,
+        "class": "2-CPFSK",
+        "xyxy_pixels": [
+          444.97,
+          583.92,
+          573.48,
+          601.9
+        ]
+      },
+      {
+        "class_id": 7,
+        "class": "4-FSK",
+        "xyxy_pixels": [
+          166.16,
+          484.1,
+          325.48,
+          508.49
+        ]
+      },
+      {
+        "class_id": 8,
+        "class": "4-CPFSK",
+        "xyxy_pixels": [
+          75.32,
+          224.58,
+          166.38,
+          240.76
+        ]
+      },
+      {
+        "class_id": 9,
+        "class": "OOK",
+        "xyxy_pixels": [
+          520.93,
+          459.34,
+          588.44,
+          476.2
+        ]
+      },
+      {
+        "class_id": 10,
+        "class": "GMSK1",
+        "xyxy_pixels": [
+          171.04,
+          382.98,
+          264.48,
+          407.13
+        ]
+      },
+      {
+        "class_id": 11,
+        "class": "GMSK2",
+        "xyxy_pixels": [
+          503.55,
+          306.3,
+          607.0,
+          329.99
+        ]
+      }
+    ]
+  },
+  {
+    "recording_id": "main-001",
+    "segment_id": "main-001-s00",
+    "file": "main-001-s00.png",
+    "boxes": [
+      {
+        "class_id": 0,
+        "class": "AM-DSB",
+        "xyxy_pixels": [
+          499.74,
+          158.05,
+          570.61,
+          175.81
+        ]
+      },
+      {
+        "class_id": 1,
+        "class": "AM-SSB",
+        "xyxy_pixels": [
+          542.04,
+          222.62,
+          625.26,
+          247.61
+        ]
+      },
+      {
+        "class_id": 2,
+        "class": "FM",
+        "xyxy_pixels": [
+          527.93,
+          450.12,
+          623.21,
+          466.61
+        ]
+      },
+      {
+        "class_id": 3,
+        "class": "PAM",
+        "xyxy_pixels": [
+          462.23,
+          300.01,
+          584.43,
+          323.07
+        ]
+      },
+      {
+        "class_id": 4,
+        "class": "OFDM",
+        "xyxy_pixels": [
+          128.64,
+          367.83,
+          202.68,
+          388.13
+        ]
+      },
+      {
+        "class_id": 5,
+        "class": "2-FSK",
+        "xyxy_pixels": [
+          243.49,
+          38.13,
+          390.35,
+          57.37
+        ]
+      },
+      {
+        "class_id": 6,
+        "class": "2-CPFSK",
+        "xyxy_pixels": [
+          377.59,
+          597.73,
+          493.61,
+          622.74
+        ]
+      },
+      {
+        "class_id": 7,
+        "class": "4-FSK",
+        "xyxy_pixels": [
+          160.88,
+          99.51,
+          279.96,
+          120.02
+        ]
+      },
+      {
+        "class_id": 8,
+        "class": "4-CPFSK",
+        "xyxy_pixels": [
+          167.1,
+          214.83,
+          299.23,
+          239.2
+        ]
+      },
+      {
+        "class_id": 9,
+        "class": "OOK",
+        "xyxy_pixels": [
+          277.93,
+          3.27,
+          351.64,
+          22.44
+        ]
+      },
+      {
+        "class_id": 10,
+        "class": "GMSK1",
+        "xyxy_pixels": [
+          182.53,
+          512.13,
+          319.15,
+          534.03
+        ]
+      },
+      {
+        "class_id": 11,
+        "class": "GMSK2",
+        "xyxy_pixels": [
+          211.0,
+          382.69,
+          276.91,
+          399.11
+        ]
+      }
+    ]
+  },
+  {
+    "recording_id": "main-002",
+    "segment_id": "main-002-s00",
+    "file": "main-002-s00.png",
+    "boxes": [
+      {
+        "class_id": 0,
+        "class": "AM-DSB",
+        "xyxy_pixels": [
+          276.75,
+          268.28,
+          346.97,
+          285.02
+        ]
+      },
+      {
+        "class_id": 1,
+        "class": "AM-SSB",
+        "xyxy_pixels": [
+          474.29,
+          336.81,
+          634.27,
+          354.64
+        ]
+      },
+      {
+        "class_id": 2,
+        "class": "FM",
+        "xyxy_pixels": [
+          192.25,
+          306.57,
+          270.86,
+          328.76
+        ]
+      },
+      {
+        "class_id": 3,
+        "class": "PAM",
+        "xyxy_pixels": [
+          341.79,
+          527.74,
+          473.72,
+          543.95
+        ]
+      },
+      {
+        "class_id": 4,
+        "class": "OFDM",
+        "xyxy_pixels": [
+          473.05,
+          570.05,
+          604.6,
+          591.41
+        ]
+      },
+      {
+        "class_id": 5,
+        "class": "2-FSK",
+        "xyxy_pixels": [
+          372.81,
+          399.92,
+          458.3,
+          417.05
+        ]
+      },
+      {
+        "class_id": 6,
+        "class": "2-CPFSK",
+        "xyxy_pixels": [
+          129.29,
+          194.04,
+          222.98,
+          210.78
+        ]
+      },
+      {
+        "class_id": 7,
+        "class": "4-FSK",
+        "xyxy_pixels": [
+          388.81,
+          207.14,
+          537.78,
+          225.28
+        ]
+      },
+      {
+        "class_id": 8,
+        "class": "4-CPFSK",
+        "xyxy_pixels": [
+          63.66,
+          44.3,
+          141.56,
+          63.58
+        ]
+      },
+      {
+        "class_id": 9,
+        "class": "OOK",
+        "xyxy_pixels": [
+          226.45,
+          80.95,
+          335.96,
+          99.32
+        ]
+      },
+      {
+        "class_id": 10,
+        "class": "GMSK1",
+        "xyxy_pixels": [
+          83.2,
+          292.53,
+          161.72,
+          317.02
+        ]
+      },
+      {
+        "class_id": 11,
+        "class": "GMSK2",
+        "xyxy_pixels": [
+          52.12,
+          379.4,
+          173.43,
+          398.78
+        ]
+      }
+    ]
+  },
+  {
+    "recording_id": "main-003",
+    "segment_id": "main-003-s00",
+    "file": "main-003-s00.png",
+    "boxes": [
+      {
+        "class_id": 0,
+        "class": "AM-DSB",
+        "xyxy_pixels": [
+          319.33,
+          176.85,
+          455.89,
+          194.5
+        ]
+      },
+      {
+        "class_id": 1,
+        "class": "AM-SSB",
+        "xyxy_pixels": [
+          264.73,
+          419.55,
+          366.13,
+          442.52
+        ]
+      },
+      {
+        "class_id": 2,
+        "class": "FM",
+        "xyxy_pixels": [
+          420.75,
+          84.03,
+          484.94,
+          101.12
+        ]
+      },
+      {
+        "class_id": 3,
+        "class": "PAM",
+        "xyxy_pixels": [
+          382.16,
+          343.25,
+          460.99,
+          359.73
+        ]
+      },
+      {
+        "class_id": 4,
+        "class": "OFDM",
+        "xyxy_pixels": [
+          75.8,
+          146.16,
+          180.28,
+          170.16
+        ]
+      },
+      {
+        "class_id": 5,
+        "class": "2-FSK",
+        "xyxy_pixels": [
+          107.25,
+          291.84,
+          205.88,
+          315.31
+        ]
+      },
+      {
+        "class_id": 6,
+        "class": "2-CPFSK",
+        "xyxy_pixels": [
+          87.71,
+          21.56,
+          152.76,
+          38.64
+        ]
+      },
+      {
+        "class_id": 7,
+        "class": "4-FSK",
+        "xyxy_pixels": [
+          122.83,
+          501.08,
+          263.45,
+          522.99
+        ]
+      },
+      {
+        "class_id": 8,
+        "class": "4-CPFSK",
+        "xyxy_pixels": [
+          150.78,
+          457.13,
+          226.31,
+          477.75
+        ]
+      },
+      {
+        "class_id": 9,
+        "class": "OOK",
+        "xyxy_pixels": [
+          73.33,
+          546.38,
+          154.01,
+          563.02
+        ]
+      },
+      {
+        "class_id": 10,
+        "class": "GMSK1",
+        "xyxy_pixels": [
+          421.38,
+          512.19,
+          522.42,
+          536.4
+        ]
+      },
+      {
+        "class_id": 11,
+        "class": "GMSK2",
+        "xyxy_pixels": [
+          59.01,
+          415.22,
+          217.65,
+          434.85
+        ]
+      }
+    ]
+  }
+]

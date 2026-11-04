@@ -57,12 +57,16 @@ def write_segment_artifacts(
     image_size: int = 640,
     min_bandwidth: float = MIN_BANDWIDTH,
     min_duration: int = MIN_DURATION,
+    global_snr_db_override: float | None = None,
+    pam_subtype_index: int | None = None,
 ) -> dict:
     """Regenerate one segment and write only image, YOLO labels, and replay JSON."""
     root = Path(root)
     specs, requested_snr = sample_specs(
         seed, profile=profile, n_samples=n_samples,
         min_bandwidth=min_bandwidth, min_duration=min_duration,
+        snr_override_db=global_snr_db_override,
+        pam_subtype_index=pam_subtype_index,
     )
     generated = generate_recording(specs, n_samples, seed, requested_snr)
     normalized, covered = log_spectrogram(generated.iq)
@@ -102,6 +106,9 @@ def write_segment_artifacts(
         "seed": int(seed),
         "profile": profile,
         "n_samples": int(n_samples),
+        "minimum_bandwidth_cycles_per_sample": float(min_bandwidth),
+        "minimum_duration_samples": int(min_duration),
+        "pam_subtype_index": pam_subtype_index,
         "covered_samples": int(covered),
         "normalized_sampling_rate_sps": 1.0,
         "requested_global_snr_db": requested_snr,

@@ -1,7 +1,5 @@
-# External data status
+# Data notice
 
-The repository contains generated synthetic signals only. The new SigMF ingestion code can turn properly annotated recordings into paper-taxonomy spectrograms and YOLO labels, but no DeepSig or Zenodo recording has been downloaded, converted, or evaluated.
+The current project run uses only reproducible synthetic signals produced by `src/wideband_recognition/signals.py` and `src/wideband_recognition/synthetic_data.py`. Generated spectra, labels, and parameter manifests contain no external recordings. Raw IQ, checkpoints, and scratch data are excluded from Git.
 
-The [Zenodo companion record](https://zenodo.org/records/7799387) was checked on 2026-11-03. Its Rights field identifies **CC BY-SA 4.0**. Its four archives total 57,472,189,381 bytes (about 53.55 GiB), larger than the roughly 20.3 GB free on the local machine at verification time. The data remain external and are not tracked by Git.
-
-The DeepSig SPAWC 2021 data access and licensing terms have not been verified for this project. Do not redistribute that dataset or claim a real-data result until the exact source terms and the imported recording metadata have been checked.
+DeepSig and the Zenodo record `10.5281/zenodo.7799387` are not integrated. The Zenodo record's Rights field is unverified, and no license claim is made. Consult the current record and dataset terms before future use.

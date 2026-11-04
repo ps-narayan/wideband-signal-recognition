@@ -83,6 +83,14 @@ def pam_metric(label, row, key="estimate"):
     return metric(f"{label} (chance level: 1/7 = 14.29%)", row, key)
 
 
+def target_display_value(key, value):
+    if value is None:
+        return "not measured"
+    if key == "processing_time_per_segment_local_seconds":
+        return f"{float(value):.3f} s"
+    return pct(value)
+
+
 def matrix(labels, values):
     if not labels or not values:
         return "Not measured."
@@ -171,6 +179,10 @@ def normalize_summary(summary, metrics):
             r"(accuracy(?:[^:]*):\s*)n/a; CI95=\[(?:n/a|None),\s*(?:n/a|None)\]",
             r"\1not measured; CI95=[not measured, not measured]", line, flags=re.IGNORECASE,
         )
+        line = re.sub(
+            r"(\b(?:P|IoU)=)not measured CI95=\[(?:None|n/a),\s*(?:None|n/a)\]",
+            r"\1not measured CI95=[not measured, not measured]", line, flags=re.IGNORECASE,
+        )
         out.append(line.rstrip())
     return "\n".join(out) + "\n"
 
@@ -178,28 +190,36 @@ def normalize_summary(summary, metrics):
 def build_results(m, repo, split_audit):
     main, shifted = m["main_test"], m["shifted_test"]
     yolo, energy, pam = main["yolo"], main["energy_baseline"], main["pam"]
+    artifact_dir = Path(m.get("metrics_path", "results/reduced_cpu/metrics.json")).parent.as_posix()
+    not_comparable = m.get("comparison_scope") == "not_comparable"
+    comparison_text = (
+        "This reduced run is not comparable to the full-scale acceptance protocol."
+        if not_comparable else
+        "Target status uses each measured point estimate; recording-level confidence intervals show uncertainty."
+    )
     target_info = [
         ("recall_at_global_snr_ge_5_db", "Detector recall, global SNR >= 5 dB", ">= 80%"),
         ("mean_iou_at_global_snr_ge_5_db", "Mean IoU, global SNR >= 5 dB", ">= 0.75"),
         ("map50_at_global_snr_ge_5_db", "Class mAP@0.5, global SNR >= 5 dB", ">= 60%"),
         ("pam_oracle_accuracy_global_snr_ge_10_db", "PAM oracle-box accuracy (chance 1/7 = 14.29%), global SNR >= 10 dB", ">= 80%"),
         ("pam_oracle_accuracy_near_0_db_0_to_1", "PAM oracle-box accuracy (chance 1/7 = 14.29%), global SNR [0, 1) dB", "> 50%"),
-        ("processing_time_per_segment_local_seconds", "Processing time per 1M samples on owner's machine", "< 5 seconds"),
+        ("processing_time_per_segment_local_seconds", "Local CPU processing time per 1M samples", "< 5 seconds"),
     ]
     lines = [
-        "# Reduced CPU Run Results", "",
+        f"# {m.get('results_title', 'Reduced CPU Run Results')}", "",
         f"Run label: {m.get('run_label', 'reduced run: CPU, small data, not comparable to target')}",
-        "Comparison: reduced run: CPU, small data, not comparable to target. Target statuses are not comparable; this run does not establish whether the portfolio targets are met or missed.",
+        f"Comparison: {comparison_text}",
+        "Data source: self-contained reproducible synthetic SigMF/IQ generator. The 53.55 GiB Zenodo/DeepSig download requirement is dropped; no external recordings were used.",
         f"Device: {m.get('device', 'not measured')}",
         f"YOLOv5 source commit: {m.get('yolo', {}).get('commit', 'not measured')}",
         f"Detector training status: {m.get('training_status', {}).get('detector', 'not measured')}; checkpoint: {m.get('training_status', {}).get('detector_checkpoint_used', 'not measured')}; requested epochs: {m.get('training_status', {}).get('detector_epochs_requested', 'not measured')}.",
         f"PAM training status: {m.get('training_status', {}).get('pam', 'not measured')}; epochs completed: {m.get('training_status', {}).get('pam_epochs_completed', 'not measured')} of {m.get('training_status', {}).get('pam_epochs_requested', 'not measured')}.",
         f"Recording support: main test {m.get('support', {}).get('main_test_recordings', 'not measured')} recordings / {m.get('support', {}).get('main_test_segments', 'not measured')} segments; shifted test {m.get('support', {}).get('shifted_test_recordings', 'not measured')} recordings / {m.get('support', {}).get('shifted_test_segments', 'not measured')} segments.",
-        f"Recording-ID leakage audit: train={split_audit['main_recording_counts']['train']}, validation={split_audit['main_recording_counts']['val']}, test={split_audit['main_recording_counts']['test']}; main splits are pairwise disjoint; shifted test IDs are separate. See [split_audit.json](results/reduced_cpu/split_audit.json) for IDs.",
+        f"Recording-ID leakage audit: train={split_audit['main_recording_counts']['train']}, validation={split_audit['main_recording_counts']['val']}, test={split_audit['main_recording_counts']['test']}; main splits are pairwise disjoint; shifted test IDs are separate. See [split_audit.json]({artifact_dir}/split_audit.json) for IDs.",
         f"SNR definition: {m.get('snr_definition', 'not measured')}.",
         "Confidence intervals use recording-level bootstrap resampling. Cells with fewer than 30 signals are marked LOW-SUPPORT.",
         "", "## Acceptance targets", "",
-        "Measured values are shown below. The reduced protocol makes performance targets not comparable to the full-scale acceptance criteria. The owner-machine timing remains not measured.",
+        "Measured values are shown below. A missing value is marked not measured.",
         "", "| Target | Threshold | Measured | Recording-level 95% CI | Support | Status |",
         "|---|---:|---:|---:|---|---|"
     ]
@@ -209,8 +229,17 @@ def build_results(m, repo, split_audit):
         sup = support(r.get("support")) if r.get("support") else "not measured"
         ci_text = ci({"ci95": r.get("ci95")})
         if key == "processing_time_per_segment_local_seconds":
-            val, sup, ci_text = None, "not applicable", "not applicable"
-        lines.append(f"| {label} | {threshold} | {pct(val)} | {ci_text} | {sup} | not comparable |")
+            ci_text = "not applicable"
+            if val is not None:
+                sup = r.get("measurement_scope", "local synthetic CLI timing")
+        if not_comparable:
+            status = "not comparable"
+        elif val is None:
+            status = "not measured"
+        else:
+            status = "met" if r.get("pass") else "missed"
+        display_value = target_display_value(key, val)
+        lines.append(f"| {label} | {threshold} | {display_value} | {ci_text} | {sup} | {status} |")
     calibration = m.get("validation_calibration", {})
     yolo_cal = calibration.get("yolo", {})
     energy_cal = calibration.get("energy_baseline", {})
@@ -357,19 +386,19 @@ def build_results(m, repo, split_audit):
               matrix(shifted.get("pam_subtype_confusion_labels", []), shifted.get("pam_subtype_confusion_matrix", [])),
               "", "## Plots and measured artifacts", "",
               "The metrics file preserves measured values, CIs, supports, validation thresholds, and confusion counts."]
-    plot_dir = repo / "results" / "reduced_cpu" / "plots"
+    plot_dir = repo / artifact_dir / "plots"
     if plot_dir.exists():
-        lines.extend(f"- [{p.name}](results/reduced_cpu/plots/{p.name})" for p in sorted(plot_dir.glob("*.png")))
+        lines.extend(f"- [{p.name}]({artifact_dir}/plots/{p.name})" for p in sorted(plot_dir.glob("*.png")))
     else:
         lines.append("Plots: not yet measured.")
-    lines += ["", "- [Complete measured metrics JSON](results/reduced_cpu/metrics.json)",
-              "- [Run summary](results/reduced_cpu/summary.txt)", "",
+    lines += ["", f"- [Complete measured metrics JSON]({artifact_dir}/metrics.json)",
+              f"- [Run summary]({artifact_dir}/summary.txt)", "",
               "## Runtime", "",
-              f"Measured total pipeline runtime on hosted CPU (seconds): {m.get('runtime_seconds_pipeline', {}).get('total', 'not measured')}.",
+              f"Measured total pipeline runtime on the configured device (seconds): {m.get('runtime_seconds_pipeline', {}).get('total', 'not measured')}.",
               f"Measured data generation runtime (seconds): {m.get('runtime_seconds_pipeline', {}).get('data_generation', 'not measured')}.",
-              f"YOLO timing probe: {('not run for this profile' if not m.get('timing_probe') else str(m['timing_probe'].get('wall_seconds', 'not measured')) + ' seconds for ' + str(m['timing_probe'].get('batches_per_epoch', 'not measured')) + ' training batches')}. See [timing_probe.json](results/reduced_cpu/timing_probe.json) when present.",
+              f"YOLO timing probe: {('not run for this profile' if not m.get('timing_probe') else str(m['timing_probe'].get('wall_seconds', 'not measured')) + ' seconds for ' + str(m['timing_probe'].get('batches_per_epoch', 'not measured')) + ' training batches')}. See [{artifact_dir}/timing_probe.json]({artifact_dir}/timing_probe.json) when present.",
               f"Detector training status: {m.get('training_status', {}).get('detector', 'not measured')}; evaluation completed: {m.get('training_status', {}).get('evaluation_completed', 'not measured')}.",
-              "The under-five-second target is specific to the owner's local machine and remains not measured there; hosted run time is not comparable.",
+              f"The local per-segment timing target is {'measured in this run' if m.get('acceptance_targets', {}).get('processing_time_per_segment_local_seconds', {}).get('measured') is not None else 'not yet measured'}; see the acceptance table above.",
               "", "## Interpretation", "",
               "Use this reduced CPU execution to inspect the software path and measured outputs. It does not establish full-scale target performance. Investigate misses using validation data only; keep both test sets frozen."]
     return "\n".join(lines) + "\n"

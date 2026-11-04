@@ -59,3 +59,21 @@ class MetricTests(unittest.TestCase):
         self.assertTrue(selected["attained_target"])
         self.assertEqual(selected["precision"], 1.0)
         self.assertEqual(selected["recall"], 1.0)
+
+    def test_validation_calibration_maximizes_recall_among_precision_feasible_points(self):
+        boxes = [[10 * i, 0, 10 * i + 5, 5] for i in range(5)]
+        predictions = [
+            {"class": "PAM", "xyxy": boxes[0], "confidence": 0.95},
+            {"class": "FM", "xyxy": [100, 100, 105, 105], "confidence": 0.90},
+            {"class": "PAM", "xyxy": boxes[1], "confidence": 0.80},
+            {"class": "PAM", "xyxy": boxes[2], "confidence": 0.70},
+            {"class": "PAM", "xyxy": boxes[3], "confidence": 0.60},
+            {"class": "PAM", "xyxy": boxes[4], "confidence": 0.50},
+        ]
+        selected = calibrate_confidence([{
+            "gt": [{"class": "PAM", "xyxy": box} for box in boxes],
+            "pred": predictions,
+        }], target_precision=0.80)
+        self.assertGreaterEqual(selected["precision"], 0.80)
+        self.assertEqual(selected["recall"], 1.0)
+        self.assertEqual(selected["threshold"], 0.5)

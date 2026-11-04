@@ -127,7 +127,14 @@ def _run_yolo_training(
     ):
         return _run(command, cwd=yolo_dir, log_path=log_path, env=env, timeout_seconds=timeout_seconds)
 
-def _check_yolo(yolo_dir: Path) -> dict:
+def _check_yolo(
+    yolo_dir: Path,
+    *,
+    minimum_bandwidth: float = 0.025,
+    minimum_duration: int = 100_000,
+    covered_samples: int = 999_936,
+    image_size: int | None = None,
+) -> dict:
     sha = subprocess.check_output(
         ["git", "-C", str(yolo_dir), "rev-parse", "HEAD"], text=True
     ).strip()
@@ -178,7 +185,8 @@ def _check_yolo(yolo_dir: Path) -> dict:
     anchors = np.asarray(model_config.get("anchors", []), dtype=np.float64).reshape(-1, 2)
     if anchors.shape != YOLOV5N_V7_ANCHORS_PX.shape or not np.array_equal(anchors, YOLOV5N_V7_ANCHORS_PX):
         raise RuntimeError("Pinned YOLOv5n anchors changed; recalculate the minimum-box preflight")
-    minimum_wh = [8192 / 999_936 * IMAGE_SIZE, 0.008 * IMAGE_SIZE]
+    image_size = IMAGE_SIZE if image_size is None else int(image_size)
+    minimum_wh = [minimum_duration / covered_samples * image_size, minimum_bandwidth * image_size]
     return {
         "repository": YOLOV5_REPOSITORY,
         "commit": sha,
@@ -196,25 +204,64 @@ def _check_yolo(yolo_dir: Path) -> dict:
         "autoanchor_note": (
             "Pinned YOLOv5 train.py calls check_anchors unless --noautoanchor is set. "
             "It attempts anchor evolution when Best Possible Recall is <= 0.98. "
-            "This ratio-fit check passes for the minimum raster box, but the box remains "
-            "smaller than the stride-eight feature cell, so localization recall must be measured."
+            "Anchor ratio fit is reported for the active generator minimum. Box visibility "
+            "and localization still require measured validation and held-out results."
         ),
     }
 
 
-def _main_manifest(n_recordings, segments_per_recording, seed):
-    split_map = grouped_split(n_recordings, seed=seed)
+def _main_manifest(
+    n_recordings,
+    segments_per_recording,
+    seed,
+    *,
+    train_fraction=2 / 3,
+    validation_fraction=1 / 9,
+    test_snr_strata=(),
+):
+    split_map = grouped_split(
+        n_recordings, train_fraction=train_fraction,
+        validation_fraction=validation_fraction, seed=seed,
+    )
+    test_ids = sorted(key for key, value in split_map.items() if value == "test")
+    requested_test_count = sum(int(row["recordings"]) for row in test_snr_strata)
+    if test_snr_strata and requested_test_count != len(test_ids):
+        raise ValueError(
+            f"test_snr_strata assign {requested_test_count} recordings, but the split has {len(test_ids)}"
+        )
+    snr_by_recording = {}
+    pam_subtype_by_recording = {}
+    for split_name in ("train", "val", "test"):
+        split_ids = sorted(key for key, value in split_map.items() if value == split_name)
+        for index, recording_id in enumerate(split_ids):
+            pam_subtype_by_recording[recording_id] = index % len(PAM_SUBTYPES)
+    cursor = 0
+    for stratum in test_snr_strata:
+        count = int(stratum["recordings"])
+        snr = float(stratum["global_snr_db"])
+        for recording_id in test_ids[cursor : cursor + count]:
+            snr_by_recording[recording_id] = snr
+            pam_subtype_by_recording[recording_id] = (
+                test_ids[cursor : cursor + count].index(recording_id) % len(PAM_SUBTYPES)
+            )
+        cursor += count
     rows = []
     for recording_id in sorted(split_map):
         recording_index = int(recording_id.rsplit("-", 1)[1])
         for segment_index in range(segments_per_recording):
-            rows.append({
+            row = {
                 "segment_id": f"{recording_id}-s{segment_index:02d}",
                 "recording_id": recording_id,
                 "split": split_map[recording_id],
                 "profile": "train",
                 "seed": seed * 100_000 + recording_index * segments_per_recording + segment_index,
-            })
+                "pam_subtype_index": pam_subtype_by_recording.get(
+                    recording_id, recording_index % len(PAM_SUBTYPES)
+                ),
+            }
+            if recording_id in snr_by_recording:
+                row["global_snr_db_override"] = snr_by_recording[recording_id]
+            rows.append(row)
     return rows, split_map
 
 
@@ -226,6 +273,7 @@ def _shift_manifest(n_recordings, segments_per_recording, seed):
             "split": "shifted",
             "profile": "shifted",
             "seed": seed * 200_000 + 90_000_000 + recording_index * segments_per_recording + segment_index,
+            "pam_subtype_index": recording_index % len(PAM_SUBTYPES),
         }
         for recording_index in range(n_recordings)
         for segment_index in range(segments_per_recording)
@@ -424,25 +472,28 @@ def _accuracy_summary(rows, *, snr_bin=None, label_filter=None, iterations=500):
         "signals": len(selected), "low_support": len(selected) < 30,
     }
 
-def _build_frame_set(rows, data_dir: Path, *, jitter: bool, max_frames_per_class=None, seed=2026):
+def _build_frame_set(
+    rows, data_dir: Path, *, jitter: bool, max_frames_per_class=None,
+    seed=2026, n_frames=4,
+):
     frames, labels, frame_rows = [], [], []
     for row in rows:
         metadata = _load_metadata(data_dir / "metadata" / row["split"] / f"{row['segment_id']}.json")
         specs, _ = sample_specs(
-            int(metadata["seed"]), profile=metadata["profile"], n_samples=int(metadata["n_samples"])
+            int(metadata["seed"]), profile=metadata["profile"], n_samples=int(metadata["n_samples"]),
+            min_bandwidth=float(metadata.get("minimum_bandwidth_cycles_per_sample", 0.025)),
+            min_duration=int(metadata.get("minimum_duration_samples", 100_000)),
+            pam_subtype_index=metadata.get("pam_subtype_index"),
         )
         recording = generate_recording(
             specs, int(metadata["n_samples"]), int(metadata["seed"]),
             float(metadata["requested_global_snr_db"]),
         )
         for signal_index, signal_meta in enumerate(metadata["signals"]):
-            # The agreed Others class is limited to AM-DSB, FM, 2-FSK, and OOK.
-            if signal_meta["detector_class"] == "OFDM":
-                continue
             box = metadata_box(signal_meta)
             target = signal_meta["modulation"] if signal_meta["detector_class"] == "PAM" else "Others"
             signal_frames = extract_frames(
-                recording.iq, box, frame_samples=FRAME_SAMPLES, n_frames=2,
+                recording.iq, box, frame_samples=FRAME_SAMPLES, n_frames=n_frames,
                 seed=int(metadata["seed"]) + signal_index * 7919, jitter=jitter,
             )
             for frame in signal_frames:
@@ -470,6 +521,7 @@ def _build_frame_set(rows, data_dir: Path, *, jitter: bool, max_frames_per_class
 def _train_pam(
     train_data, val_data, checkpoint_path: Path, *, epochs: int, batch_size: int,
     seed: int, device: str, max_runtime_seconds=None,
+    learning_rate: float = 1e-3, early_stopping_patience: int = 8,
 ):
     import torch
     from torch.utils.data import DataLoader, TensorDataset
@@ -493,7 +545,7 @@ def _train_pam(
     criterion = torch.nn.CrossEntropyLoss(
         weight=torch.tensor(weights, dtype=torch.float32, device=device_obj)
     )
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     history = {"train_loss": [], "validation_loss": [], "validation_accuracy": [], "class_counts": counts.tolist()}
     best_loss = float("inf")
     best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
@@ -532,7 +584,7 @@ def _train_pam(
             stale = 0
         else:
             stale += 1
-            if stale >= 4:
+            if stale >= early_stopping_patience:
                 break
     history["epochs_completed"] = len(history["train_loss"])
     history["training_status"] = (
@@ -662,7 +714,8 @@ def _save_detector_snr_plot(result, path: Path, title: str):
 
 
 def _score_test_pipeline(
-    items, metadata_by_segment, confidence_threshold, model, device, *, iterations=500,
+    items, metadata_by_segment, confidence_threshold, model, device, *,
+    iterations=500, frames_per_signal=4,
 ):
     """Compute oracle PAM, detector-box PAM, false-class Others, and joint correctness."""
     oracle_rows, detector_pam_rows = [], []
@@ -675,7 +728,10 @@ def _score_test_pipeline(
     for item in items:
         metadata = metadata_by_segment[item["segment_id"]]
         specs, _ = sample_specs(
-            int(metadata["seed"]), profile=metadata["profile"], n_samples=int(metadata["n_samples"])
+            int(metadata["seed"]), profile=metadata["profile"], n_samples=int(metadata["n_samples"]),
+            min_bandwidth=float(metadata.get("minimum_bandwidth_cycles_per_sample", 0.025)),
+            min_duration=int(metadata.get("minimum_duration_samples", 100_000)),
+            pam_subtype_index=metadata.get("pam_subtype_index"),
         )
         recording = generate_recording(
             specs, int(metadata["n_samples"]), int(metadata["seed"]),
@@ -687,7 +743,7 @@ def _score_test_pipeline(
         pam_box = metadata_box(pam_spec)
         pam_index = gt_metadata.index(pam_spec)
         oracle_frames = extract_frames(
-            recording.iq, pam_box, n_frames=2,
+            recording.iq, pam_box, n_frames=frames_per_signal,
             seed=int(metadata["seed"]) + pam_index * 7919, jitter=False,
         )
         oracle_guesses = _predict_frame_labels(model, oracle_frames, device=device)
@@ -737,7 +793,7 @@ def _score_test_pipeline(
                 continue
             try:
                 frames = extract_frames(
-                    recording.iq, box, n_frames=2,
+                    recording.iq, box, n_frames=frames_per_signal,
                     seed=int(metadata["seed"]) + index * 104729, jitter=False,
                 )
             except ValueError:
@@ -748,7 +804,8 @@ def _score_test_pipeline(
             flat_frames = np.concatenate([candidate_frames[index] for index in candidate_indices], axis=0)
             flat_guesses = _predict_frame_labels(model, flat_frames, device=device)
             for position, index in enumerate(candidate_indices):
-                guesses = flat_guesses[position * 2 : position * 2 + 2]
+                lower = position * frames_per_signal
+                guesses = flat_guesses[lower : lower + frames_per_signal]
                 subtype_predictions[index] = PAM_LABELS[Counter(guesses.tolist()).most_common(1)[0][0]]
         for index, predicted_subtype in subtype_predictions.items():
             pred = predictions[index]
@@ -1218,7 +1275,13 @@ def run(args):
         if local_font is None:
             raise RuntimeError("YOLOv5 requires an ASCII label font; install Arial or DejaVu Sans")
         shutil.copyfile(local_font, font_path)
-    yolo_info = _check_yolo(yolo_dir)
+    yolo_info = _check_yolo(
+        yolo_dir,
+        minimum_bandwidth=float(config["data"].get("minimum_bandwidth_cycles_per_sample", 0.025)),
+        minimum_duration=int(config["data"].get("minimum_duration_samples", 100_000)),
+        covered_samples=(N_SAMPLES // 512) * 512,
+        image_size=IMAGE_SIZE,
+    )
     _save_json(out_dir / "results" / "yolov5_api_check.json", yolo_info)
     print(
         "Pinned YOLOv5 minimum-box anchor check: "
@@ -1235,7 +1298,10 @@ def run(args):
         raise FileExistsError(f"{data_dir} already exists; choose a new --data-work folder.")
     data_dir.mkdir(parents=True)
     main_rows, recording_split = _main_manifest(
-        args.recordings, args.segments_per_recording, args.seed
+        args.recordings, args.segments_per_recording, args.seed,
+        train_fraction=float(config["data"].get("train_fraction", 2 / 3)),
+        validation_fraction=float(config["data"].get("validation_fraction", 1 / 9)),
+        test_snr_strata=config["data"].get("test_snr_strata", ()),
     )
     shifted_rows = _shift_manifest(args.shift_recordings, args.segments_per_recording, args.seed)
     all_rows = main_rows + shifted_rows
@@ -1244,6 +1310,10 @@ def run(args):
         write_segment_artifacts(
             data_dir, row["segment_id"], row["recording_id"], row["split"],
             row["seed"], row["profile"], n_samples=N_SAMPLES, image_size=IMAGE_SIZE,
+            min_bandwidth=float(config["data"].get("minimum_bandwidth_cycles_per_sample", 0.025)),
+            min_duration=int(config["data"].get("minimum_duration_samples", 100_000)),
+            global_snr_db_override=row.get("global_snr_db_override"),
+            pam_subtype_index=row.get("pam_subtype_index"),
         )
         if index % 25 == 0 or index == len(all_rows):
             print(f"Generated image/label/metadata artifacts: {index}/{len(all_rows)}", flush=True)
@@ -1414,8 +1484,12 @@ def run(args):
         raise ValueError("pam_frames_per_class must be positive when supplied")
     train_data = _build_frame_set(
         train_rows, data_dir, jitter=True, max_frames_per_class=pam_frame_cap, seed=args.seed,
+        n_frames=int(config["pam_classifier"].get("frames_per_signal", 4)),
     )
-    val_data = _build_frame_set(val_rows, data_dir, jitter=False)
+    val_data = _build_frame_set(
+        val_rows, data_dir, jitter=False,
+        n_frames=int(config["pam_classifier"].get("frames_per_signal", 4)),
+    )
     pam_model, pam_history = _train_pam(
         train_data, val_data, out_dir / "checkpoints" / "pam_cnn.pt",
         epochs=args.pam_epochs, batch_size=args.pam_batch, seed=args.seed, device=device,
@@ -1427,6 +1501,8 @@ def run(args):
                 - args.evaluation_reserve_minutes * 60,
             )) if args.runtime_budget_minutes > 0 else None
         ),
+        learning_rate=float(config["pam_classifier"].get("learning_rate", 1e-3)),
+        early_stopping_patience=int(config["pam_classifier"].get("early_stopping_patience", 8)),
     )
     _save_json(out_dir / "results" / "pam_training_history.json", pam_history)
     _save_pam_curves(pam_history, out_dir / "plots" / "pam_training_curves.png")
@@ -1434,10 +1510,12 @@ def run(args):
     main_joint = _score_test_pipeline(
         test_items, test_meta, float(yolo_calibration["threshold"]), pam_model, device,
         iterations=args.bootstrap_iterations,
+        frames_per_signal=int(config["pam_classifier"].get("frames_per_signal", 4)),
     )
     shifted_joint = _score_test_pipeline(
         shifted_items, shifted_meta, float(yolo_calibration["threshold"]), pam_model, device,
         iterations=args.bootstrap_iterations,
+        frames_per_signal=int(config["pam_classifier"].get("frames_per_signal", 4)),
     )
     main_yolo_stats = detection_stats(
         test_items, confidence_threshold=float(yolo_calibration["threshold"]), class_agnostic=True
@@ -1935,7 +2013,7 @@ def run(args):
 
 def parse_args():
     project_root = Path(__file__).resolve().parents[1]
-    default_config = project_root / "configs" / "milestone2.yaml"
+    default_config = project_root / "configs" / "major_project_cpu.yaml"
     defaults = _load_config(default_config)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--yolo-dir", required=True)

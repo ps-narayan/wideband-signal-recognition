@@ -1,63 +1,41 @@
-# Interview explainer: wideband signal recognition
+# Explain it in plain language
 
-## What problem does this solve?
+## What does the project do?
 
-A receiver can capture a wide chunk of radio spectrum as complex I/Q samples. The system should point out where signals appear in time and frequency, name the broad modulation family, and inspect PAM-like signals more closely. An operator can use these boxes and labels to monitor a band or investigate interference.
+A wideband recording can contain many narrower transmissions at different times and frequencies. The first model looks at a spectrogram like an image and draws a box around each transmission. It also assigns one of twelve modulation labels. When that label is `PAM`, a second model reads the corresponding raw I/Q waveform and picks one of six supported PSK/QAM types or `Others`.
 
-## Why use an image detector?
+This is useful for spectrum monitoring because an operator needs to know what occupied a band, when it happened, and how wide it was. The same boxes can guide an interference investigation.
 
-A spectrogram turns time into the horizontal direction and frequency into the vertical direction. A signal then looks like a patch or stripe. An object detector can locate several such patches and assign a broad class in one pass. The energy baseline only groups bright connected regions; it gives a geometry comparison but cannot decide a class.
+## Why two stages?
 
-## Why does the detector use one PAM class?
+A spectrogram makes time and frequency location visible, but PSK and QAM types often have similar average brightness patterns. The detector therefore merges the supported PSK/QAM families into one `PAM` label. The I/Q classifier sees symbol-level phase and amplitude patterns that the spectrogram hides.
 
-PSK and QAM differ in the symbols carried by the waveform. Those symbols are not directly visible in a power-only spectrogram. After normalization, their patches can have very similar shape and brightness, so the detector merges them into PAM. The second classifier uses the complex I and Q values, where phase and amplitude symbol patterns remain available.
+The detector emits a time-frequency rectangle. The extraction code turns its edges back into sample numbers and normalized frequencies, filters the requested band, shifts the center toward zero frequency, and takes fixed 1024-sample I/Q frames. If the box is wrong, the filter can cut off useful signal or leave a residual frequency rotation, which can reduce PAM accuracy.
 
-## What does the spectrogram resolution mean?
+## Why these image settings?
 
-The analysis window spans 512 input samples and advances without overlap. That gives a time step of 512 samples. A 4096-point FFT gives finely spaced plotted frequency bins by zero-padding, but the true ability to distinguish nearby tones is still limited mainly by the 512-sample window. A shorter signal may occupy only a few columns. The approved minimum duration and bandwidth were chosen so the smallest synthetic box covers at least five resized pixels on each image axis; the notebook repeats the low-SNR visibility experiment before training.
+The generator uses one-million-sample segments and a Hann window of 512 samples with 4096 FFT points and no overlap. This keeps the same broad spectrogram idea as the paper. The 640 x 640 detector image cannot preserve arbitrarily small boxes, so the synthetic generator uses at least 0.025 cycles/sample of bandwidth and 100,000 samples of duration. Those dimensions cover about 16 frequency pixels and 64 time pixels after resizing. This is a measured project deviation, not the paper's exact scale.
 
-The image stretches the time and frequency axes to a square detector input. This preserves the box mapping only because labels are converted using the same covered-sample and pixel geometry. Labels come from the signal generator parameters, never from looking at the rendered image.
+The STFT covers 999,936 samples from a one-million-sample input. Pixel mapping uses that covered interval, leaving the final 64 samples outside the image coordinate map. Labels come from the generator's time and frequency parameters, not from image inspection.
 
-## What does a box mean physically?
+## What does SNR mean here?
 
-Its left and right edges are the signal start and end in samples. Its bottom and top edges are the low and high normalized frequencies in cycles per sample. With a real sample rate, normalized frequency can later be converted to hertz. The final STFT window does not cover the last 64 samples of a one-million-sample segment, so the box-to-image map uses the samples actually covered by the windows.
+Global SNR compares the total clean signal power with the total added noise power over the whole wideband recording. A single PAM signal's in-band SNR can be different because its bandwidth contains only part of the total noise and because several signals contribute to total signal power. The run logs both.
 
-## Why filter and downconvert before PAM classification?
+As noise increases, detections, box overlap, and modulation accuracy should generally get worse. If a lower-SNR split suddenly looks much better, check SNR measurement, split assignment, normalization, and labels before drawing a conclusion.
 
-The detector supplies an estimated frequency band. The extraction block shifts that band's center to zero frequency, applies a linear-phase low-pass filter, compensates for the filter delay, and cuts frames from inside the estimated time interval. This makes the classifier focus on the modulation symbols instead of the full wideband recording.
+## How are train and test kept separate?
 
-If the estimated center is wrong, residual carrier rotation remains in the frame. The agreed edge jitter is five percent of box bandwidth per frequency edge; when both edges shift together, the largest center error is five percent of the box bandwidth. At the shifted-profile maximum bandwidth of 0.12 cycles per sample, that is 0.006 cycles per sample, or about 6.14 phase cycles in a 1024-sample frame. The filter uses an odd 1111-tap Kaiser-windowed FIR at minimum bandwidth, with 555 samples of group delay. Unit tests check its passband ripple and stopband attenuation.
+The split unit is a parent recording ID. Every rendered segment and derived I/Q frame from that parent stays in one split. Thresholds are selected with validation data only. The held-out main-test and shifted-test recordings are used only for final evaluation. Confidence intervals resample recordings because several signals from one recording are related.
 
-Too narrow a filter clips wanted symbols and spreads their pulse shape. Too wide a filter admits nearby signals and noise. The generator therefore enforces a guard between simultaneous signals; predictions closer than the guard are marked unresolved rather than treated as clean isolated signals.
+## Why keep an energy baseline?
 
-## What should happen as SNR falls?
+A simple energy/connected-component baseline suggests bright regions that may be transmissions. It can measure rough geometry, but it cannot name modulation classes. The detector comparison therefore reports class-agnostic recall and mean IoU at the validation-selected precision operating point, while class mAP is measured separately.
 
-The spectrogram becomes less distinct and the I/Q symbols become less reliable. Detection recall, box overlap, and PAM accuracy should generally decline as noise rises. An unexpected large improvement at lower SNR, or a sharp improvement only on test data, would make me inspect the SNR calculation, split, normalization, and label alignment for a bug.
+## What can the project claim?
 
-Global SNR is computed from total clean signal power divided by total added noise power across the full segment. A PAM signal's approximate in-band SNR is also saved per signal. These differ because several signals share a segment and because the noise integrated over one signal's bandwidth is different from total wideband noise.
+Only values in `RESULTS.md` that are backed by the local metrics JSON and run artifacts. The included generator is synthetic and reproducible; this does not demonstrate real-world receiver performance. No result from the paper is presented as a project measurement.
 
-## How do we avoid optimistic testing?
+## What is not modeled?
 
-Parent recording IDs are assigned to train, validation, or test before any detector training. Every segment under a parent ID stays in one split. The additional shifted test set uses different bandwidth and SNR ranges. Bootstrap intervals sample parent recordings, not individual detections or frames. Any low-support class or SNR cell is explicitly marked.
-
-The current synthetic implementation uses independent seeded segment realizations grouped under parent IDs for split and bootstrap bookkeeping. That is a scaled test protocol, not a claim that a continuous real recording was captured.
-
-## What does the PAM CNN learn?
-
-The classifier receives short complex I/Q frames, represented as two channels: I and Q. A small one-dimensional CNN learns local waveform patterns. It predicts one of the PAM subtypes or Others. Others is trained from the agreed AM-DSB, FM, two-FSK, and OOK signals using the same extraction steps. OFDM is excluded from this classifier's Others training set by design.
-
-Accuracy with generator-defined boxes measures the classifier when extraction is ideal. Accuracy with detector boxes measures the effect of real localization errors. The joint end-to-end score is stricter: a detection counts only when its box overlaps enough, its detector class is correct, and its PAM subtype is correct when applicable.
-
-## What changed for the full detector labels?
-
-The reduced model that produced the published CPU results still has six classes. A separate SigMF importer can now read annotation time and frequency bounds and write YOLO labels using the paper's 12-class order. It maps PSK/QAM/APSK labels to the shared `PAM` detector class. It stops on a generic `GMSK` label because the paper splits GMSK1 and GMSK2 by spectrogram shape; assigning one automatically would invent ground truth. The importer has not been run on the Zenodo archive, and the 12-class model has not been trained.
-
-## Why keep the energy baseline?
-
-A simple connected-component detector creates candidate boxes from bright spectrogram regions. We calibrate its confidence on validation data to the same 80 percent precision operating target as YOLO when possible. Then we compare class-agnostic recall and mean IoU on the untouched test recordings. YOLO class mAP is reported separately because the energy baseline has no class labels.
-
-If YOLO does not improve geometry enough to justify its complexity, the result is still useful: it shows the limit of a simple brightness-based baseline on this synthetic layout. No score is copied from the paper.
-
-## What do we deliberately leave out?
-
-The prototype does not model fading, frequency offset beyond deliberate extraction-error tests, oscillator phase noise, IQ imbalance, DC offset, nonlinear hardware distortion, ADC quantization, AGC behavior, or sample-clock drift. It also does not validate the synthetic waveforms as standards-compliant emitters or establish real-world receiver performance. The 12-class importer prepares labeled data, but the current model is six-class and no real dataset has been evaluated. OOK versus narrow AM-DSB and FM versus PAM confusion are known cases to measure. The Zenodo record is CC BY-SA 4.0, but its archives have not been downloaded; DeepSig terms remain unverified.
+The primary layout has no time-frequency overlap. The generator also omits multipath fading, carrier-frequency error beyond extraction tests, oscillator phase noise, IQ imbalance, DC offset, nonlinear RF hardware, ADC quantization, AGC, and sample-clock drift. It does not generate APSK for the second-stage classifier, and the waveforms are not certified as standards-compliant. These are future extensions, not hidden assumptions.

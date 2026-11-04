@@ -1,30 +1,15 @@
-# Decisions
+# Design decisions
 
-- Use AGPL-3.0 for this repository because the pinned YOLOv5 source is AGPL-3.0; the exact revision and required training, detection, and AutoAnchor APIs are checked at runtime.
-- Pin YOLOv5 to `f9578796b8a64889aa9e66dc06914d19f40d338e` and pin its installed runtime helpers because earlier missing-module startup failures made an unpinned environment unreliable.
-- Keep the current synthetic scope at six detector classes, including one merged PAM class and six PAM subtypes, because the project began as a scaled-down reproduction. The paper's full twelve-class detector remains an explicit limitation.
-- Keep the 640-pixel standard reduced profile for comparability with its already measured run. Use 1280-pixel images for the updated medium CPU profile because the smallest boxes measured 11.65 x 10.93 pixels there and the controlled detector overfit passed at this resolution.
-- Retain the minimum 0.008 cycles/sample bandwidth and 8,192-sample duration from the agreed visibility constraints. The 50-seed visibility check measures appearance, while the detector overfit check measures whether the model can localize and classify the boxes.
-- Keep generator-derived boxes and recording-disjoint splits. All segments from one recording stay in one split; test IDs remain frozen and thresholds are calibrated from validation only.
-- Keep the reduced benchmark synthetic because DeepSig terms remain unverified and the Zenodo archive is too large for the local disk; the Zenodo Rights field and file sizes have since been checked and are documented below.
-- Do not retain all I/Q recordings; store spectrograms, YOLO labels, and replay metadata, then regenerate I/Q from the seed for training/evaluation. The deployment CLI reads the provided file and never uses a generator seed.
-- Keep the energy detector as a class-agnostic geometry baseline and fallback. It does not supply modulation labels and does not gate class predictions.
-- Use recording-level bootstrap intervals because signals within one recording are not independent observations. Mark any cell with fewer than 30 signals as low-support.
-- The original pinned YOLOv5 schedule used nominal batch 64 and a 100-iteration warm-up floor. For the eight-image, batch-4, 100-epoch check this yielded 25 optimizer updates, 18 during warm-up; for the original 3-epoch reduced workflow it yielded only 6 updates, all during warm-up.
-- Make the training schedule explicit: set nominal batch size equal to the physical batch and use a 10-iteration warm-up floor. In a controlled eight-image check, batch alignment raised mAP@0.5 from 2.85% to 29.81%; lowering only the warm-up floor raised it to 74.04%; extending only the duration to 200 epochs then produced 100.00% same-image mAP@0.5 and recall. These are training-only measurements, not held-out results.
-- Patch only exact pinned-source markers, restore YOLOv5's original source after each training call, and fail closed if the expected lines change. This makes optimizer overrides reversible and reviewable.
-- Set inference max-det to 3,000 per image and delete each previous prediction directory before running detection. Clean cap tests showed that the former 300-box cap clipped recall on the low-confidence training candidates.
-- Keep augmentation disabled for memorization tests so they can check whether the detector can fit the fixed images. The medium run uses the project's configured spectrogram-compatible augmentation; its impact on held-out data remains to be measured.
-- Use 1280-pixel images, batch 4, nominal batch 4, a 10-iteration warm-up floor, and 135 epochs in `medium_cpu`. Twelve training images at three batches per epoch give 405 expected updates, close to the 400-update memorization run.
-- The 200-epoch, 400-update overfit run measured 1,100.50 seconds locally. Scaling that rate to 405 updates gives about 1,114 seconds, an extrapolation for planning only. The hosted workflow measures a one-epoch timing probe before training and has a 210-minute pipeline budget inside a 270-minute job timeout; partial training is evaluated from the latest checkpoint.
-- Keep the medium profile at 18 main and 4 shifted recordings with one 1M-sample segment per recording, the same seed, and frozen test IDs. Use 125 PAM epochs, at most 16 frames per represented class, and 500 recording bootstraps. This is still a small CPU evaluation, labelled not comparable to the portfolio targets.
-- Make the CLI image size an explicit option because a YOLO checkpoint trained at 1280 must not silently receive a 640-pixel spectrogram. The CLI records the chosen size and max detection count in its JSON output.
-- Use 0.25 only as the runnable CLI default. For measured inference, use a confidence threshold calibrated on validation, never one selected from test results.
-- The earlier schedule run `41566581098` is historical only (4.17% main-test recall). Latest run `41640721078` measured 37.50% all-SNR recall, 28.78% mAP@0.5 at global SNR >= 5 dB, and 0.00% PAM oracle-box accuracy versus 14.29% chance. This remains a low-support reduced-CPU result, not evidence that portfolio targets were met.
-- Preflight GitHub Actions write access with the built-in token, run tests before model work, fast-forward before publishing, and add `[skip ci]` to automatic results commits.
-- Upload metrics, plots, checkpoints, generated dataset, and logs as workflow artifacts. Keep datasets and checkpoints out of Git.
-- Preserve the six-class reduced training/evaluation profile and its frozen measured results while adding a separate SigMF ingestion route for the paper's twelve detector labels; this adds a data path without silently changing the experiment that produced the published metrics.
-- Add a subprocess-only Windows pickle compatibility shim because the measured Linux Actions checkpoint stores `pathlib.PosixPath` objects that the Windows CLI cannot deserialize; the trained weights and pinned YOLO source remain unchanged.
-- Map explicit PSK/QAM/APSK subtypes to the merged `PAM` detector class. Reject bare `GMSK` labels because the paper separates GMSK1 and GMSK2 by spectrogram shape, which cannot be recovered reliably from an unspecified generic label.
-- Make YOLO+PAM the CLI default and require both checkpoints; require `--detector-only` to intentionally omit subtype inference, while keeping the geometry baseline behind the explicit `--backend energy` option.
-- Record the verified Zenodo CC BY-SA 4.0 Rights field and 57,472,189,381-byte archive total, but leave the archives external because the full set is larger than local free disk and has not been ingested or tested.
+- Use a self-contained seeded NumPy/SciPy generator so the project can run without external data downloads, unverified data terms, or large disk requirements.
+- Activate all twelve detector labels in the paper's specified order so every synthetic recording exercises the full detector class map.
+- Train a seven-output PAM CNN for the six requested PSK/QAM subclasses plus `Others`; use `Others` samples from non-PAM classes through the same extraction chain.
+- Use a 0.025 cycles/sample minimum bandwidth and a 100,000-sample minimum duration. On a 640 x 640 raster these become about 16 by 64 pixels, reducing the risk of disappearing boxes after resize. This is a deliberate scale deviation.
+- Keep the energy detector as a geometry baseline, not a class gate, because it cannot supply modulation labels.
+- Assign parent recording IDs before data generation and keep each parent's segments in one split. Fix low- and high-SNR test strata in the configuration and calibrate confidence on validation only.
+- Store spectrograms, labels, and per-recording seed/parameters. Regenerate I/Q only when training/evaluation needs it; deployment reads the actual user file.
+- Pin YOLOv5 source to `f9578796b8a64889aa9e66dc06914d19f40d338e` and pin Python dependencies to make results reproducible.
+- Use recording-level bootstrap intervals because signals from one recording are not independent. Mark any cell with fewer than 30 signals as low support.
+- Keep the primary synthetic layout free of time-frequency overlap. Model overlapping transmissions only in a future stress test.
+- Do not claim standards-compliant transmissions, real-world generalization, APSK subtype support, or performance not shown by measured run artifacts.
+- The Zenodo record Rights field is unverified and no external dataset is used. The 53.55 GiB download is not a project requirement.
+# 2026-11-03: CLI passes its validation-selected confidence threshold directly to YOLO NMS, avoiding work on proposals it will discard while preserving the accepted set.

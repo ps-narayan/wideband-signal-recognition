@@ -1,5 +1,5 @@
 from scripts.publish_reduced_results import (
-    END, START, build_split_audit, format_target, matrix, pct, support, update_readme,
+    END, START, build_split_audit, format_target, matrix, pct, support, target_display_value, update_readme,
 )
 
 
@@ -64,6 +64,7 @@ def test_empty_detector_cells_are_not_reported_as_zero():
 def test_target_formatting_preserves_strictness_and_units():
     assert format_target("pam_oracle_accuracy_near_0_db_0_to_1", 0.5) == "> 50%"
     assert format_target("processing_time_per_segment_local_seconds", 5) == "< 5 seconds"
+    assert target_display_value("processing_time_per_segment_local_seconds", 29.891) == "29.891 s"
 
 
 def test_recording_split_audit_detects_disjoint_and_overlapping_ids():
@@ -84,3 +85,48 @@ def test_recording_split_audit_detects_disjoint_and_overlapping_ids():
     audit = build_split_audit(manifest)
     assert not audit["main_splits_disjoint"]
     assert audit["pairwise_main_split_overlaps"]["train__test"] == ["r-train"]
+
+
+def test_major_project_readme_table_uses_only_measured_values_and_status():
+    from scripts.publish_major_project_results import build_readme_section
+
+    metrics = {
+        "run_label": "synthetic CPU run",
+        "device": "cpu",
+        "training_status": {"detector": "completed", "detector_epochs_completed": 80,
+                            "detector_epochs_requested": 80, "pam": "completed",
+                            "pam_epochs_completed": 20, "pam_epochs_requested": 60},
+        "runtime_seconds_pipeline": {"total": 123.0, "data_generation": 10.0},
+        "acceptance_targets": {
+            "recall_at_global_snr_ge_5_db": {
+                "target": 0.8, "measured": 0.85, "ci95": [0.7, 0.9], "pass": True,
+                "support": {"recordings": 30, "signals": 30, "low_support": False},
+            },
+        },
+    }
+    output = build_readme_section(metrics)
+    assert "85.00%" in output and "met" in output
+    assert "not measured" in output
+    assert "Others" not in output  # the summary table does not invent classifier scores
+
+
+def test_major_project_publisher_reports_measured_cli_demo_counts_only():
+    from scripts.publish_major_project_results import build_cli_section, build_readme_section
+
+    metrics = {
+        "cli_examples": {
+            "confidence_threshold": 0.2,
+            "examples": {
+                "16-QAM": {
+                    "ground_truth_signals": 1,
+                    "accepted_detections": 0,
+                    "class_and_iou50_matches": 0,
+                    "pam_detections": 0,
+                    "pam_subtype_predictions": 0,
+                    "cli_seconds_per_segment": 29.5,
+                }
+            },
+        }
+    }
+    assert "| 16-QAM | 1 | 0 | 0 | 0 | 0 | 29.5 |" in build_cli_section(metrics)
+    assert "16-QAM: 0 boxes, 0 PAM boxes, 0 subtype outputs" in build_readme_section(metrics)

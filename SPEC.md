@@ -2,132 +2,50 @@
 
 ## Objective
 
-Build a small, explainable reproduction of the wideband signal-recognition
-pipeline. Input is complex I/Q data. Output is a list of occupied time/frequency
-boxes and modulation labels, with a second-stage PAM subtype when applicable.
-The portfolio use case is spectrum monitoring; the same output can support
-interference hunting.
+Given a complex I/Q recording, find each narrowband burst's time and frequency extent and assign a modulation class. For a detector output of `PAM`, filter and downconvert the extracted samples, split them into 1024-sample I/Q frames, and classify the supported subtype. The intended user is a spectrum-monitoring operator; bounding boxes can also help with interference hunting.
 
-## Acceptance criteria
+## Active taxonomy
 
-| Area | Measurable criterion | Design consequence |
-|---|---|---|
-| Detector | On a recording-disjoint synthetic test set at global SNR >= 5 dB: recall >= 80%, mean IoU >= 0.75, and mAP@0.5 >= 60% for selected classes. | Class labels are always required, so the energy/connected-component baseline is a geometry floor and fallback, not a gate. Compare energy baseline and YOLOv5n class-agnostic recall and mean IoU at matched 80% precision, with operating points chosen on validation data. Judge YOLO class mAP@0.5 separately. |
-| PAM subtype | Accuracy >= 80% at global SNR >= 10 dB and >50% at 0 dB. Report by class and SNR. | Use 1024x2 I/Q frames and a compact CNN first. Report oracle-box and detector-box accuracy separately. |
-| End to end | A signal is correct only when one-to-one matched IoU >= 0.5, detector class is correct, and PAM subtype is correct for PAM. Report end-to-end precision/recall by global SNR. | Keep the joint result separate from detector-only and PAM-only scores. |
-| Runtime | <5 seconds per 1M-sample segment on the user's machine. | Measure on CPU and Colab T4 separately; do not infer local speed from Colab. |
-| Raster visibility | The smallest generated box has bandwidth >=0.008 cycles/sample and duration >=8192 samples. At 640x640 it occupies at least 5 pixels on both axes. Run 50 random seeds at -5 dB global SNR and report worst local contrast in standard deviations above the local median. | If the worst case is below 1 local standard deviation, pause and review raising the minimum bandwidth or duration before detector training. |
-| Geometry | Time/frequency-to-pixel round trips recover values within one source sample or one output pixel. Time mapping uses exactly 999,936 covered samples for 1,000,000 input samples with 512-sample non-overlapping windows. | Do not map the final 64 uncovered samples into the image. |
-| Separation | Main generator contains no time-frequency-overlapping boxes. Simultaneous signals have edge separation >= 9/16 times the larger box bandwidth. Closer cases are labeled unresolved. | Use the same guard rule as the extraction-filter transition. Overlap is optional stress data only. |
-| Data split | Use 90 parent recording IDs and 900 1M-sample segments; keep all segments from a recording together. Split parent IDs 60/10/20 for train/validation/test. | Split at recording level before any segment-level sampling or augmentation. Assert no ID crosses splits. |
-| Shift robustness | Evaluate both held-out seeds within the training parameter ranges and a second test set with different bandwidth and SNR-placement ranges. | Report the two tests separately. |
-| Confidence | Every per-class and per-SNR result includes a recording-level bootstrap confidence interval and counts of recordings/signals. Cells with fewer than 30 signals are marked low-support. | Resample recordings, not individual boxes or frames. |
-| Storage | Store spectrograms, labels, and JSON generator parameters/seeds; do not retain I/Q for all 900 segments. Regenerate I/Q for training/evaluation. | The deployed CLI reads I/Q from the user-supplied file and never requires a seed. On one saved synthetic IQ file, assert seed-regenerated and file-input extraction produce the same frames. |
+Stage 1 uses 12 detector classes in this order: `AM-DSB`, `AM-SSB`, `FM`, `PAM`, `OFDM`, `2-FSK`, `2-CPFSK`, `4-FSK`, `4-CPFSK`, `OOK`, `GMSK1`, `GMSK2`. Stage 2 uses seven outputs: `2-PSK`, `4-PSK`, `8-PSK`, `16-QAM`, `64-QAM`, `256-QAM`, `Others`. `Others` is trained on non-PAM signals using the same extraction path.
 
-## Fixed signal and image conventions
+## Acceptance targets
 
-- Normalized sampling rate is Fs=1 Sps; normalized frequencies are
-  in [-0.5, 0.5) cycles/sample. Convert to Hz only when file metadata gives a
-  physical sample rate.
-- STFT array is time-by-frequency; transpose it for the image so horizontal is
-  time and vertical is frequency, with positive frequencies at the top. Use a
-  Hann window, 512 samples, no overlap, 4096-point FFT, log magnitude, then
-  global image mean removal and standard-deviation normalization.
-- A 1,000,000-sample segment yields 1,953 windows and covers 999,936 samples.
-- Resize directly to 640x640. This distorts the two axes and is a deliberate
-  small-model deviation; visibility is measured after resize.
-- Minimum bandwidth is 0.008 cycles/sample and minimum duration is 8192 samples.
-- Global SNR is 10 log10(total clean signal power / total added noise power)
-  measured over the full I/Q segment. Log approximate in-band SNR per PAM
-  signal as well; the two values need not match.
-- Main synthetic data has no overlapping time-frequency boxes. A separate,
-  optional stress set may contain overlaps. Main placement enforces the guard
-  band below; closer simultaneous pairs are unresolved.
-- Training parameter profile: bandwidth log-uniform in [0.008, 0.08] cycles/sample
-  and global SNR uniform in [-5, 20] dB. The shifted test profile is bandwidth
-  uniform in [0.02, 0.12] and SNR uniform in [-5, 5] dB. These are project
-  design ranges, not facts attributed to the paper.
+These are project targets, not expected or assumed outcomes. Each is marked met, missed, or not measured from an actual run in `RESULTS.md`.
 
-## Extraction rule
+| Metric | Acceptance target | Evaluation rule |
+|---|---:|---|
+| Detector recall at global SNR >= 5 dB | >= 80% | Class-agnostic one-to-one match at IoU >= 0.5, confidence calibrated on validation |
+| Mean IoU for true positives at global SNR >= 5 dB | >= 0.75 | Same matched detections as above |
+| Detector class mAP@0.5 at global SNR >= 5 dB | >= 60% | Class-aware average precision at IoU 0.5 |
+| PAM oracle-box accuracy at global SNR >= 10 dB | >= 80% | Generator ground-truth boxes; chance is 1/7 = 14.29% |
+| PAM oracle-box accuracy at global SNR [0, 1) dB | > 50% | Generator ground-truth boxes; chance is 14.29% |
+| Local processing time for a 1M-sample segment | < 5 seconds | Measured on the project owner's CPU; report exact timing method |
 
-For box bandwidth B, use a complex-baseband low-pass FIR after downconversion.
-Set passband half-width to 5B/8 (wanted half-bandwidth B/2 plus a B/8 guard),
-then a transition of 7B/16; stopband begins at 17B/16 from the estimated center.
-Thus a neighboring box must be separated edge-to-edge by at least 9B/16 for
-that crop. For two simultaneous boxes require a gap of at least
-9/16 * max(B1, B2). The generator uses a larger conservative margin when time
-edges may jitter by five percent: `e * (B1 + B2) + (9/16) * (1 + 2e) * max(B1, B2)`,
-where `e=0.05`. If the time gap is larger than `e * (duration1 + duration2)`,
-the boxes remain time-disjoint under that jitter and need no frequency guard.
-Use an odd, linear-phase Kaiser-windowed FIR with 1111 taps
-at the minimum bandwidth (0.008), beta=6.0, passband ripple <=0.1 dB and
-stopband attenuation >=60 dB. Compensate its 555-sample group delay. For wider
-boxes the transition is wider; verify the measured response for each design.
-Any closer pair is unresolved, not silently treated as isolated.
+The end-to-end signal metric requires IoU >= 0.5, a correct detector class, and a correct PAM subtype for PAM signals. Report detector-only, PAM-only, and end-to-end metrics separately. Confidence intervals resample parent recordings. Cells with fewer than 30 signals are labeled `LOW-SUPPORT`.
 
-## Model/data scope
+## Signal and image conventions
 
-- Detector classes: AM-DSB, FM, OFDM, 2-FSK, OOK, and merged PAM.
-- PAM subtypes: 2/4/8-PSK, 16/64/256-QAM, and Others. Others initially uses
-  AM-DSB, FM, 2-FSK, and OOK under the same extraction procedure. The synthetic
-  detector set has one example of each detector class per segment, so detector
-  class counts are balanced by construction; this does not reproduce the paper's original imbalance. PAM subtype skew is handled with inverse-frequency loss,
-  and PAM-only recording undersampling is not needed for this synthetic set.
-- PAM generation randomizes carrier phase, symbol timing, and pulse-shaping
-  roll-off. Main training starts synthetic-only. DeepSig is optional after
-  access and license checks; the user will verify the Zenodo companion's size
-  and license.
-- Energy detection is a class-agnostic geometry floor/fallback. Labels are
-  always required, so it is not a gate to YOLOv5n. Compare class-agnostic recall
-  and mean IoU at matched 80% precision (choose each operating threshold using
-  validation data, then freeze it for test). If a model cannot attain that
-  validation precision, report its curve and nearest operating point. Judge
-  YOLOv5n class mAP@0.5 separately.
+- Normalized sample rate is 1 sample/second; normalized frequency spans -0.5 to 0.5 cycles/sample.
+- Training segments contain 1,000,000 complex samples. The Hann STFT uses a 512-sample window, no overlap, and 4096 FFT points. This covers 999,936 samples. Time-to-pixel mapping uses those covered samples and does not stretch the final 64 uncovered samples into the image.
+- Spectrogram pixels are log magnitude, normalized by subtracting the mean and dividing by standard deviation, then resized to 640 x 640.
+- Main generator minimum bandwidth is 0.025 cycles/sample and minimum duration is 100,000 samples. At 640 x 640 these are about 16 frequency pixels and 64 time pixels. They are deliberately larger than the paper's minimum visibility example to survive resizing.
+- Ground-truth boxes come from generator parameters, never from the rendered image. The generator enforces frequency guard bands tied to the extraction filter transition. Main signals do not overlap in time-frequency; overlap is not part of the primary benchmark.
+- Global SNR is 10 log10(total clean signal power / total added noise power) over the full I/Q segment. Also record approximate in-band SNR for each PAM signal.
 
-## Evaluation/reporting
+## Data and split protocol
 
-Report detector precision, recall, mAP@0.5, mean IoU of true positives,
-per-class metrics and confusion matrices; PAM accuracy/confusion matrices;
-oracle-box versus detector-box PAM accuracy; non-PAM-to-PAM-classifier Others
-rate; and end-to-end precision/recall. All are broken out by global SNR where
-applicable. Include recording and signal counts, recording-level bootstrap
-confidence intervals, and low-support flags. Label every SNR plot with the
-global SNR definition and record PAM in-band SNR estimates.
+No external recordings are required. The NumPy/SciPy generator writes reproducible spectrograms, YOLO labels, and per-segment seed/parameter JSON. Training and evaluation regenerate I/Q from the seed. Deployment always reads I/Q from the supplied SigMF or IQ file.
 
-## Coupling experiments
+The active configuration assigns parent recording IDs before data generation: 48 train, 12 validation, 60 main-test, and 12 distinct shifted-test recordings. The main test has 30 parent recordings at 0.5 dB global SNR and 30 at 15 dB. All signals from one parent recording stay in one split. The split audit is published with the measurements.
 
-- Compare PAM accuracy with oracle boxes and detector boxes to measure how
-  localization affects extraction and subtype classification.
-- Log the six detector-class counts after merging all PSK/QAM/APSK-style PAM
-  signals into one detector label; report per-class results to expose imbalance.
-- Verify recording-ID disjointness and, for demonstration only, compare against
-  a random-segment split to quantify leakage optimism.
-- If real data becomes available, compare synthetic-only with synthetic
-  pretraining plus real fine-tuning on recording-held-out real data; report FM
-  separately as well as aggregate results.
-- If PAM-only undersampling is used, log retained PAM signal/frame counts by
-  subtype and compare PAM accuracy before and after undersampling.
-- Send non-PAM detector boxes to the PAM classifier and report the fraction
-  predicted as Others, both overall and by non-PAM class.
+## Model and deployment
 
-## Deliberate limitations
+- Baseline: connected-component/energy proposals provide geometry only and are not a class gate.
+- Detector: YOLOv5n, initialized from the configured model definition, with pinned source commit `f9578796b8a64889aa9e66dc06914d19f40d338e`.
+- Extraction: convert the box to samples and normalized frequency, bandpass, shift the band center to baseband, compensate filter delay, and take 1024-sample frames.
+- PAM model: compact 1-D CNN receiving two channels, I and Q.
+- CLI: reads SigMF and supported raw/NumPy inputs and emits JSON plus an annotated spectrogram. It must not require generator seeds.
 
-The initial generator does not model fading, frequency offset beyond deliberate
-extraction-error tests, oscillator phase noise, IQ imbalance, DC offset,
-nonlinear hardware distortion, ADC quantization, AGC behavior, or sample-clock
-drift. It does not establish performance on real receivers or on omitted
-modulation classes. These limitations must remain visible in the README and
-demo.
+## Reproducibility and exclusions
 
-## Milestone acceptance
-
-1. Week 1: spec, reproducible synthetic generator, STFT renderer, physical box
-   conversion, guard-band checks, and 50-seed visibility report.
-2. Week 2: energy baseline and YOLOv5n detector; autoanchor logs inspected;
-   PAM CNN and training curves.
-3. Week 3: extraction filter, seed/file path equivalence, evaluation metrics,
-   recording bootstrap, two test distributions, and SNR plots.
-4. Week 4: SigMF/IQ CLI, JSON detections, annotated spectrogram, README, and
-   measured results/limitations.
-
-Each milestone stops for the user's run results before the next begins.
+Seeds, pinned package versions, configuration, split IDs, checkpoints, CI and tests are recorded. No DeepSig/Zenodo data are integrated. The generator is an educational approximation and does not claim radio-standard compliance. Fading, carrier offset beyond extraction error, phase noise, hardware impairments, quantization, AGC, sample-clock drift, and primary-layout overlap are not modeled.

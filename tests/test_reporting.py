@@ -71,6 +71,7 @@ class ReportingNormalizationTests(unittest.TestCase):
             "Shifted end-to-end precision: 0.0000; CI95=[0.0000, 0.0000]",
             "YOLO precision: n/a; CI95=[n/a, n/a]",
             "AM-DSB: P=n/a CI95=[None, None]",
+            "GMSK2: P=not measured CI95=[None, None]; R=0.0000 CI95=[0.0000, 0.0000]; IoU=not measured CI95=[None, None]",
             "All-signal classifier accuracy for Others: 0.1250; CI95=[0.0000, 0.2500]",
         ])
         result = normalize_summary(summary, metrics)
@@ -80,6 +81,7 @@ class ReportingNormalizationTests(unittest.TestCase):
         self.assertIn("Shifted end-to-end precision: not measured; CI95=[not measured, not measured]", result)
         self.assertIn("YOLO precision: not measured; CI95=[not measured, not measured]", result)
         self.assertIn("P=not measured CI95=[not measured, not measured]", result)
+        self.assertIn("IoU=not measured CI95=[not measured, not measured]", result)
         self.assertIn("All-signal classifier accuracy for Others (PAM chance level 1/7 = 14.29%)", result)
 
     def test_measured_zero_precision_with_predictions_is_preserved(self):

@@ -39,3 +39,5 @@ run_state_recovery.json
 .DS_Store
 Thumbs.db
 /yolov5_pinned/
+examples/major_project_cpu/16qam_unfiltered/
+examples/major_project_cpu/multi_unfiltered/

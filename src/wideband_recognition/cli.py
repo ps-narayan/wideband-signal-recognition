@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from typing import Any
 
 import numpy as np
@@ -313,6 +314,7 @@ def _annotate(
 
 def run_inference(args: argparse.Namespace) -> dict[str, Any]:
     """Run detector and optional subtype model on actual samples; never use a seed."""
+    processing_started = time.perf_counter()
     source = Path(args.input).expanduser().resolve()
     output_dir = Path(args.output_dir).expanduser().resolve()
     backend = getattr(args, "backend", "yolo")
@@ -392,7 +394,11 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
             command = [
                 sys.executable, str(detect_script), "--weights", str(weights),
                 "--source", str(image_dir), "--img", str(image_size),
-                "--conf-thres", "0.001", "--iou-thres", "0.6", "--max-det", str(max_detections),
+                # Use the caller's operating threshold before NMS. Candidates
+                # below this value are discarded by the CLI anyway, and cannot
+                # suppress a higher-confidence box, so retaining them only
+                # increases CPU work and can fill max-det with irrelevant boxes.
+                "--conf-thres", str(args.confidence_threshold), "--iou-thres", "0.6", "--max-det", str(max_detections),
                 "--device", detector_device, "--save-txt", "--save-conf", "--project",
                 str(detect_output), "--name", "result", "--exist-ok", "--nosave",
             ]
@@ -473,6 +479,7 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
                 row.pop("_box")
             detections.extend(annotated_rows)
 
+    processing_seconds = float(time.perf_counter() - processing_started)
     report = {
         "schema_version": 1,
         "run_notice": (
@@ -510,6 +517,12 @@ def run_inference(args: argparse.Namespace) -> dict[str, Any]:
         "covered_samples_per_segment": [int(rendered[f"segment_{i:05d}"][2]) for i in range(len(segments))],
         "samples_processed": int(sum(rendered[f"segment_{i:05d}"][2] for i in range(len(segments)))),
         "samples_not_processed": int(iq.size - sum(rendered[f"segment_{i:05d}"][2] for i in range(len(segments)))),
+        "processing_runtime_seconds": {
+            "total": processing_seconds,
+            "per_segment": processing_seconds / len(segments),
+            "scope": "Measured CLI wall time from input validation through spectrogram rendering, detector inference, PAM extraction/classification, and annotated-image writes; excludes JSON serialization.",
+            "execution_device": "CPU" if detector_device == "cpu" else f"CUDA:{detector_device}",
+        },
         "annotated_images": [f"annotated_segment_{index:05d}.png" for index in range(len(segments))],
         "detections": detections,
         "seed_dependent": False,
@@ -525,7 +538,7 @@ def build_parser() -> argparse.ArgumentParser:
                         help="trained YOLO detector or class-agnostic geometry baseline")
     parser.add_argument("--detector-weights", help="Milestone 2 YOLOv5n best.pt; required for yolo backend")
     parser.add_argument("--yolo-dir", help="checkout at the pinned YOLOv5 revision; required for yolo backend")
-    parser.add_argument("--detector-class-map", help="JSON list of names matching a custom detector checkpoint; defaults to the six-class reduced model")
+    parser.add_argument("--detector-class-map", help="JSON list of names matching the detector checkpoint; defaults to the active 12-class taxonomy")
     parser.add_argument("--energy-mask-threshold", type=float, default=1.0,
                         help="normalized spectrogram mask threshold for energy backend")
     parser.add_argument("--output-dir", default="outputs/cli", help="directory for JSON and annotated PNG files")

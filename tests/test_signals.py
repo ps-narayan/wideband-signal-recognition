@@ -8,6 +8,8 @@ import numpy as np
 from wideband_recognition.geometry import SignalBox
 from wideband_recognition.layout import unresolved_pairs
 from wideband_recognition.signals import (
+    DETECTOR_CLASSES,
+    PAM_SUBTYPES,
     SignalSpec,
     generate_recording,
     make_visibility_specs,
@@ -16,6 +18,15 @@ from wideband_recognition.signals import (
 
 
 class SignalTests(unittest.TestCase):
+    def test_active_taxonomy_matches_the_two_stage_project_spec(self):
+        self.assertEqual(DETECTOR_CLASSES, (
+            "AM-DSB", "AM-SSB", "FM", "PAM", "OFDM", "2-FSK",
+            "2-CPFSK", "4-FSK", "4-CPFSK", "OOK", "GMSK1", "GMSK2",
+        ))
+        self.assertEqual(PAM_SUBTYPES, (
+            "2-PSK", "4-PSK", "8-PSK", "16-QAM", "64-QAM", "256-QAM",
+        ))
+
     def test_seed_replays_iq_exactly(self):
         specs = make_visibility_specs(seed=11, n_samples=500_000)
         first = generate_recording(specs, 500_000, seed=12, global_snr_db=-5)
@@ -25,8 +36,13 @@ class SignalTests(unittest.TestCase):
 
     def test_visibility_layout_has_minimum_signal_and_no_unresolved_pairs(self):
         specs = make_visibility_specs(seed=2)
-        self.assertEqual(min(s.bandwidth for s in specs), 0.008)
-        self.assertEqual(min(s.duration for s in specs), 8192)
+        self.assertEqual(len(specs), 12)
+        self.assertEqual(min(s.bandwidth for s in specs), 0.025)
+        self.assertEqual(min(s.duration for s in specs), 100_000)
+        self.assertEqual({s.detector_class for s in specs}, {
+            "AM-DSB", "AM-SSB", "FM", "PAM", "OFDM", "2-FSK",
+            "2-CPFSK", "4-FSK", "4-CPFSK", "OOK", "GMSK1", "GMSK2",
+        })
         boxes = [SignalBox(s.start, s.end, s.f_low, s.f_high, s.detector_class) for s in specs]
         self.assertEqual(unresolved_pairs(boxes), [])
         pam = next(s for s in specs if s.detector_class == "PAM")
@@ -51,5 +67,5 @@ class SignalTests(unittest.TestCase):
             metadata = json.loads(path.read_text(encoding="utf-8"))
         self.assertEqual(metadata["seed"], 4)
         self.assertEqual(metadata["n_samples"], 500_000)
-        self.assertEqual(len(metadata["signals"]), 6)
+        self.assertEqual(len(metadata["signals"]), 12)
         self.assertTrue(all(status == "resolved" for status in metadata["resolution_status"]))

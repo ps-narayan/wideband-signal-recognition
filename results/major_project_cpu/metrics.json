@@ -1,0 +1,7698 @@
+{
+  "schema_version": 1,
+  "run_label": "synthetic-only 12-class major project CPU run",
+  "comparison_scope": "configured_run",
+  "training_status": {
+    "detector": "completed",
+    "detector_checkpoint_used": "best.pt",
+    "detector_epochs_requested": 80,
+    "pam": "completed",
+    "pam_epochs_completed": 42,
+    "pam_epochs_requested": 60,
+    "evaluation_completed": true,
+    "runtime_budget_minutes": 40.0,
+    "pam_training_budget_minutes": 5.0,
+    "evaluation_reserve_minutes": 8.0,
+    "detector_epochs_completed": 80
+  },
+  "device": "cpu",
+  "config": {
+    "seed": 2026,
+    "data": {
+      "segment_samples": 1000000,
+      "main_recordings": 120,
+      "shifted_recordings": 12,
+      "segments_per_recording": 1,
+      "train_fraction": 0.4,
+      "validation_fraction": 0.1,
+      "image_size": 640,
+      "minimum_bandwidth_cycles_per_sample": 0.025,
+      "minimum_duration_samples": 100000,
+      "main_profile": {
+        "bandwidth_cycles_per_sample": [
+          0.025,
+          0.04
+        ],
+        "bandwidth_distribution": "log_uniform",
+        "global_snr_db": [
+          -5,
+          20
+        ]
+      },
+      "shifted_profile": {
+        "bandwidth_cycles_per_sample": [
+          0.03,
+          0.05
+        ],
+        "bandwidth_distribution": "uniform",
+        "global_snr_db": [
+          -5,
+          5
+        ]
+      },
+      "test_snr_strata": [
+        {
+          "global_snr_db": 0.5,
+          "recordings": 30
+        },
+        {
+          "global_snr_db": 15.0,
+          "recordings": 30
+        }
+      ]
+    },
+    "detector": {
+      "framework": "YOLOv5n",
+      "repository": "https://github.com/ultralytics/yolov5.git",
+      "commit": "f9578796b8a64889aa9e66dc06914d19f40d338e",
+      "epochs": 80,
+      "batch_size": 8,
+      "nominal_batch_size": 8,
+      "warmup_min_iterations": 10,
+      "max_detections_per_image": 3000,
+      "image_size": 640,
+      "matched_precision": 0.8,
+      "iou_threshold": 0.5,
+      "initialization": "random"
+    },
+    "pam_classifier": {
+      "frame_samples": 1024,
+      "frames_per_signal": 4,
+      "epochs": 60,
+      "batch_size": 32,
+      "max_frames_per_class": 64,
+      "learning_rate": 0.001,
+      "early_stopping_patience": 10,
+      "loss": "inverse_frequency_weighted_cross_entropy"
+    },
+    "evaluation": {
+      "bootstrap_iterations": 500,
+      "bootstrap_unit": "parent_recording"
+    }
+  },
+  "pam_training_data": {
+    "max_frames_per_class": 64,
+    "frames_total": 256,
+    "frames_by_class": {
+      "2-PSK": 32,
+      "4-PSK": 32,
+      "8-PSK": 32,
+      "16-QAM": 32,
+      "64-QAM": 32,
+      "256-QAM": 32,
+      "Others": 64
+    }
+  },
+  "timing_probe": {
+    "probe_epochs": 1,
+    "training_images": 48,
+    "batch_size": 8,
+    "batches_per_epoch": 6,
+    "wall_seconds": 124.10979409998981,
+    "scope": "measured on generated training images immediately before the full fit; not used to select thresholds or inspect held-out test performance"
+  },
+  "seed": 2026,
+  "yolo": {
+    "repository": "https://github.com/ultralytics/yolov5.git",
+    "commit": "f9578796b8a64889aa9e66dc06914d19f40d338e",
+    "license": "AGPL-3.0",
+    "license_verified": true,
+    "train_cli_verified": true,
+    "detect_cli_verified": true,
+    "autoanchor_api_verified": true,
+    "autoanchor_training_enabled": true,
+    "minimum_box_width_height_pixels": [
+      64.00409626216077,
+      16.0
+    ],
+    "default_anchor_bpr_for_minimum_box": 1.0,
+    "default_anchors_px": [
+      [
+        10.0,
+        13.0
+      ],
+      [
+        16.0,
+        30.0
+      ],
+      [
+        33.0,
+        23.0
+      ],
+      [
+        30.0,
+        61.0
+      ],
+      [
+        62.0,
+        45.0
+      ],
+      [
+        59.0,
+        119.0
+      ],
+      [
+        116.0,
+        90.0
+      ],
+      [
+        156.0,
+        198.0
+      ],
+      [
+        373.0,
+        326.0
+      ]
+    ],
+    "autoanchor_note": "Pinned YOLOv5 train.py calls check_anchors unless --noautoanchor is set. It attempts anchor evolution when Best Possible Recall is <= 0.98. Anchor ratio fit is reported for the active generator minimum. Box visibility and localization still require measured validation and held-out results.",
+    "optimizer_schedule": {
+      "micro_batches_total": 480,
+      "warmup_micro_batches": 19,
+      "nominal_batch_size": 8,
+      "micro_batch_size": 8,
+      "steady_state_accumulation": 1,
+      "optimizer_updates_expected_from_pinned_loop": 480,
+      "optimizer_updates_during_warmup": 19,
+      "fraction_optimizer_updates_during_warmup": 0.03958333333333333,
+      "warmup_min_iterations": 10,
+      "warmup_epochs": 3.0
+    },
+    "inference_max_detections_per_image": 3000,
+    "autoanchor_training_log_excerpt": [
+      "\u001b[34m\u001b[1mAutoAnchor: \u001b[0m2.81 anchors/target, 1.000 Best Possible Recall (BPR). Current anchors are a good fit to dataset "
+    ],
+    "prediction_directories_cleared_before_inference": [
+      "val",
+      "test",
+      "shifted"
+    ]
+  },
+  "snr_definition": "10*log10(total clean signal power / total added noise power over the full I/Q segment)",
+  "runtime_seconds_pipeline": {
+    "data_generation": 322.6992998000351,
+    "total": 2477.0320000000065,
+    "note": "Measured end-to-end runtime on the configured execution device."
+  },
+  "split_counts_recordings": {
+    "train": 48,
+    "val": 12,
+    "test": 60
+  },
+  "validation_calibration": {
+    "target_precision": 0.8,
+    "yolo": {
+      "threshold": 0.21875284000000003,
+      "attained_target": true,
+      "precision": 0.8181818181818182,
+      "recall": 0.625,
+      "mean_iou_true_positives": 0.8709751586694571,
+      "tp": 90,
+      "fp": 20,
+      "fn": 54
+    },
+    "energy_mask_threshold": 1.5,
+    "energy_confidence_threshold": 2.301176729202271,
+    "energy_baseline": {
+      "threshold": 2.301176729202271,
+      "attained_target": true,
+      "precision": 0.8156028368794326,
+      "recall": 0.7986111111111112,
+      "mean_iou_true_positives": 0.8171565328828411,
+      "tp": 115,
+      "fp": 26,
+      "fn": 29
+    }
+  },
+  "acceptance_targets": {
+    "recall_at_global_snr_ge_5_db": {
+      "target": 0.8,
+      "measured": 0.6305555555555555,
+      "ci95": [
+        0.5929861111111111,
+        0.6694444444444444
+      ],
+      "pass": false,
+      "support": {
+        "recordings": 30,
+        "signals": 360,
+        "low_support": false
+      }
+    },
+    "mean_iou_at_global_snr_ge_5_db": {
+      "target": 0.75,
+      "measured": 0.8788753856768566,
+      "ci95": [
+        0.8717938321554205,
+        0.8868144947039668
+      ],
+      "pass": true,
+      "support": {
+        "recordings": 30,
+        "signals": 360,
+        "low_support": false
+      }
+    },
+    "map50_at_global_snr_ge_5_db": {
+      "target": 0.6,
+      "measured": 0.4127190322942614,
+      "ci95": [
+        0.409470957325271,
+        0.4510997173519263
+      ],
+      "pass": false,
+      "support": {
+        "recordings": 30,
+        "signals": 360,
+        "low_support": false
+      }
+    },
+    "pam_oracle_accuracy_global_snr_ge_10_db": {
+      "target": 0.8,
+      "measured": 0.4666666666666667,
+      "ci95": [
+        0.3,
+        0.6333333333333333
+      ],
+      "pass": false,
+      "support": {
+        "recordings": 30,
+        "signals": 30,
+        "low_support": false
+      }
+    },
+    "pam_oracle_accuracy_near_0_db_0_to_1": {
+      "target": 0.5,
+      "measured": 0.36666666666666664,
+      "ci95": [
+        0.2,
+        0.5333333333333333
+      ],
+      "pass": false,
+      "support": {
+        "recordings": 30,
+        "signals": 30,
+        "low_support": false
+      }
+    },
+    "processing_time_per_segment_local_seconds": {
+      "target": 5.0,
+      "measured": 29.89102229999844,
+      "pass": false,
+      "note": "Measured on this CPU environment; not a prediction for another laptop.",
+      "measurement_scope": "Maximum measured CLI internal wall time across two local CPU synthetic SigMF examples; includes input read, spectrogram, YOLO, extraction/classification, and annotated PNG write; excludes JSON serialization.",
+      "local_measurements_seconds": [
+        29.652594599989243,
+        29.89102229999844
+      ],
+      "outer_command_wall_seconds": [
+        31.7443601,
+        31.895924
+      ]
+    }
+  },
+  "main_test": {
+    "yolo": {
+      "matched_precision": {
+        "precision": 0.7964774951076321,
+        "recall": 0.5652777777777778,
+        "mean_iou_true_positives": 0.8757249891821527,
+        "tp": 407,
+        "fp": 104,
+        "fn": 313
+      },
+      "matched_precision_with_recording_bootstrap": {
+        "precision": {
+          "estimate": 0.7964774951076321,
+          "ci95": [
+            0.7720206565172881,
+            0.8227055188272492
+          ],
+          "recordings": 60,
+          "signals": 720,
+          "low_support": false
+        },
+        "recall": {
+          "estimate": 0.5652777777777778,
+          "ci95": [
+            0.5347222222222222,
+            0.5958333333333333
+          ],
+          "recordings": 60,
+          "signals": 720,
+          "low_support": false
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.8757249891821527,
+          "ci95": [
+            0.8700413286343697,
+            0.8812257944210738
+          ],
+          "recordings": 60,
+          "signals": 720,
+          "low_support": false
+        }
+      },
+      "detector_confusion_matrix": [
+        [
+          32,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          24,
+          0
+        ],
+        [
+          0,
+          59,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          16,
+          0,
+          21,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          9,
+          0,
+          14,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          0,
+          3,
+          0,
+          4,
+          0,
+          3,
+          0,
+          4,
+          0,
+          44,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          3,
+          1,
+          17,
+          2,
+          0,
+          0,
+          0,
+          0,
+          37,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          52,
+          0,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          11,
+          10,
+          1,
+          0,
+          0,
+          0,
+          36,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          40,
+          0,
+          18,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          13,
+          0,
+          3,
+          0,
+          0,
+          1,
+          43,
+          0
+        ],
+        [
+          5,
+          0,
+          4,
+          0,
+          0,
+          0,
+          1,
+          0,
+          3,
+          0,
+          13,
+          0,
+          34,
+          0
+        ],
+        [
+          6,
+          0,
+          7,
+          0,
+          0,
+          0,
+          1,
+          0,
+          6,
+          0,
+          5,
+          0,
+          35,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          10,
+          0,
+          3,
+          0,
+          3,
+          0,
+          43,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          1,
+          6,
+          0,
+          4,
+          24,
+          5,
+          54,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      ],
+      "detector_confusion_labels": [
+        "AM-DSB",
+        "AM-SSB",
+        "FM",
+        "PAM",
+        "OFDM",
+        "2-FSK",
+        "2-CPFSK",
+        "4-FSK",
+        "4-CPFSK",
+        "OOK",
+        "GMSK1",
+        "GMSK2",
+        "missed",
+        "background"
+      ],
+      "map50_all_snr": {
+        "map50": 0.39344320689583046,
+        "per_class": {
+          "AM-DSB": {
+            "estimate": 0.5565353861440506,
+            "ci95": [
+              0.4780119201596663,
+              0.6667331420154516
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "AM-SSB": {
+            "estimate": 0.9833333333333333,
+            "ci95": [
+              0.95,
+              1.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "FM": {
+            "estimate": 0.5709419685652031,
+            "ci95": [
+              0.47915439102345064,
+              0.6908995063203764
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "PAM": {
+            "estimate": 0.09499909760231673,
+            "ci95": [
+              0.05434009600639963,
+              0.1869804448492195
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "OFDM": {
+            "estimate": 0.24889248270228403,
+            "ci95": [
+              0.19343527721360831,
+              0.36021013730921386
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "2-FSK": {
+            "estimate": 0.7088880265413534,
+            "ci95": [
+              0.6470322158019142,
+              0.7969732251185845
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "2-CPFSK": {
+            "estimate": 0.23282146664845083,
+            "ci95": [
+              0.1943383394182687,
+              0.30360807086147956
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "4-FSK": {
+            "estimate": 0.4988573951399083,
+            "ci95": [
+              0.4301615656770965,
+              0.6003121414491014
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "4-CPFSK": {
+            "estimate": 0.22669163824307864,
+            "ci95": [
+              0.19193924629590378,
+              0.2949219648464547
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "OOK": {
+            "estimate": 0.19586915963179996,
+            "ci95": [
+              0.16066917952330156,
+              0.2870670756728885
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "GMSK1": {
+            "estimate": 0.2325232965607059,
+            "ci95": [
+              0.18341831719398224,
+              0.3092589242118847
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "GMSK2": {
+            "estimate": 0.17096523163748,
+            "ci95": [
+              0.14451794584750133,
+              0.24474037031741994
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          }
+        },
+        "map50_recording_bootstrap": {
+          "estimate": 0.39344320689583046,
+          "ci95": [
+            0.38655146824979175,
+            0.4240761089346243
+          ],
+          "recordings": 60,
+          "signals": 720,
+          "low_support": false
+        },
+        "per_class_with_recording_bootstrap": {
+          "AM-DSB": {
+            "estimate": 0.5565353861440506,
+            "ci95": [
+              0.4780119201596663,
+              0.6667331420154516
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "AM-SSB": {
+            "estimate": 0.9833333333333333,
+            "ci95": [
+              0.95,
+              1.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "FM": {
+            "estimate": 0.5709419685652031,
+            "ci95": [
+              0.47915439102345064,
+              0.6908995063203764
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "PAM": {
+            "estimate": 0.09499909760231673,
+            "ci95": [
+              0.05434009600639963,
+              0.1869804448492195
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "OFDM": {
+            "estimate": 0.24889248270228403,
+            "ci95": [
+              0.19343527721360831,
+              0.36021013730921386
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "2-FSK": {
+            "estimate": 0.7088880265413534,
+            "ci95": [
+              0.6470322158019142,
+              0.7969732251185845
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "2-CPFSK": {
+            "estimate": 0.23282146664845083,
+            "ci95": [
+              0.1943383394182687,
+              0.30360807086147956
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "4-FSK": {
+            "estimate": 0.4988573951399083,
+            "ci95": [
+              0.4301615656770965,
+              0.6003121414491014
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "4-CPFSK": {
+            "estimate": 0.22669163824307864,
+            "ci95": [
+              0.19193924629590378,
+              0.2949219648464547
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "OOK": {
+            "estimate": 0.19586915963179996,
+            "ci95": [
+              0.16066917952330156,
+              0.2870670756728885
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "GMSK1": {
+            "estimate": 0.2325232965607059,
+            "ci95": [
+              0.18341831719398224,
+              0.3092589242118847
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "GMSK2": {
+            "estimate": 0.17096523163748,
+            "ci95": [
+              0.14451794584750133,
+              0.24474037031741994
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          }
+        }
+      },
+      "map50_global_snr_ge_5_db": {
+        "map50": 0.4127190322942614,
+        "per_class": {
+          "AM-DSB": {
+            "estimate": 0.7419131185249789,
+            "ci95": [
+              0.6323656253573721,
+              0.8596711191264539
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "AM-SSB": {
+            "estimate": 0.9666666666666667,
+            "ci95": [
+              0.9,
+              1.0
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "FM": {
+            "estimate": 0.5866706634773668,
+            "ci95": [
+              0.4624598665589473,
+              0.7397675309845604
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "PAM": {
+            "estimate": 0.12165095421526784,
+            "ci95": [
+              0.0517340773104733,
+              0.2813791051990478
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "OFDM": {
+            "estimate": 0.29795173248466744,
+            "ci95": [
+              0.21281776797486002,
+              0.43613963793545735
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "2-FSK": {
+            "estimate": 0.6717527851621764,
+            "ci95": [
+              0.611354641811142,
+              0.7806340909090909
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "2-CPFSK": {
+            "estimate": 0.23393003585221633,
+            "ci95": [
+              0.18138305278890152,
+              0.32845961217170927
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "4-FSK": {
+            "estimate": 0.6010109813558088,
+            "ci95": [
+              0.5134944173720309,
+              0.7208305134114512
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "4-CPFSK": {
+            "estimate": 0.17235904276691824,
+            "ci95": [
+              0.13429839301307403,
+              0.2606899294804092
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "OOK": {
+            "estimate": 0.18729543313032151,
+            "ci95": [
+              0.14725676647273767,
+              0.3100398599716307
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "GMSK1": {
+            "estimate": 0.2104559119236856,
+            "ci95": [
+              0.13925249651483432,
+              0.3211162849995023
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "GMSK2": {
+            "estimate": 0.16097106197106203,
+            "ci95": [
+              0.13236411384653002,
+              0.2855535036745575
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          }
+        },
+        "map50_recording_bootstrap": {
+          "estimate": 0.4127190322942614,
+          "ci95": [
+            0.409470957325271,
+            0.4510997173519263
+          ],
+          "recordings": 30,
+          "signals": 360,
+          "low_support": false
+        },
+        "per_class_with_recording_bootstrap": {
+          "AM-DSB": {
+            "estimate": 0.7419131185249789,
+            "ci95": [
+              0.6323656253573721,
+              0.8596711191264539
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "AM-SSB": {
+            "estimate": 0.9666666666666667,
+            "ci95": [
+              0.9,
+              1.0
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "FM": {
+            "estimate": 0.5866706634773668,
+            "ci95": [
+              0.4624598665589473,
+              0.7397675309845604
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "PAM": {
+            "estimate": 0.12165095421526784,
+            "ci95": [
+              0.0517340773104733,
+              0.2813791051990478
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "OFDM": {
+            "estimate": 0.29795173248466744,
+            "ci95": [
+              0.21281776797486002,
+              0.43613963793545735
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "2-FSK": {
+            "estimate": 0.6717527851621764,
+            "ci95": [
+              0.611354641811142,
+              0.7806340909090909
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "2-CPFSK": {
+            "estimate": 0.23393003585221633,
+            "ci95": [
+              0.18138305278890152,
+              0.32845961217170927
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "4-FSK": {
+            "estimate": 0.6010109813558088,
+            "ci95": [
+              0.5134944173720309,
+              0.7208305134114512
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "4-CPFSK": {
+            "estimate": 0.17235904276691824,
+            "ci95": [
+              0.13429839301307403,
+              0.2606899294804092
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "OOK": {
+            "estimate": 0.18729543313032151,
+            "ci95": [
+              0.14725676647273767,
+              0.3100398599716307
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "GMSK1": {
+            "estimate": 0.2104559119236856,
+            "ci95": [
+              0.13925249651483432,
+              0.3211162849995023
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          },
+          "GMSK2": {
+            "estimate": 0.16097106197106203,
+            "ci95": [
+              0.13236411384653002,
+              0.2855535036745575
+            ],
+            "recordings": 30,
+            "signals": 30,
+            "low_support": false
+          }
+        }
+      },
+      "per_class_with_recording_bootstrap": {
+        "AM-DSB": {
+          "precision": {
+            "estimate": 0.47058823529411764,
+            "ci95": [
+              0.3821190708252112,
+              0.5728174603174603
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.5333333333333333,
+            "ci95": [
+              0.4166666666666667,
+              0.6666666666666666
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8798660539929657,
+            "ci95": [
+              0.8621579119370593,
+              0.8986279843432358
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.5565353861440506,
+            "ci95": [
+              0.4780119201596663,
+              0.6667331420154516
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 32,
+          "fp": 36,
+          "fn": 28
+        },
+        "AM-SSB": {
+          "precision": {
+            "estimate": 0.9833333333333333,
+            "ci95": [
+              0.9430349576271186,
+              1.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.9833333333333333,
+            "ci95": [
+              0.95,
+              1.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8547662242227619,
+            "ci95": [
+              0.8399843421872178,
+              0.8694841483815199
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.9833333333333333,
+            "ci95": [
+              0.95,
+              1.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 59,
+          "fp": 1,
+          "fn": 1
+        },
+        "FM": {
+          "precision": {
+            "estimate": 0.5348837209302325,
+            "ci95": [
+              0.42262820512820515,
+              0.6444444444444445
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.38333333333333336,
+            "ci95": [
+              0.26666666666666666,
+              0.5166666666666667
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.901992947384452,
+            "ci95": [
+              0.8784198662709883,
+              0.9180573387864928
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.5709419685652031,
+            "ci95": [
+              0.47915439102345064,
+              0.6908995063203764
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 23,
+          "fp": 20,
+          "fn": 37
+        },
+        "PAM": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.09499909760231673,
+            "ci95": [
+              0.05434009600639963,
+              0.1869804448492195
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 0,
+          "fp": 0,
+          "fn": 60
+        },
+        "OFDM": {
+          "precision": {
+            "estimate": 0.36363636363636365,
+            "ci95": [
+              0.03392857142857153,
+              0.6666666666666666
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.06666666666666667,
+            "ci95": [
+              0.00791666666666669,
+              0.13333333333333333
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.9081899029879783,
+            "ci95": [
+              0.8768908771144327,
+              0.9405919840257659
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.24889248270228403,
+            "ci95": [
+              0.19343527721360831,
+              0.36021013730921386
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 4,
+          "fp": 7,
+          "fn": 56
+        },
+        "2-FSK": {
+          "precision": {
+            "estimate": 0.4957983193277311,
+            "ci95": [
+              0.4648278703534151,
+              0.5267857142857143
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.9833333333333333,
+            "ci95": [
+              0.95,
+              1.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8474507831140516,
+            "ci95": [
+              0.8322380627072169,
+              0.8629678214396739
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.7088880265413534,
+            "ci95": [
+              0.6470322158019142,
+              0.7969732251185845
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 59,
+          "fp": 60,
+          "fn": 1
+        },
+        "2-CPFSK": {
+          "precision": {
+            "estimate": 0.22580645161290322,
+            "ci95": [
+              0.14517786561264823,
+              0.33107142857142846
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.23333333333333334,
+            "ci95": [
+              0.15,
+              0.35874999999999957
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8705829587928695,
+            "ci95": [
+              0.8362259148080551,
+              0.9011109249764871
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.23282146664845083,
+            "ci95": [
+              0.1943383394182687,
+              0.30360807086147956
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 14,
+          "fp": 48,
+          "fn": 46
+        },
+        "4-FSK": {
+          "precision": {
+            "estimate": 0.41304347826086957,
+            "ci95": [
+              0.3553828800601579,
+              0.46704710144927536
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.6333333333333333,
+            "ci95": [
+              0.49125,
+              0.75
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8498772935860388,
+            "ci95": [
+              0.8281739616721467,
+              0.8693424795544995
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.4988573951399083,
+            "ci95": [
+              0.4301615656770965,
+              0.6003121414491014
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 38,
+          "fp": 54,
+          "fn": 22
+        },
+        "4-CPFSK": {
+          "precision": {
+            "estimate": 0.15789473684210525,
+            "ci95": [
+              0.0,
+              0.3076923076923077
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.05,
+            "ci95": [
+              0.0,
+              0.11666666666666667
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8601503723803209,
+            "ci95": [
+              0.8260890116223827,
+              0.8930710405566641
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.22669163824307864,
+            "ci95": [
+              0.19193924629590378,
+              0.2949219648464547
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 3,
+          "fp": 16,
+          "fn": 57
+        },
+        "OOK": {
+          "precision": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.19586915963179996,
+            "ci95": [
+              0.16066917952330156,
+              0.2870670756728885
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 0,
+          "fp": 0,
+          "fn": 60
+        },
+        "GMSK1": {
+          "precision": {
+            "estimate": 0.1388888888888889,
+            "ci95": [
+              0.03771367521367522,
+              0.24324324324324326
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.08333333333333333,
+            "ci95": [
+              0.016666666666666666,
+              0.15
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.9587550014074445,
+            "ci95": [
+              0.9461137798247103,
+              0.9739232795361797
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.2325232965607059,
+            "ci95": [
+              0.18341831719398224,
+              0.3092589242118847
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 5,
+          "fp": 31,
+          "fn": 55
+        },
+        "GMSK2": {
+          "precision": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "ap50": {
+            "estimate": 0.17096523163748,
+            "ci95": [
+              0.14451794584750133,
+              0.24474037031741994
+            ],
+            "recordings": 60,
+            "signals": 60,
+            "low_support": false
+          },
+          "tp": 0,
+          "fp": 1,
+          "fn": 60
+        }
+      },
+      "by_global_snr_with_recording_bootstrap": {
+        "[0,5)": {
+          "precision": {
+            "estimate": 0.7964601769911505,
+            "ci95": [
+              0.7574560206661937,
+              0.8406470437347697
+            ],
+            "recordings": 30,
+            "signals": 360,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.5,
+            "ci95": [
+              0.4638888888888889,
+              0.5347916666666666
+            ],
+            "recordings": 30,
+            "signals": 360,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8717519891582761,
+            "ci95": [
+              0.862773644171827,
+              0.8812344241751273
+            ],
+            "recordings": 30,
+            "signals": 360,
+            "low_support": false
+          }
+        },
+        "[10,15)": {
+          "precision": {
+            "estimate": 0.8108108108108109,
+            "ci95": [
+              0.7586206896551724,
+              0.8643431432038835
+            ],
+            "recordings": 12,
+            "signals": 144,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.625,
+            "ci95": [
+              0.5625,
+              0.7013888888888888
+            ],
+            "recordings": 12,
+            "signals": 144,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8780805208075173,
+            "ci95": [
+              0.8679835377424125,
+              0.8874019204462048
+            ],
+            "recordings": 12,
+            "signals": 144,
+            "low_support": false
+          }
+        },
+        "[15,20)": {
+          "precision": {
+            "estimate": 0.7873563218390804,
+            "ci95": [
+              0.7577081877659912,
+              0.8132215675890375
+            ],
+            "recordings": 18,
+            "signals": 216,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.6342592592592593,
+            "ci95": [
+              0.5879629629629629,
+              0.6805555555555556
+            ],
+            "recordings": 18,
+            "signals": 216,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8793975596786124,
+            "ci95": [
+              0.869979991504588,
+              0.8889955698435112
+            ],
+            "recordings": 18,
+            "signals": 216,
+            "low_support": false
+          }
+        }
+      }
+    },
+    "energy_baseline": {
+      "matched_precision": {
+        "precision": 0.8060522696011004,
+        "recall": 0.8138888888888889,
+        "mean_iou_true_positives": 0.8200611345375961,
+        "tp": 586,
+        "fp": 141,
+        "fn": 134
+      },
+      "matched_precision_with_recording_bootstrap": {
+        "precision": {
+          "estimate": 0.8060522696011004,
+          "ci95": [
+            0.7846213119072708,
+            0.8263043253370729
+          ],
+          "recordings": 60,
+          "signals": 720,
+          "low_support": false
+        },
+        "recall": {
+          "estimate": 0.8138888888888889,
+          "ci95": [
+            0.7930555555555555,
+            0.8333333333333334
+          ],
+          "recordings": 60,
+          "signals": 720,
+          "low_support": false
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.8200611345375961,
+          "ci95": [
+            0.8159560944499155,
+            0.8242007998340914
+          ],
+          "recordings": 60,
+          "signals": 720,
+          "low_support": false
+        }
+      },
+      "by_global_snr_with_recording_bootstrap": {
+        "[0,5)": {
+          "precision": {
+            "estimate": 0.8617886178861789,
+            "ci95": [
+              0.8362303251751276,
+              0.8872152468743377
+            ],
+            "recordings": 30,
+            "signals": 360,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.8833333333333333,
+            "ci95": [
+              0.8666666666666667,
+              0.8986805555555555
+            ],
+            "recordings": 30,
+            "signals": 360,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8136622625769402,
+            "ci95": [
+              0.8083414924000382,
+              0.8187763116799381
+            ],
+            "recordings": 30,
+            "signals": 360,
+            "low_support": false
+          }
+        },
+        "[10,15)": {
+          "precision": {
+            "estimate": 0.75,
+            "ci95": [
+              0.75,
+              0.75
+            ],
+            "recordings": 12,
+            "signals": 144,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.75,
+            "ci95": [
+              0.75,
+              0.75
+            ],
+            "recordings": 12,
+            "signals": 144,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8229165645360753,
+            "ci95": [
+              0.81556830121607,
+              0.8308875716458322
+            ],
+            "recordings": 12,
+            "signals": 144,
+            "low_support": false
+          }
+        },
+        "[15,20)": {
+          "precision": {
+            "estimate": 0.7476635514018691,
+            "ci95": [
+              0.7238178294573644,
+              0.7641509433962265
+            ],
+            "recordings": 18,
+            "signals": 216,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.7407407407407407,
+            "ci95": [
+              0.7222222222222222,
+              0.75
+            ],
+            "recordings": 18,
+            "signals": 216,
+            "low_support": false
+          },
+          "mean_iou_true_positives": {
+            "estimate": 0.8308514773104261,
+            "ci95": [
+              0.823998581557068,
+              0.8371683251881621
+            ],
+            "recordings": 18,
+            "signals": 216,
+            "low_support": false
+          }
+        }
+      },
+      "mask_threshold_selected_on_validation": 1.5,
+      "confidence_threshold_selected_on_validation": 2.301176729202271
+    },
+    "pam": {
+      "oracle_accuracy": {
+        "accuracy": 0.4166666666666667,
+        "ci95": [
+          0.3,
+          0.55
+        ],
+        "recordings": 60,
+        "signals": 60,
+        "low_support": false
+      },
+      "oracle_accuracy_by_global_snr": {
+        "[0,5)": {
+          "accuracy": 0.36666666666666664,
+          "ci95": [
+            0.2,
+            0.5333333333333333
+          ],
+          "recordings": 30,
+          "signals": 30,
+          "low_support": false
+        },
+        "[10,15)": {
+          "accuracy": 0.4166666666666667,
+          "ci95": [
+            0.16666666666666666,
+            0.6666666666666666
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "[15,20)": {
+          "accuracy": 0.5,
+          "ci95": [
+            0.2777777777777778,
+            0.7222222222222222
+          ],
+          "recordings": 18,
+          "signals": 18,
+          "low_support": true
+        }
+      },
+      "oracle_accuracy_by_subtype": {
+        "2-PSK": {
+          "accuracy": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "4-PSK": {
+          "accuracy": 0.3,
+          "ci95": [
+            0.047500000000000146,
+            0.6
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "8-PSK": {
+          "accuracy": 0.6,
+          "ci95": [
+            0.3,
+            0.9
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "16-QAM": {
+          "accuracy": 0.2,
+          "ci95": [
+            0.0,
+            0.5
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "64-QAM": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "256-QAM": {
+          "accuracy": 0.4,
+          "ci95": [
+            0.1,
+            0.7
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        }
+      },
+      "detector_box_accuracy": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "detector_box_accuracy_by_global_snr": {},
+      "detector_box_accuracy_by_subtype": {
+        "2-PSK": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "4-PSK": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "8-PSK": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "16-QAM": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "64-QAM": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "256-QAM": {
+          "accuracy": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        }
+      },
+      "oracle_subtype_confusion_matrix": [
+        [
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          2,
+          0,
+          0,
+          0,
+          5
+        ],
+        [
+          0,
+          3,
+          6,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          2,
+          1,
+          5,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          6,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          3,
+          1,
+          4,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "oracle_subtype_confusion_labels": [
+        "2-PSK",
+        "4-PSK",
+        "8-PSK",
+        "16-QAM",
+        "64-QAM",
+        "256-QAM",
+        "Others"
+      ],
+      "unresolved_detection_count": 208,
+      "unresolved_detections": [
+        {
+          "recording_id": "main-001",
+          "segment_id": "main-001-s00",
+          "prediction_index": 4,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            163.99967999999998,
+            99.00016,
+            277.0,
+            120.00016000000001
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-001",
+          "segment_id": "main-001-s00",
+          "prediction_index": 5,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            379.00032000000004,
+            599.9998400000001,
+            496.0,
+            620.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-001",
+          "segment_id": "main-001-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            375.99968,
+            599.0,
+            497.0,
+            621.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-001",
+          "segment_id": "main-001-s00",
+          "prediction_index": 8,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            163.00032,
+            98.99968,
+            279.00032,
+            118.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-004",
+          "segment_id": "main-004-s00",
+          "prediction_index": 0,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            233.99968,
+            279.0,
+            343.99968,
+            297.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-004",
+          "segment_id": "main-004-s00",
+          "prediction_index": 1,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            237.00032,
+            278.00016,
+            345.00032,
+            297.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-004",
+          "segment_id": "main-004-s00",
+          "prediction_index": 2,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            503.0,
+            56.0,
+            596.00032,
+            76.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-004",
+          "segment_id": "main-004-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            502.00032,
+            55.0,
+            596.0003200000001,
+            77.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-006",
+          "segment_id": "main-006-s00",
+          "prediction_index": 1,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            162.99999999999997,
+            50.999967999999996,
+            261.0,
+            73.999968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-006",
+          "segment_id": "main-006-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            81.00031999999999,
+            8.0,
+            189.00032,
+            28.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-006",
+          "segment_id": "main-006-s00",
+          "prediction_index": 4,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            83.99968000000001,
+            5.999968,
+            185.0,
+            26.999968000000003
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-006",
+          "segment_id": "main-006-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            163.0,
+            51.99996800000001,
+            264.00032,
+            74.999968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-007",
+          "segment_id": "main-007-s00",
+          "prediction_index": 0,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            3.9999999999999947,
+            521.0,
+            122.0,
+            539.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-007",
+          "segment_id": "main-007-s00",
+          "prediction_index": 1,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            6.999808000000005,
+            521.0,
+            120.000128,
+            539.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-007",
+          "segment_id": "main-007-s00",
+          "prediction_index": 2,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            56.000319999999995,
+            143.99984,
+            130.00032000000002,
+            164.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-007",
+          "segment_id": "main-007-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            101.00031999999999,
+            275.00016,
+            210.0,
+            296.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-007",
+          "segment_id": "main-007-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            396.0,
+            285.00032,
+            499.00032000000004,
+            305.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-007",
+          "segment_id": "main-007-s00",
+          "prediction_index": 7,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            58.00032,
+            145.00032,
+            129.0,
+            165.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-007",
+          "segment_id": "main-007-s00",
+          "prediction_index": 8,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            396.0,
+            284.0,
+            499.00032000000004,
+            304.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-007",
+          "segment_id": "main-007-s00",
+          "prediction_index": 9,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            101.00000000000001,
+            273.99967999999996,
+            214.00032,
+            295.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-011",
+          "segment_id": "main-011-s00",
+          "prediction_index": 1,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            307.0,
+            480.99984,
+            413.99968,
+            503.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-011",
+          "segment_id": "main-011-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            541.0,
+            310.99984,
+            639.0,
+            329.99984000000006
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-011",
+          "segment_id": "main-011-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            539.00032,
+            309.00016,
+            639.00032,
+            330.00016000000005
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-011",
+          "segment_id": "main-011-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            304.99968,
+            478.99984000000006,
+            420.0,
+            501.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-013",
+          "segment_id": "main-013-s00",
+          "prediction_index": 0,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            148.00032,
+            311.0,
+            286.00032,
+            336.99999999999994
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-013",
+          "segment_id": "main-013-s00",
+          "prediction_index": 2,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            180.99968,
+            351.00016000000005,
+            316.99968,
+            372.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-013",
+          "segment_id": "main-013-s00",
+          "prediction_index": 3,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            145.99968,
+            313.99984,
+            279.0,
+            334.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-021",
+          "segment_id": "main-021-s00",
+          "prediction_index": 1,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            276.00032000000004,
+            146.99968,
+            402.00032,
+            166.99967999999998
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-021",
+          "segment_id": "main-021-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            529.00032,
+            368.0,
+            609.00032,
+            388.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-021",
+          "segment_id": "main-021-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            275.00032,
+            146.0,
+            404.0,
+            166.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-021",
+          "segment_id": "main-021-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            532.0,
+            368.0,
+            608.99968,
+            388.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-024",
+          "segment_id": "main-024-s00",
+          "prediction_index": 0,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            145.00032000000002,
+            48.000032,
+            245.00032000000002,
+            65.00003199999999
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-024",
+          "segment_id": "main-024-s00",
+          "prediction_index": 1,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            136.00032000000002,
+            238.00032000000002,
+            243.0,
+            256.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-024",
+          "segment_id": "main-024-s00",
+          "prediction_index": 3,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            228.99968,
+            79.00016,
+            340.0,
+            100.00016000000001
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-024",
+          "segment_id": "main-024-s00",
+          "prediction_index": 4,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            148.0,
+            48.0,
+            240.0,
+            66.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-024",
+          "segment_id": "main-024-s00",
+          "prediction_index": 6,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            226.99968,
+            77.99983999999999,
+            342.0,
+            98.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-024",
+          "segment_id": "main-024-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            133.0,
+            233.99984,
+            239.99967999999998,
+            254.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-026",
+          "segment_id": "main-026-s00",
+          "prediction_index": 0,
+          "detector_class": "GMSK1",
+          "xyxy_pixels": [
+            149.00032,
+            9.999999999999998,
+            238.0,
+            28.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-026",
+          "segment_id": "main-026-s00",
+          "prediction_index": 1,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            152.0,
+            10.000032000000001,
+            236.99968,
+            27.000031999999997
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-026",
+          "segment_id": "main-026-s00",
+          "prediction_index": 2,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            223.99968,
+            54.99968,
+            293.99968,
+            74.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-026",
+          "segment_id": "main-026-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            320.99967999999996,
+            599.00032,
+            400.99967999999996,
+            619.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-026",
+          "segment_id": "main-026-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            222.0,
+            54.0,
+            294.0,
+            74.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-026",
+          "segment_id": "main-026-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            326.99968,
+            599.00016,
+            398.99968,
+            620.0001599999999
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-027",
+          "segment_id": "main-027-s00",
+          "prediction_index": 3,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            217.99999999999997,
+            109.00016,
+            297.00032,
+            130.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-027",
+          "segment_id": "main-027-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            220.0,
+            110.0,
+            296.0,
+            130.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-028",
+          "segment_id": "main-028-s00",
+          "prediction_index": 1,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            183.99968,
+            22.0,
+            305.0,
+            42.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-028",
+          "segment_id": "main-028-s00",
+          "prediction_index": 2,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            429.0,
+            297.99984,
+            506.99999999999994,
+            318.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-028",
+          "segment_id": "main-028-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            429.0,
+            298.99984,
+            511.0,
+            317.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-028",
+          "segment_id": "main-028-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            436.99968,
+            22.0,
+            524.9996799999999,
+            42.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-028",
+          "segment_id": "main-028-s00",
+          "prediction_index": 6,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            434.99967999999996,
+            21.0,
+            526.99968,
+            41.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-028",
+          "segment_id": "main-028-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            181.99967999999998,
+            21.999968000000003,
+            303.99968,
+            42.999967999999996
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-034",
+          "segment_id": "main-034-s00",
+          "prediction_index": 2,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            503.00032,
+            25.999968000000003,
+            612.0,
+            44.999967999999996
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-034",
+          "segment_id": "main-034-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            500.0,
+            27.000032000000004,
+            616.0,
+            46.000032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-036",
+          "segment_id": "main-036-s00",
+          "prediction_index": 0,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            182.0,
+            38.0,
+            298.99967999999996,
+            60.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-036",
+          "segment_id": "main-036-s00",
+          "prediction_index": 1,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            76.0,
+            600.99968,
+            152.0,
+            620.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-036",
+          "segment_id": "main-036-s00",
+          "prediction_index": 3,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            177.99968,
+            37.000032000000004,
+            299.99968,
+            58.000032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-036",
+          "segment_id": "main-036-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            179.0,
+            38.0,
+            301.0,
+            58.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-036",
+          "segment_id": "main-036-s00",
+          "prediction_index": 6,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            374.0,
+            490.0,
+            489.00032000000004,
+            510.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-036",
+          "segment_id": "main-036-s00",
+          "prediction_index": 7,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            74.00031999999999,
+            602.0001599999999,
+            152.00032,
+            621.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-036",
+          "segment_id": "main-036-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            377.99968,
+            489.00032000000004,
+            483.99967999999996,
+            509.00032000000004
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-036",
+          "segment_id": "main-036-s00",
+          "prediction_index": 10,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            2.0000000000000018,
+            356.99984,
+            108.0,
+            375.99984000000006
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-036",
+          "segment_id": "main-036-s00",
+          "prediction_index": 12,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            4.000191999999991,
+            354.00016,
+            108.999872,
+            377.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-037",
+          "segment_id": "main-037-s00",
+          "prediction_index": 0,
+          "detector_class": "AM-SSB",
+          "xyxy_pixels": [
+            251.0,
+            260.0,
+            377.99968,
+            288.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-037",
+          "segment_id": "main-037-s00",
+          "prediction_index": 2,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            414.0,
+            551.99984,
+            522.99968,
+            572.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-037",
+          "segment_id": "main-037-s00",
+          "prediction_index": 4,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            410.0,
+            551.99968,
+            526.0,
+            573.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-037",
+          "segment_id": "main-037-s00",
+          "prediction_index": 5,
+          "detector_class": "AM-SSB",
+          "xyxy_pixels": [
+            259.00032,
+            240.0,
+            384.0,
+            260.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-038",
+          "segment_id": "main-038-s00",
+          "prediction_index": 2,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            35.00032000000001,
+            459.00032000000004,
+            147.00032,
+            479.00032000000004
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-038",
+          "segment_id": "main-038-s00",
+          "prediction_index": 4,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            30.999679999999998,
+            458.00032,
+            146.99967999999998,
+            480.00032000000004
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-040",
+          "segment_id": "main-040-s00",
+          "prediction_index": 1,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            396.99968,
+            400.0,
+            484.99967999999996,
+            420.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-040",
+          "segment_id": "main-040-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            485.0,
+            463.00016,
+            603.0,
+            484.00015999999994
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-040",
+          "segment_id": "main-040-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            484.0,
+            461.99984,
+            608.0,
+            482.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-040",
+          "segment_id": "main-040-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            396.99968,
+            399.00016,
+            488.99968,
+            420.00015999999994
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-050",
+          "segment_id": "main-050-s00",
+          "prediction_index": 0,
+          "detector_class": "OFDM",
+          "xyxy_pixels": [
+            430.00032000000004,
+            610.0,
+            548.00032,
+            630.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-050",
+          "segment_id": "main-050-s00",
+          "prediction_index": 2,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            143.0,
+            571.99984,
+            285.0,
+            592.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-050",
+          "segment_id": "main-050-s00",
+          "prediction_index": 3,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            251.00032000000002,
+            611.99968,
+            328.00000000000006,
+            633.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-050",
+          "segment_id": "main-050-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            429.0,
+            609.00016,
+            550.00032,
+            630.0001599999999
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-050",
+          "segment_id": "main-050-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            89.00031999999999,
+            603.00016,
+            214.00000000000003,
+            624.0001599999999
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-050",
+          "segment_id": "main-050-s00",
+          "prediction_index": 6,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            252.0,
+            613.00016,
+            328.99968,
+            634.0001599999999
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-053",
+          "segment_id": "main-053-s00",
+          "prediction_index": 1,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            384.99968,
+            131.00016,
+            504.99968,
+            152.00016000000002
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-053",
+          "segment_id": "main-053-s00",
+          "prediction_index": 2,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            404.99967999999996,
+            55.99984,
+            520.0,
+            72.99983999999999
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-053",
+          "segment_id": "main-053-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            383.99968,
+            131.99983999999998,
+            505.99968,
+            152.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-053",
+          "segment_id": "main-053-s00",
+          "prediction_index": 5,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            45.0,
+            456.0,
+            155.0,
+            476.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-053",
+          "segment_id": "main-053-s00",
+          "prediction_index": 6,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            408.99968,
+            56.99968,
+            516.99968,
+            72.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-053",
+          "segment_id": "main-053-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            41.99967999999999,
+            455.0,
+            155.99968,
+            477.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-056",
+          "segment_id": "main-056-s00",
+          "prediction_index": 0,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            432.00032,
+            95.00031999999999,
+            531.0,
+            111.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-056",
+          "segment_id": "main-056-s00",
+          "prediction_index": 2,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            307.00032,
+            591.0,
+            371.99999999999994,
+            613.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-056",
+          "segment_id": "main-056-s00",
+          "prediction_index": 3,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            432.00032,
+            95.00016000000001,
+            531.0,
+            112.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-056",
+          "segment_id": "main-056-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            308.0,
+            592.99968,
+            372.99968,
+            612.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-059",
+          "segment_id": "main-059-s00",
+          "prediction_index": 1,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            315.99967999999996,
+            609.00016,
+            429.0,
+            630.0001599999999
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-059",
+          "segment_id": "main-059-s00",
+          "prediction_index": 3,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            314.99968,
+            609.9998400000001,
+            430.0,
+            630.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-059",
+          "segment_id": "main-059-s00",
+          "prediction_index": 5,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            138.0,
+            216.99984,
+            221.00032000000002,
+            239.99983999999998
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-059",
+          "segment_id": "main-059-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            133.0,
+            216.99984,
+            223.0,
+            239.99983999999998
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-061",
+          "segment_id": "main-061-s00",
+          "prediction_index": 1,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            439.99968,
+            480.0,
+            525.99968,
+            500.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-061",
+          "segment_id": "main-061-s00",
+          "prediction_index": 2,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            441.99999999999994,
+            480.0,
+            526.0,
+            500.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-063",
+          "segment_id": "main-063-s00",
+          "prediction_index": 0,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            21.99968,
+            359.99984000000006,
+            111.99968,
+            380.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-063",
+          "segment_id": "main-063-s00",
+          "prediction_index": 3,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            516.0,
+            138.0,
+            624.0,
+            158.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-063",
+          "segment_id": "main-063-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            512.99968,
+            138.0,
+            624.0,
+            158.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-063",
+          "segment_id": "main-063-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            19.000128000000007,
+            359.99984000000006,
+            107.999808,
+            380.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-064",
+          "segment_id": "main-064-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            39.00032,
+            555.9998400000001,
+            148.0,
+            576.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-064",
+          "segment_id": "main-064-s00",
+          "prediction_index": 8,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            195.00032,
+            258.0,
+            267.00032,
+            278.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-064",
+          "segment_id": "main-064-s00",
+          "prediction_index": 9,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            196.99967999999998,
+            257.99984,
+            268.99968,
+            278.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-064",
+          "segment_id": "main-064-s00",
+          "prediction_index": 10,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            38.00000000000001,
+            555.9998400000001,
+            150.0,
+            576.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-065",
+          "segment_id": "main-065-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            363.00032,
+            389.99967999999996,
+            451.00032,
+            411.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-065",
+          "segment_id": "main-065-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            335.0,
+            443.0,
+            453.0,
+            465.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-065",
+          "segment_id": "main-065-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            363.00032,
+            389.99984000000006,
+            448.0,
+            410.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-065",
+          "segment_id": "main-065-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            336.0,
+            444.00032,
+            451.99999999999994,
+            466.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-066",
+          "segment_id": "main-066-s00",
+          "prediction_index": 3,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            117.99968,
+            275.99984,
+            187.0,
+            292.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-066",
+          "segment_id": "main-066-s00",
+          "prediction_index": 5,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            116.0,
+            275.99984,
+            188.0,
+            292.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-071",
+          "segment_id": "main-071-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            552.0,
+            284.0,
+            628.99968,
+            308.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-071",
+          "segment_id": "main-071-s00",
+          "prediction_index": 5,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            245.99968,
+            419.99984000000006,
+            359.0,
+            440.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-071",
+          "segment_id": "main-071-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            246.99968,
+            419.0,
+            358.00000000000006,
+            441.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-071",
+          "segment_id": "main-071-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            552.0,
+            283.00032,
+            631.00032,
+            307.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-077",
+          "segment_id": "main-077-s00",
+          "prediction_index": 4,
+          "detector_class": "OFDM",
+          "xyxy_pixels": [
+            468.00032,
+            385.0,
+            570.0003200000001,
+            407.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-077",
+          "segment_id": "main-077-s00",
+          "prediction_index": 5,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            468.0,
+            385.0,
+            572.0,
+            407.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-077",
+          "segment_id": "main-077-s00",
+          "prediction_index": 6,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            517.0,
+            154.99967999999998,
+            587.0,
+            174.99967999999998
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-077",
+          "segment_id": "main-077-s00",
+          "prediction_index": 7,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            509.99968,
+            232.00016000000002,
+            631.0,
+            255.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-077",
+          "segment_id": "main-077-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            518.0,
+            155.99967999999998,
+            590.0,
+            173.99967999999998
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-077",
+          "segment_id": "main-077-s00",
+          "prediction_index": 9,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            510.0,
+            233.99984,
+            630.0,
+            254.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-078",
+          "segment_id": "main-078-s00",
+          "prediction_index": 0,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            91.99968,
+            255.0,
+            181.99967999999998,
+            277.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-078",
+          "segment_id": "main-078-s00",
+          "prediction_index": 4,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            95.00032000000002,
+            321.99984,
+            172.0,
+            342.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-078",
+          "segment_id": "main-078-s00",
+          "prediction_index": 5,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            92.00032,
+            321.99984,
+            170.00032000000002,
+            342.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-078",
+          "segment_id": "main-078-s00",
+          "prediction_index": 8,
+          "detector_class": "OFDM",
+          "xyxy_pixels": [
+            91.0,
+            255.0,
+            181.0,
+            277.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-078",
+          "segment_id": "main-078-s00",
+          "prediction_index": 9,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            329.99968,
+            67.99984,
+            443.00000000000006,
+            88.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-078",
+          "segment_id": "main-078-s00",
+          "prediction_index": 10,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            331.00032000000004,
+            69.00016,
+            447.00032,
+            90.00016000000001
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-079",
+          "segment_id": "main-079-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            89.00032000000002,
+            320.99984,
+            154.0,
+            343.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-079",
+          "segment_id": "main-079-s00",
+          "prediction_index": 6,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            376.0,
+            310.99967999999996,
+            508.00000000000006,
+            330.99967999999996
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-079",
+          "segment_id": "main-079-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            376.0,
+            311.99983999999995,
+            508.00000000000006,
+            332.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-079",
+          "segment_id": "main-079-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            91.00000000000001,
+            322.00016,
+            157.99968,
+            345.00015999999994
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-081",
+          "segment_id": "main-081-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            144.0,
+            205.00032000000002,
+            296.0,
+            229.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-081",
+          "segment_id": "main-081-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            140.99968,
+            207.00016,
+            296.99968,
+            228.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-083",
+          "segment_id": "main-083-s00",
+          "prediction_index": 2,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            315.00032000000004,
+            542.0,
+            403.00032,
+            566.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-083",
+          "segment_id": "main-083-s00",
+          "prediction_index": 5,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            406.0,
+            273.0,
+            478.00000000000006,
+            291.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-083",
+          "segment_id": "main-083-s00",
+          "prediction_index": 7,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            403.99967999999996,
+            273.99968,
+            477.99968,
+            291.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-083",
+          "segment_id": "main-083-s00",
+          "prediction_index": 10,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            315.00032,
+            541.99968,
+            404.0,
+            563.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-084",
+          "segment_id": "main-084-s00",
+          "prediction_index": 0,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            135.0,
+            145.99984,
+            249.0,
+            166.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-084",
+          "segment_id": "main-084-s00",
+          "prediction_index": 2,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            139.99967999999998,
+            145.0,
+            245.99968,
+            167.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-084",
+          "segment_id": "main-084-s00",
+          "prediction_index": 3,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            333.00032,
+            527.9998400000001,
+            401.00032,
+            548.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-084",
+          "segment_id": "main-084-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            335.0,
+            530.0003200000001,
+            397.0,
+            548.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-086",
+          "segment_id": "main-086-s00",
+          "prediction_index": 0,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            50.00000000000001,
+            178.00016000000002,
+            133.00032000000002,
+            201.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-086",
+          "segment_id": "main-086-s00",
+          "prediction_index": 4,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            195.0,
+            441.99984,
+            293.0,
+            462.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-086",
+          "segment_id": "main-086-s00",
+          "prediction_index": 7,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            195.99967999999996,
+            441.99984,
+            293.99968,
+            462.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-086",
+          "segment_id": "main-086-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            48.00032000000001,
+            176.99968,
+            135.0,
+            200.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-092",
+          "segment_id": "main-092-s00",
+          "prediction_index": 2,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            322.00032,
+            260.99968,
+            396.00032000000004,
+            284.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-092",
+          "segment_id": "main-092-s00",
+          "prediction_index": 5,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            297.0,
+            359.99967999999996,
+            415.99968,
+            381.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-092",
+          "segment_id": "main-092-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            293.0,
+            361.00016000000005,
+            414.00032,
+            382.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-092",
+          "segment_id": "main-092-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            316.99968,
+            260.99968,
+            396.0,
+            284.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-094",
+          "segment_id": "main-094-s00",
+          "prediction_index": 0,
+          "detector_class": "OFDM",
+          "xyxy_pixels": [
+            47.000319999999995,
+            214.00016,
+            144.0,
+            237.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-094",
+          "segment_id": "main-094-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            323.00032,
+            76.99968,
+            440.0,
+            100.99967999999998
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-094",
+          "segment_id": "main-094-s00",
+          "prediction_index": 7,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            48.999680000000005,
+            214.00016,
+            144.99967999999998,
+            237.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-094",
+          "segment_id": "main-094-s00",
+          "prediction_index": 8,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            424.0,
+            7.0,
+            544.0,
+            29.000000000000004
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-094",
+          "segment_id": "main-094-s00",
+          "prediction_index": 9,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            420.0,
+            7.0,
+            544.9996799999999,
+            29.000000000000004
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-094",
+          "segment_id": "main-094-s00",
+          "prediction_index": 10,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            321.00032,
+            76.99968,
+            445.99999999999994,
+            100.99967999999998
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-095",
+          "segment_id": "main-095-s00",
+          "prediction_index": 0,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            38.0,
+            359.99967999999996,
+            146.99967999999998,
+            381.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-095",
+          "segment_id": "main-095-s00",
+          "prediction_index": 1,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            212.00000000000003,
+            598.0,
+            327.00032,
+            622.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-095",
+          "segment_id": "main-095-s00",
+          "prediction_index": 4,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            33.00032000000001,
+            358.99967999999996,
+            150.0,
+            382.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-095",
+          "segment_id": "main-095-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            208.00032000000002,
+            596.99984,
+            335.0,
+            623.9998400000001
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-097",
+          "segment_id": "main-097-s00",
+          "prediction_index": 2,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            235.00032000000002,
+            267.0,
+            355.00032000000004,
+            289.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-097",
+          "segment_id": "main-097-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            174.0,
+            178.99984,
+            298.99968,
+            201.99983999999998
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-097",
+          "segment_id": "main-097-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            240.0,
+            267.0,
+            351.00032,
+            289.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-097",
+          "segment_id": "main-097-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            173.0,
+            178.0,
+            306.00032000000004,
+            202.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-099",
+          "segment_id": "main-099-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            251.0,
+            396.00015999999994,
+            317.99968,
+            415.00016000000005
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-099",
+          "segment_id": "main-099-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            249.00000000000003,
+            396.99984,
+            315.99968,
+            415.99984000000006
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-099",
+          "segment_id": "main-099-s00",
+          "prediction_index": 8,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            75.00032,
+            195.00016,
+            164.0,
+            216.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-099",
+          "segment_id": "main-099-s00",
+          "prediction_index": 9,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            76.0,
+            195.00016,
+            160.0,
+            216.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-101",
+          "segment_id": "main-101-s00",
+          "prediction_index": 1,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            197.0,
+            390.0,
+            270.00032,
+            414.00000000000006
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-101",
+          "segment_id": "main-101-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            196.00032000000002,
+            389.99983999999995,
+            274.00032,
+            414.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-102",
+          "segment_id": "main-102-s00",
+          "prediction_index": 6,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            164.99967999999998,
+            374.00016,
+            268.0,
+            397.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-102",
+          "segment_id": "main-102-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            165.00032,
+            374.99984000000006,
+            270.0,
+            397.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-104",
+          "segment_id": "main-104-s00",
+          "prediction_index": 2,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            510.0,
+            423.99983999999995,
+            618.0,
+            440.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-104",
+          "segment_id": "main-104-s00",
+          "prediction_index": 5,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            503.00032,
+            30.999968,
+            600.0,
+            53.999968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-104",
+          "segment_id": "main-104-s00",
+          "prediction_index": 6,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            513.0,
+            423.00016,
+            619.0,
+            440.00016000000005
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-104",
+          "segment_id": "main-104-s00",
+          "prediction_index": 7,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            36.00000000000001,
+            295.00016,
+            132.99968,
+            316.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-104",
+          "segment_id": "main-104-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            504.0,
+            30.999968,
+            599.00032,
+            53.999968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-104",
+          "segment_id": "main-104-s00",
+          "prediction_index": 9,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            36.000319999999995,
+            292.99984,
+            135.0,
+            315.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-106",
+          "segment_id": "main-106-s00",
+          "prediction_index": 1,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            325.00032,
+            543.99984,
+            409.00032000000004,
+            560.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-106",
+          "segment_id": "main-106-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            518.0,
+            281.99984,
+            614.99968,
+            302.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-106",
+          "segment_id": "main-106-s00",
+          "prediction_index": 8,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            519.00032,
+            281.99984,
+            615.00032,
+            302.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-106",
+          "segment_id": "main-106-s00",
+          "prediction_index": 9,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            324.99968,
+            544.99968,
+            408.00000000000006,
+            560.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-109",
+          "segment_id": "main-109-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            333.00000000000006,
+            417.99984,
+            439.99968,
+            438.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-109",
+          "segment_id": "main-109-s00",
+          "prediction_index": 8,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            333.00000000000006,
+            418.00032,
+            439.99968,
+            440.00032000000004
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-110",
+          "segment_id": "main-110-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            432.0,
+            56.00016,
+            512.0,
+            79.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-110",
+          "segment_id": "main-110-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            433.00031999999993,
+            330.00015999999994,
+            517.00032,
+            349.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-110",
+          "segment_id": "main-110-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            431.00032,
+            330.0,
+            520.0,
+            350.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-110",
+          "segment_id": "main-110-s00",
+          "prediction_index": 7,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            429.00032,
+            54.99968,
+            518.0,
+            78.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-112",
+          "segment_id": "main-112-s00",
+          "prediction_index": 0,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            410.0,
+            51.0,
+            514.9996799999999,
+            69.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-112",
+          "segment_id": "main-112-s00",
+          "prediction_index": 1,
+          "detector_class": "OFDM",
+          "xyxy_pixels": [
+            443.00032,
+            569.0,
+            532.0,
+            591.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-112",
+          "segment_id": "main-112-s00",
+          "prediction_index": 5,
+          "detector_class": "GMSK1",
+          "xyxy_pixels": [
+            411.99968,
+            51.000032,
+            513.99968,
+            70.000032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-112",
+          "segment_id": "main-112-s00",
+          "prediction_index": 7,
+          "detector_class": "2-CPFSK",
+          "xyxy_pixels": [
+            444.0,
+            569.0,
+            532.0,
+            591.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-112",
+          "segment_id": "main-112-s00",
+          "prediction_index": 8,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            502.0,
+            383.99968,
+            602.0,
+            401.99968
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-112",
+          "segment_id": "main-112-s00",
+          "prediction_index": 9,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            502.99968,
+            383.00016,
+            602.99968,
+            400.00016000000005
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-112",
+          "segment_id": "main-112-s00",
+          "prediction_index": 10,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            496.99999999999994,
+            520.0,
+            591.0,
+            540.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-112",
+          "segment_id": "main-112-s00",
+          "prediction_index": 11,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            495.99999999999994,
+            519.9998400000001,
+            591.00032,
+            540.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-115",
+          "segment_id": "main-115-s00",
+          "prediction_index": 0,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            184.00032,
+            387.99984,
+            250.00032000000002,
+            404.99984000000006
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-115",
+          "segment_id": "main-115-s00",
+          "prediction_index": 4,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            182.00000000000003,
+            388.00032,
+            250.0,
+            406.00032
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-116",
+          "segment_id": "main-116-s00",
+          "prediction_index": 0,
+          "detector_class": "GMSK1",
+          "xyxy_pixels": [
+            334.00032,
+            328.99983999999995,
+            416.00032,
+            347.99984
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-116",
+          "segment_id": "main-116-s00",
+          "prediction_index": 4,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            334.0,
+            329.0,
+            417.00032,
+            346.99999999999994
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-116",
+          "segment_id": "main-116-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            110.0,
+            582.0,
+            210.0,
+            602.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-116",
+          "segment_id": "main-116-s00",
+          "prediction_index": 7,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            111.0,
+            583.00016,
+            212.99999999999997,
+            604.0001599999999
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-118",
+          "segment_id": "main-118-s00",
+          "prediction_index": 4,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            48.00032,
+            385.99999999999994,
+            158.00032,
+            410.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-118",
+          "segment_id": "main-118-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            213.99968,
+            446.99999999999994,
+            283.99968,
+            469.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-118",
+          "segment_id": "main-118-s00",
+          "prediction_index": 7,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            215.99967999999996,
+            447.99984,
+            285.0,
+            468.99983999999995
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-118",
+          "segment_id": "main-118-s00",
+          "prediction_index": 8,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            46.00000000000001,
+            387.00032,
+            162.99968,
+            411.00032000000004
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-119",
+          "segment_id": "main-119-s00",
+          "prediction_index": 1,
+          "detector_class": "AM-DSB",
+          "xyxy_pixels": [
+            286.0,
+            112.0,
+            394.99968,
+            128.0
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-119",
+          "segment_id": "main-119-s00",
+          "prediction_index": 3,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            489.99968,
+            275.00016,
+            623.0,
+            300.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-119",
+          "segment_id": "main-119-s00",
+          "prediction_index": 4,
+          "detector_class": "FM",
+          "xyxy_pixels": [
+            286.99999999999994,
+            111.00016,
+            400.00032,
+            128.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-119",
+          "segment_id": "main-119-s00",
+          "prediction_index": 5,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            478.00000000000006,
+            278.00016000000005,
+            634.99968,
+            301.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-119",
+          "segment_id": "main-119-s00",
+          "prediction_index": 6,
+          "detector_class": "2-FSK",
+          "xyxy_pixels": [
+            122.0,
+            270.00016000000005,
+            225.00032000000002,
+            293.00016
+          ],
+          "status": "unresolved"
+        },
+        {
+          "recording_id": "main-119",
+          "segment_id": "main-119-s00",
+          "prediction_index": 7,
+          "detector_class": "4-FSK",
+          "xyxy_pixels": [
+            123.99999999999999,
+            271.00032,
+            220.0,
+            291.00032
+          ],
+          "status": "unresolved"
+        }
+      ],
+      "non_pam_detections_classified_as_others": {
+        "overall": {
+          "rate": 0.6732673267326733,
+          "ci95": [
+            0.6245710784313726,
+            0.7161096977714461
+          ],
+          "recordings": 60,
+          "signals": 303,
+          "low_support": false
+        },
+        "by_detector_class": {
+          "AM-DSB": {
+            "rate": 0.39285714285714285,
+            "ci95": [
+              0.2549019607843137,
+              0.5081967213114754
+            ],
+            "recordings": 40,
+            "signals": 56,
+            "low_support": false
+          },
+          "AM-SSB": {
+            "rate": 0.9655172413793104,
+            "ci95": [
+              0.9137931034482759,
+              1.0
+            ],
+            "recordings": 58,
+            "signals": 58,
+            "low_support": false
+          },
+          "FM": {
+            "rate": 0.5714285714285714,
+            "ci95": [
+              0.4,
+              0.737222222222222
+            ],
+            "recordings": 23,
+            "signals": 28,
+            "low_support": true
+          },
+          "OFDM": {
+            "rate": 0.5,
+            "ci95": [
+              0.16666666666666666,
+              0.8333333333333334
+            ],
+            "recordings": 6,
+            "signals": 6,
+            "low_support": true
+          },
+          "2-FSK": {
+            "rate": 0.75,
+            "ci95": [
+              0.6199519230769232,
+              0.8720812875068195
+            ],
+            "recordings": 30,
+            "signals": 40,
+            "low_support": false
+          },
+          "2-CPFSK": {
+            "rate": 0.6730769230769231,
+            "ci95": [
+              0.5490196078431373,
+              0.7809545454545455
+            ],
+            "recordings": 33,
+            "signals": 52,
+            "low_support": false
+          },
+          "4-FSK": {
+            "rate": 0.5,
+            "ci95": [
+              0.2,
+              0.8
+            ],
+            "recordings": 10,
+            "signals": 10,
+            "low_support": true
+          },
+          "4-CPFSK": {
+            "rate": 0.7368421052631579,
+            "ci95": [
+              0.5263157894736842,
+              0.9444444444444444
+            ],
+            "recordings": 13,
+            "signals": 19,
+            "low_support": true
+          },
+          "OOK": {
+            "rate": null,
+            "ci95": [
+              null,
+              null
+            ],
+            "recordings": 0,
+            "signals": 0,
+            "low_support": true
+          },
+          "GMSK1": {
+            "rate": 0.6666666666666666,
+            "ci95": [
+              0.5172413793103449,
+              0.8102163461538461
+            ],
+            "recordings": 24,
+            "signals": 33,
+            "low_support": false
+          },
+          "GMSK2": {
+            "rate": 1.0,
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "recordings": 1,
+            "signals": 1,
+            "low_support": true
+          }
+        },
+        "by_global_snr": {
+          "[0,5)": {
+            "rate": 0.6363636363636364,
+            "ci95": [
+              0.5724806201550388,
+              0.7004133858267716
+            ],
+            "recordings": 30,
+            "signals": 132,
+            "low_support": false
+          },
+          "[10,15)": {
+            "rate": 0.6901408450704225,
+            "ci95": [
+              0.5909256745291023,
+              0.7851923076923076
+            ],
+            "recordings": 12,
+            "signals": 71,
+            "low_support": false
+          },
+          "[15,20)": {
+            "rate": 0.71,
+            "ci95": [
+              0.6323498267231421,
+              0.7772163120567376
+            ],
+            "recordings": 18,
+            "signals": 100,
+            "low_support": false
+          }
+        },
+        "counts": {
+          "others": 204,
+          "total": 303,
+          "per_non_pam_detector_class": {
+            "GMSK1": {
+              "others": 22,
+              "total": 33
+            },
+            "AM-DSB": {
+              "others": 22,
+              "total": 56
+            },
+            "2-FSK": {
+              "others": 30,
+              "total": 40
+            },
+            "AM-SSB": {
+              "others": 56,
+              "total": 58
+            },
+            "OFDM": {
+              "others": 3,
+              "total": 6
+            },
+            "2-CPFSK": {
+              "others": 35,
+              "total": 52
+            },
+            "FM": {
+              "others": 16,
+              "total": 28
+            },
+            "4-FSK": {
+              "others": 5,
+              "total": 10
+            },
+            "4-CPFSK": {
+              "others": 14,
+              "total": 19
+            },
+            "GMSK2": {
+              "others": 1,
+              "total": 1
+            }
+          }
+        }
+      },
+      "all_signal_classifier_accuracy": {
+        "accuracy": 0.6583333333333333,
+        "ci95": [
+          0.6375,
+          0.6791666666666667
+        ],
+        "recordings": 60,
+        "signals": 720,
+        "low_support": false
+      },
+      "all_signal_classifier_accuracy_by_class": {
+        "2-PSK": {
+          "accuracy": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "4-PSK": {
+          "accuracy": 0.3,
+          "ci95": [
+            0.047500000000000146,
+            0.6
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "8-PSK": {
+          "accuracy": 0.6,
+          "ci95": [
+            0.3,
+            0.9
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "16-QAM": {
+          "accuracy": 0.2,
+          "ci95": [
+            0.0,
+            0.5
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "64-QAM": {
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "256-QAM": {
+          "accuracy": 0.4,
+          "ci95": [
+            0.1,
+            0.7
+          ],
+          "recordings": 10,
+          "signals": 10,
+          "low_support": true
+        },
+        "Others": {
+          "accuracy": 0.6803030303030303,
+          "ci95": [
+            0.659810606060606,
+            0.703030303030303
+          ],
+          "recordings": 60,
+          "signals": 660,
+          "low_support": false
+        }
+      },
+      "all_classes_confusion_matrix": [
+        [
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          2,
+          0,
+          0,
+          0,
+          5
+        ],
+        [
+          0,
+          3,
+          6,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          2,
+          1,
+          5,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          6,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          3,
+          1,
+          4,
+          1
+        ],
+        [
+          4,
+          29,
+          34,
+          44,
+          33,
+          67,
+          449
+        ]
+      ],
+      "all_classes_confusion_labels": [
+        "2-PSK",
+        "4-PSK",
+        "8-PSK",
+        "16-QAM",
+        "64-QAM",
+        "256-QAM",
+        "Others"
+      ],
+      "approximate_pam_inband_snr_db": {
+        "count": 60,
+        "mean": 19.807321419015715,
+        "min": 11.243811959412808,
+        "max": 28.04858853358853
+      }
+    },
+    "end_to_end": {
+      "precision": 0.39921722113502933,
+      "precision_ci95": [
+        0.3655974025974026,
+        0.43276471309966874
+      ],
+      "recall": 0.2833333333333333,
+      "recall_ci95": [
+        0.2625,
+        0.30694444444444446
+      ],
+      "correct": 204,
+      "predictions": 511,
+      "ground_truth": 720,
+      "recordings": 60,
+      "signals": 720,
+      "low_support": false,
+      "by_global_snr_with_recording_bootstrap": {
+        "[0,5)": {
+          "precision": {
+            "estimate": 0.4247787610619469,
+            "ci95": [
+              0.3609385765467824,
+              0.49448878905779947
+            ],
+            "recordings": 30,
+            "signals": 360,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.26666666666666666,
+            "ci95": [
+              0.23055555555555557,
+              0.30291666666666656
+            ],
+            "recordings": 30,
+            "signals": 360,
+            "low_support": false
+          },
+          "recordings": 30,
+          "signals": 360,
+          "low_support": false
+        },
+        "[10,15)": {
+          "precision": {
+            "estimate": 0.3783783783783784,
+            "ci95": [
+              0.3421064814814815,
+              0.41755952380952377
+            ],
+            "recordings": 12,
+            "signals": 144,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.2916666666666667,
+            "ci95": [
+              0.2569444444444444,
+              0.3333333333333333
+            ],
+            "recordings": 12,
+            "signals": 144,
+            "low_support": false
+          },
+          "recordings": 12,
+          "signals": 144,
+          "low_support": false
+        },
+        "[15,20)": {
+          "precision": {
+            "estimate": 0.3793103448275862,
+            "ci95": [
+              0.33045748343510456,
+              0.43156556709067073
+            ],
+            "recordings": 18,
+            "signals": 216,
+            "low_support": false
+          },
+          "recall": {
+            "estimate": 0.3055555555555556,
+            "ci95": [
+              0.26851851851851855,
+              0.33796296296296297
+            ],
+            "recordings": 18,
+            "signals": 216,
+            "low_support": false
+          },
+          "recordings": 18,
+          "signals": 216,
+          "low_support": false
+        }
+      }
+    }
+  },
+  "shifted_test": {
+    "distribution": "bandwidth uniform [0.02, 0.12]; global SNR uniform [-5, 5] dB",
+    "yolo_matched_precision": {
+      "precision": 0.7419354838709677,
+      "recall": 0.4791666666666667,
+      "mean_iou_true_positives": 0.8051215128932472,
+      "tp": 69,
+      "fp": 24,
+      "fn": 75
+    },
+    "yolo_matched_precision_with_recording_bootstrap": {
+      "precision": {
+        "estimate": 0.7419354838709677,
+        "ci95": [
+          0.6774131944444445,
+          0.8131868131868132
+        ],
+        "recordings": 12,
+        "signals": 144,
+        "low_support": false
+      },
+      "recall": {
+        "estimate": 0.4791666666666667,
+        "ci95": [
+          0.4444444444444444,
+          0.5208333333333334
+        ],
+        "recordings": 12,
+        "signals": 144,
+        "low_support": false
+      },
+      "mean_iou_true_positives": {
+        "estimate": 0.8051215128932473,
+        "ci95": [
+          0.7878684142645936,
+          0.8232210661422786
+        ],
+        "recordings": 12,
+        "signals": 144,
+        "low_support": false
+      }
+    },
+    "yolo_map50": {
+      "map50": 0.3221403801277722,
+      "per_class": {
+        "AM-DSB": {
+          "estimate": 0.5183732933732934,
+          "ci95": [
+            0.36379512032085565,
+            0.8246551087801088
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "AM-SSB": {
+          "estimate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "FM": {
+          "estimate": 0.3557042372831847,
+          "ci95": [
+            0.21641292571070092,
+            0.5548237747289088
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "PAM": {
+          "estimate": 0.13105680868838765,
+          "ci95": [
+            0.027777777777777776,
+            0.3266109922624944
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "OFDM": {
+          "estimate": 0.01845238095238095,
+          "ci95": [
+            0.0012157960199004976,
+            0.08515530287672146
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "2-FSK": {
+          "estimate": 0.45894298553873025,
+          "ci95": [
+            0.31923713327693537,
+            0.7091791802967695
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "2-CPFSK": {
+          "estimate": 0.096802973472494,
+          "ci95": [
+            0.04546527650170683,
+            0.21685268390980383
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "4-FSK": {
+          "estimate": 0.36508968972204264,
+          "ci95": [
+            0.23828254872717797,
+            0.6014151324289406
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "4-CPFSK": {
+          "estimate": 0.1618317864372382,
+          "ci95": [
+            0.08972519445058054,
+            0.32228337123255024
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "OOK": {
+          "estimate": 0.3294727200733449,
+          "ci95": [
+            0.19159070338565518,
+            0.5338553697599198
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "GMSK1": {
+          "estimate": 0.338003663003663,
+          "ci95": [
+            0.12303046218487396,
+            0.6069039865114559
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "GMSK2": {
+          "estimate": 0.09195402298850575,
+          "ci95": [
+            0.03888208061002179,
+            0.17224768875192598
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        }
+      },
+      "map50_recording_bootstrap": {
+        "estimate": 0.3221403801277722,
+        "ci95": [
+          0.30541297049429933,
+          0.39512878342071855
+        ],
+        "recordings": 12,
+        "signals": 144,
+        "low_support": false
+      },
+      "per_class_with_recording_bootstrap": {
+        "AM-DSB": {
+          "estimate": 0.5183732933732934,
+          "ci95": [
+            0.36379512032085565,
+            0.8246551087801088
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "AM-SSB": {
+          "estimate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "FM": {
+          "estimate": 0.3557042372831847,
+          "ci95": [
+            0.21641292571070092,
+            0.5548237747289088
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "PAM": {
+          "estimate": 0.13105680868838765,
+          "ci95": [
+            0.027777777777777776,
+            0.3266109922624944
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "OFDM": {
+          "estimate": 0.01845238095238095,
+          "ci95": [
+            0.0012157960199004976,
+            0.08515530287672146
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "2-FSK": {
+          "estimate": 0.45894298553873025,
+          "ci95": [
+            0.31923713327693537,
+            0.7091791802967695
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "2-CPFSK": {
+          "estimate": 0.096802973472494,
+          "ci95": [
+            0.04546527650170683,
+            0.21685268390980383
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "4-FSK": {
+          "estimate": 0.36508968972204264,
+          "ci95": [
+            0.23828254872717797,
+            0.6014151324289406
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "4-CPFSK": {
+          "estimate": 0.1618317864372382,
+          "ci95": [
+            0.08972519445058054,
+            0.32228337123255024
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "OOK": {
+          "estimate": 0.3294727200733449,
+          "ci95": [
+            0.19159070338565518,
+            0.5338553697599198
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "GMSK1": {
+          "estimate": 0.338003663003663,
+          "ci95": [
+            0.12303046218487396,
+            0.6069039865114559
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "GMSK2": {
+          "estimate": 0.09195402298850575,
+          "ci95": [
+            0.03888208061002179,
+            0.17224768875192598
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        }
+      }
+    },
+    "detector_confusion_matrix": [
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        11,
+        0
+      ],
+      [
+        0,
+        12,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        9,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        8,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        7,
+        1,
+        3,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        10,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        7,
+        0,
+        3,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        10,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        11,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        11,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        11,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        9,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        8,
+        1,
+        14,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "detector_confusion_labels": [
+      "AM-DSB",
+      "AM-SSB",
+      "FM",
+      "PAM",
+      "OFDM",
+      "2-FSK",
+      "2-CPFSK",
+      "4-FSK",
+      "4-CPFSK",
+      "OOK",
+      "GMSK1",
+      "GMSK2",
+      "missed",
+      "background"
+    ],
+    "pam_subtype_confusion_matrix": [
+      [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pam_subtype_confusion_labels": [
+      "2-PSK",
+      "4-PSK",
+      "8-PSK",
+      "16-QAM",
+      "64-QAM",
+      "256-QAM",
+      "Others"
+    ],
+    "unresolved_detection_count": 48,
+    "unresolved_detections": [
+      {
+        "recording_id": "shift-000",
+        "segment_id": "shift-000-s00",
+        "prediction_index": 0,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          467.0,
+          279.00032,
+          588.00032,
+          303.00032
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-000",
+        "segment_id": "shift-000-s00",
+        "prediction_index": 1,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          312.0,
+          278.99968,
+          448.99968,
+          298.99968
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-000",
+        "segment_id": "shift-000-s00",
+        "prediction_index": 2,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          302.99968,
+          326.0,
+          402.99968,
+          354.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-000",
+        "segment_id": "shift-000-s00",
+        "prediction_index": 3,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          330.99968,
+          183.00016,
+          410.0,
+          204.00016
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-000",
+        "segment_id": "shift-000-s00",
+        "prediction_index": 4,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          316.0,
+          277.00016,
+          448.00000000000006,
+          298.00016
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-000",
+        "segment_id": "shift-000-s00",
+        "prediction_index": 5,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          326.99968000000007,
+          182.99984,
+          406.0,
+          205.99984
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-000",
+        "segment_id": "shift-000-s00",
+        "prediction_index": 6,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          298.00032,
+          328.99984000000006,
+          405.0,
+          351.99984
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-000",
+        "segment_id": "shift-000-s00",
+        "prediction_index": 7,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          462.0,
+          280.00016000000005,
+          593.00032,
+          303.00016
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-001",
+        "segment_id": "shift-001-s00",
+        "prediction_index": 2,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          266.0,
+          444.00015999999994,
+          377.00032,
+          463.00016
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-001",
+        "segment_id": "shift-001-s00",
+        "prediction_index": 6,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          262.0,
+          441.99984,
+          378.0,
+          462.99983999999995
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-002",
+        "segment_id": "shift-002-s00",
+        "prediction_index": 0,
+        "detector_class": "OFDM",
+        "xyxy_pixels": [
+          74.99968,
+          449.00016,
+          178.99968,
+          470.00015999999994
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-002",
+        "segment_id": "shift-002-s00",
+        "prediction_index": 2,
+        "detector_class": "2-CPFSK",
+        "xyxy_pixels": [
+          15.0,
+          209.99983999999998,
+          137.0,
+          230.99984
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-002",
+        "segment_id": "shift-002-s00",
+        "prediction_index": 3,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          22.999679999999998,
+          121.99983999999999,
+          106.99968,
+          142.99984
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-002",
+        "segment_id": "shift-002-s00",
+        "prediction_index": 4,
+        "detector_class": "2-CPFSK",
+        "xyxy_pixels": [
+          76.99968,
+          448.00032,
+          180.0,
+          470.00032000000004
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-002",
+        "segment_id": "shift-002-s00",
+        "prediction_index": 5,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          23.0,
+          123.00016,
+          108.99999999999999,
+          144.00016
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-002",
+        "segment_id": "shift-002-s00",
+        "prediction_index": 6,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          11.000320000000006,
+          210.00032,
+          140.0,
+          232.00032
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-003",
+        "segment_id": "shift-003-s00",
+        "prediction_index": 1,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          474.00032,
+          211.99967999999998,
+          593.0,
+          233.99968
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-003",
+        "segment_id": "shift-003-s00",
+        "prediction_index": 2,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          388.99968,
+          156.00016,
+          472.0,
+          175.00016
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-003",
+        "segment_id": "shift-003-s00",
+        "prediction_index": 5,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          391.00032,
+          154.99984,
+          468.0,
+          173.99984
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-003",
+        "segment_id": "shift-003-s00",
+        "prediction_index": 7,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          473.0,
+          211.99967999999998,
+          575.0,
+          233.99968
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-004",
+        "segment_id": "shift-004-s00",
+        "prediction_index": 0,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          534.0,
+          46.000032,
+          590.0,
+          67.00003199999999
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-004",
+        "segment_id": "shift-004-s00",
+        "prediction_index": 2,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          485.00032,
+          180.0,
+          585.00032,
+          200.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-004",
+        "segment_id": "shift-004-s00",
+        "prediction_index": 4,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          488.00031999999993,
+          179.0,
+          582.00032,
+          201.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-004",
+        "segment_id": "shift-004-s00",
+        "prediction_index": 6,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          525.0,
+          38.99999999999999,
+          595.0,
+          63.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-005",
+        "segment_id": "shift-005-s00",
+        "prediction_index": 0,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          469.99968,
+          588.9998400000001,
+          615.99968,
+          611.99984
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-005",
+        "segment_id": "shift-005-s00",
+        "prediction_index": 2,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          116.00031999999999,
+          82.00016000000002,
+          246.00032,
+          101.00016
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-005",
+        "segment_id": "shift-005-s00",
+        "prediction_index": 3,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          468.0,
+          589.9996799999999,
+          619.00032,
+          611.99968
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-005",
+        "segment_id": "shift-005-s00",
+        "prediction_index": 4,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          116.00000000000001,
+          270.99968,
+          256.0,
+          294.99968
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-005",
+        "segment_id": "shift-005-s00",
+        "prediction_index": 5,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          242.99999999999997,
+          454.99968,
+          341.0,
+          474.99968
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-005",
+        "segment_id": "shift-005-s00",
+        "prediction_index": 6,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          116.0,
+          81.00032,
+          247.99999999999997,
+          101.00032
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-005",
+        "segment_id": "shift-005-s00",
+        "prediction_index": 7,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          121.99968000000001,
+          268.99984,
+          255.99968,
+          291.99983999999995
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-005",
+        "segment_id": "shift-005-s00",
+        "prediction_index": 8,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          238.00032000000002,
+          455.0,
+          345.0,
+          477.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-006",
+        "segment_id": "shift-006-s00",
+        "prediction_index": 0,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          546.0,
+          82.0,
+          625.00032,
+          102.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-006",
+        "segment_id": "shift-006-s00",
+        "prediction_index": 1,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          548.99968,
+          82.0,
+          624.0,
+          102.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-008",
+        "segment_id": "shift-008-s00",
+        "prediction_index": 2,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          211.99968,
+          296.99968,
+          293.0,
+          320.99968
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-008",
+        "segment_id": "shift-008-s00",
+        "prediction_index": 4,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          207.00032,
+          299.0,
+          292.0,
+          321.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-009",
+        "segment_id": "shift-009-s00",
+        "prediction_index": 0,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          51.00000000000001,
+          382.0,
+          172.00032,
+          402.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-009",
+        "segment_id": "shift-009-s00",
+        "prediction_index": 2,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          303.0,
+          398.00032,
+          397.0,
+          420.00032000000004
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-009",
+        "segment_id": "shift-009-s00",
+        "prediction_index": 4,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          49.000319999999995,
+          379.99967999999996,
+          177.00032,
+          401.99968
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-009",
+        "segment_id": "shift-009-s00",
+        "prediction_index": 5,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          302.99967999999996,
+          397.99984,
+          398.99967999999996,
+          418.99983999999995
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-010",
+        "segment_id": "shift-010-s00",
+        "prediction_index": 0,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          380.0,
+          527.9998400000001,
+          512.0,
+          548.99984
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-010",
+        "segment_id": "shift-010-s00",
+        "prediction_index": 1,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          260.99968,
+          98.99968,
+          336.99968,
+          118.99968
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-010",
+        "segment_id": "shift-010-s00",
+        "prediction_index": 2,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          265.99967999999996,
+          99.00016,
+          335.0,
+          120.00016000000001
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-010",
+        "segment_id": "shift-010-s00",
+        "prediction_index": 3,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          185.99968,
+          334.99983999999995,
+          263.99967999999996,
+          353.99984000000006
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-010",
+        "segment_id": "shift-010-s00",
+        "prediction_index": 5,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          382.0,
+          526.00032,
+          510.99968,
+          548.00032
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-010",
+        "segment_id": "shift-010-s00",
+        "prediction_index": 6,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          188.99968,
+          335.00016000000005,
+          264.0,
+          356.00015999999994
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-011",
+        "segment_id": "shift-011-s00",
+        "prediction_index": 1,
+        "detector_class": "4-FSK",
+        "xyxy_pixels": [
+          440.99967999999996,
+          570.0,
+          560.99968,
+          590.0
+        ],
+        "status": "unresolved"
+      },
+      {
+        "recording_id": "shift-011",
+        "segment_id": "shift-011-s00",
+        "prediction_index": 2,
+        "detector_class": "2-FSK",
+        "xyxy_pixels": [
+          443.00032,
+          569.00016,
+          560.0,
+          590.0001599999999
+        ],
+        "status": "unresolved"
+      }
+    ],
+    "yolo_per_class_with_recording_bootstrap": {
+      "AM-DSB": {
+        "precision": {
+          "estimate": 0.3333333333333333,
+          "ci95": [
+            0.0,
+            1.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.08333333333333333,
+          "ci95": [
+            0.0,
+            0.25
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.8609952213740834,
+          "ci95": [
+            0.8609952213740834,
+            0.8609952213740834
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.5183732933732934,
+          "ci95": [
+            0.36379512032085565,
+            0.8246551087801088
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 1,
+        "fp": 2,
+        "fn": 11
+      },
+      "AM-SSB": {
+        "precision": {
+          "estimate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.820387439187607,
+          "ci95": [
+            0.7598976462947727,
+            0.8702740249842393
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 12,
+        "fp": 0,
+        "fn": 0
+      },
+      "FM": {
+        "precision": {
+          "estimate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.08333333333333333,
+          "ci95": [
+            0.0,
+            0.25
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.8969924037723926,
+          "ci95": [
+            0.8969924037723926,
+            0.8969924037723928
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.3557042372831847,
+          "ci95": [
+            0.21641292571070092,
+            0.5548237747289088
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 1,
+        "fp": 0,
+        "fn": 11
+      },
+      "PAM": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.13105680868838765,
+          "ci95": [
+            0.027777777777777776,
+            0.3266109922624944
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 12
+      },
+      "OFDM": {
+        "precision": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.01845238095238095,
+          "ci95": [
+            0.0012157960199004976,
+            0.08515530287672146
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 2,
+        "fn": 12
+      },
+      "2-FSK": {
+        "precision": {
+          "estimate": 0.23255813953488372,
+          "ci95": [
+            0.17442934782608696,
+            0.2857142857142857
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.8333333333333334,
+          "ci95": [
+            0.6666666666666666,
+            1.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.8149092527341993,
+          "ci95": [
+            0.7739899276596071,
+            0.8540249356638737
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.45894298553873025,
+          "ci95": [
+            0.31923713327693537,
+            0.7091791802967695
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 10,
+        "fp": 33,
+        "fn": 2
+      },
+      "2-CPFSK": {
+        "precision": {
+          "estimate": 0.14285714285714285,
+          "ci95": [
+            0.0,
+            0.3492424242424236
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.08333333333333333,
+          "ci95": [
+            0.0,
+            0.25
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.7576153525186137,
+          "ci95": [
+            0.7576153525186137,
+            0.7576153525186137
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.096802973472494,
+          "ci95": [
+            0.04546527650170683,
+            0.21685268390980383
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 1,
+        "fp": 6,
+        "fn": 11
+      },
+      "4-FSK": {
+        "precision": {
+          "estimate": 0.2916666666666667,
+          "ci95": [
+            0.17391304347826086,
+            0.42105263157894735
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.5833333333333334,
+          "ci95": [
+            0.3333333333333333,
+            0.8333333333333334
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.8130498552078164,
+          "ci95": [
+            0.7812241597332334,
+            0.8528611323391734
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.36508968972204264,
+          "ci95": [
+            0.23828254872717797,
+            0.6014151324289406
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 7,
+        "fp": 17,
+        "fn": 5
+      },
+      "4-CPFSK": {
+        "precision": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.1618317864372382,
+          "ci95": [
+            0.08972519445058054,
+            0.32228337123255024
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 1,
+        "fn": 12
+      },
+      "OOK": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.3294727200733449,
+          "ci95": [
+            0.19159070338565518,
+            0.5338553697599198
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 12
+      },
+      "GMSK1": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.338003663003663,
+          "ci95": [
+            0.12303046218487396,
+            0.6069039865114559
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 12
+      },
+      "GMSK2": {
+        "precision": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "recall": {
+          "estimate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "mean_iou_true_positives": {
+          "estimate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "ap50": {
+          "estimate": 0.09195402298850575,
+          "ci95": [
+            0.03888208061002179,
+            0.17224768875192598
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "tp": 0,
+        "fp": 0,
+        "fn": 12
+      }
+    },
+    "yolo_by_global_snr_with_recording_bootstrap": {
+      "[-5,0)": {
+        "precision": {
+          "estimate": 0.703125,
+          "ci95": [
+            0.6377998500749625,
+            0.7787664783427495
+          ],
+          "recordings": 8,
+          "signals": 96,
+          "low_support": false
+        },
+        "recall": {
+          "estimate": 0.46875,
+          "ci95": [
+            0.4166666666666667,
+            0.5104166666666666
+          ],
+          "recordings": 8,
+          "signals": 96,
+          "low_support": false
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.801454321293355,
+          "ci95": [
+            0.7790413873987216,
+            0.8230398047442123
+          ],
+          "recordings": 8,
+          "signals": 96,
+          "low_support": false
+        }
+      },
+      "[0,5)": {
+        "precision": {
+          "estimate": 0.8275862068965517,
+          "ci95": [
+            0.75,
+            0.9629629629629629
+          ],
+          "recordings": 4,
+          "signals": 48,
+          "low_support": false
+        },
+        "recall": {
+          "estimate": 0.5,
+          "ci95": [
+            0.4166666666666667,
+            0.5833333333333334
+          ],
+          "recordings": 4,
+          "signals": 48,
+          "low_support": false
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.8119974971430451,
+          "ci95": [
+            0.7890751426923153,
+            0.8440887933740668
+          ],
+          "recordings": 4,
+          "signals": 48,
+          "low_support": false
+        }
+      }
+    },
+    "energy_baseline_matched_precision": {
+      "precision": 0.7014925373134329,
+      "recall": 0.6527777777777778,
+      "mean_iou_true_positives": 0.7947567345761235,
+      "tp": 94,
+      "fp": 40,
+      "fn": 50
+    },
+    "energy_baseline_matched_precision_with_recording_bootstrap": {
+      "precision": {
+        "estimate": 0.7014925373134329,
+        "ci95": [
+          0.6557176470588235,
+          0.7428615196078432
+        ],
+        "recordings": 12,
+        "signals": 144,
+        "low_support": false
+      },
+      "recall": {
+        "estimate": 0.6527777777777778,
+        "ci95": [
+          0.5625,
+          0.7430555555555556
+        ],
+        "recordings": 12,
+        "signals": 144,
+        "low_support": false
+      },
+      "mean_iou_true_positives": {
+        "estimate": 0.7947567345761235,
+        "ci95": [
+          0.7649920187072328,
+          0.8158318268591108
+        ],
+        "recordings": 12,
+        "signals": 144,
+        "low_support": false
+      }
+    },
+    "energy_baseline_by_global_snr_with_recording_bootstrap": {
+      "[-5,0)": {
+        "precision": {
+          "estimate": 0.7051282051282052,
+          "ci95": [
+            0.6266666666666667,
+            0.7777777777777778
+          ],
+          "recordings": 8,
+          "signals": 96,
+          "low_support": false
+        },
+        "recall": {
+          "estimate": 0.5729166666666666,
+          "ci95": [
+            0.4479166666666667,
+            0.6770833333333334
+          ],
+          "recordings": 8,
+          "signals": 96,
+          "low_support": false
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.7770364414664294,
+          "ci95": [
+            0.7231130421108003,
+            0.8117494449440882
+          ],
+          "recordings": 8,
+          "signals": 96,
+          "low_support": false
+        }
+      },
+      "[0,5)": {
+        "precision": {
+          "estimate": 0.6964285714285714,
+          "ci95": [
+            0.6607142857142857,
+            0.7142857142857143
+          ],
+          "recordings": 4,
+          "signals": 48,
+          "low_support": false
+        },
+        "recall": {
+          "estimate": 0.8125,
+          "ci95": [
+            0.7708333333333334,
+            0.8333333333333334
+          ],
+          "recordings": 4,
+          "signals": 48,
+          "low_support": false
+        },
+        "mean_iou_true_positives": {
+          "estimate": 0.819746891525692,
+          "ci95": [
+            0.8072791466538314,
+            0.8328708334960716
+          ],
+          "recordings": 4,
+          "signals": 48,
+          "low_support": false
+        }
+      }
+    },
+    "pam_oracle_accuracy": {
+      "accuracy": 0.16666666666666666,
+      "ci95": [
+        0.0,
+        0.4166666666666667
+      ],
+      "recordings": 12,
+      "signals": 12,
+      "low_support": true
+    },
+    "pam_oracle_accuracy_by_global_snr": {
+      "[-5,0)": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 8,
+        "signals": 8,
+        "low_support": true
+      },
+      "[0,5)": {
+        "accuracy": 0.5,
+        "ci95": [
+          0.0,
+          1.0
+        ],
+        "recordings": 4,
+        "signals": 4,
+        "low_support": true
+      }
+    },
+    "pam_oracle_accuracy_by_subtype": {
+      "2-PSK": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 2,
+        "signals": 2,
+        "low_support": true
+      },
+      "4-PSK": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 2,
+        "signals": 2,
+        "low_support": true
+      },
+      "8-PSK": {
+        "accuracy": 1.0,
+        "ci95": [
+          1.0,
+          1.0
+        ],
+        "recordings": 2,
+        "signals": 2,
+        "low_support": true
+      },
+      "16-QAM": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 2,
+        "signals": 2,
+        "low_support": true
+      },
+      "64-QAM": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 2,
+        "signals": 2,
+        "low_support": true
+      },
+      "256-QAM": {
+        "accuracy": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "recordings": 2,
+        "signals": 2,
+        "low_support": true
+      }
+    },
+    "pam_detector_box_accuracy": {
+      "accuracy": null,
+      "ci95": [
+        null,
+        null
+      ],
+      "recordings": 0,
+      "signals": 0,
+      "low_support": true
+    },
+    "pam_detector_box_accuracy_by_global_snr": {},
+    "pam_detector_box_accuracy_by_subtype": {
+      "2-PSK": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "4-PSK": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "8-PSK": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "16-QAM": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "64-QAM": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      },
+      "256-QAM": {
+        "accuracy": null,
+        "ci95": [
+          null,
+          null
+        ],
+        "recordings": 0,
+        "signals": 0,
+        "low_support": true
+      }
+    },
+    "end_to_end": {
+      "precision": 0.27956989247311825,
+      "precision_ci95": [
+        0.23115384615384615,
+        0.3333333333333333
+      ],
+      "recall": 0.18055555555555555,
+      "recall_ci95": [
+        0.14913194444444447,
+        0.2152777777777778
+      ],
+      "correct": 26,
+      "predictions": 93,
+      "ground_truth": 144,
+      "recordings": 12,
+      "signals": 144,
+      "low_support": false
+    },
+    "end_to_end_by_global_snr_with_recording_bootstrap": {
+      "[-5,0)": {
+        "precision": {
+          "estimate": 0.28125,
+          "ci95": [
+            0.20967741935483872,
+            0.3442622950819672
+          ],
+          "recordings": 8,
+          "signals": 96,
+          "low_support": false
+        },
+        "recall": {
+          "estimate": 0.1875,
+          "ci95": [
+            0.13541666666666666,
+            0.22916666666666666
+          ],
+          "recordings": 8,
+          "signals": 96,
+          "low_support": false
+        },
+        "recordings": 8,
+        "signals": 96,
+        "low_support": false
+      },
+      "[0,5)": {
+        "precision": {
+          "estimate": 0.27586206896551724,
+          "ci95": [
+            0.2222222222222222,
+            0.3333333333333333
+          ],
+          "recordings": 4,
+          "signals": 48,
+          "low_support": false
+        },
+        "recall": {
+          "estimate": 0.16666666666666666,
+          "ci95": [
+            0.16666666666666666,
+            0.16666666666666666
+          ],
+          "recordings": 4,
+          "signals": 48,
+          "low_support": false
+        },
+        "recordings": 4,
+        "signals": 48,
+        "low_support": false
+      }
+    },
+    "non_pam_detections_classified_as_others": {
+      "overall": {
+        "rate": 0.6444444444444445,
+        "ci95": [
+          0.5048469387755102,
+          0.7819633152173913
+        ],
+        "recordings": 12,
+        "signals": 45,
+        "low_support": false
+      },
+      "by_detector_class": {
+        "AM-DSB": {
+          "rate": 0.3333333333333333,
+          "ci95": [
+            0.0,
+            1.0
+          ],
+          "recordings": 3,
+          "signals": 3,
+          "low_support": true
+        },
+        "AM-SSB": {
+          "rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 12,
+          "signals": 12,
+          "low_support": true
+        },
+        "FM": {
+          "rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "OFDM": {
+          "rate": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "2-FSK": {
+          "rate": 0.5,
+          "ci95": [
+            0.2631578947368421,
+            0.7272727272727273
+          ],
+          "recordings": 10,
+          "signals": 20,
+          "low_support": true
+        },
+        "2-CPFSK": {
+          "rate": 0.4,
+          "ci95": [
+            0.0,
+            0.8
+          ],
+          "recordings": 5,
+          "signals": 5,
+          "low_support": true
+        },
+        "4-FSK": {
+          "rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 2,
+          "signals": 2,
+          "low_support": true
+        },
+        "4-CPFSK": {
+          "rate": 1.0,
+          "ci95": [
+            1.0,
+            1.0
+          ],
+          "recordings": 1,
+          "signals": 1,
+          "low_support": true
+        },
+        "OOK": {
+          "rate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "GMSK1": {
+          "rate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        },
+        "GMSK2": {
+          "rate": null,
+          "ci95": [
+            null,
+            null
+          ],
+          "recordings": 0,
+          "signals": 0,
+          "low_support": true
+        }
+      },
+      "by_global_snr": {
+        "[-5,0)": {
+          "rate": 0.6538461538461539,
+          "ci95": [
+            0.4530058651026393,
+            0.8674853372434016
+          ],
+          "recordings": 8,
+          "signals": 26,
+          "low_support": true
+        },
+        "[0,5)": {
+          "rate": 0.631578947368421,
+          "ci95": [
+            0.5,
+            0.8
+          ],
+          "recordings": 4,
+          "signals": 19,
+          "low_support": true
+        }
+      }
+    }
+  },
+  "support": {
+    "main_test_recordings": 60,
+    "main_test_segments": 60,
+    "shifted_test_recordings": 12,
+    "shifted_test_segments": 12,
+    "low_support_rule": "Any per-class or per-SNR cell with fewer than 30 signals is marked low_support.",
+    "pam_zero_db_bin": "[0, 1) dB because the generator draws a continuous SNR; inspect support before interpreting."
+  },
+  "metrics_path": "results/major_project_cpu/metrics.json",
+  "cli_examples": {
+    "confidence_threshold": 0.21875284000000003,
+    "threshold_source": "selected using validation recordings only",
+    "execution_device": "cpu",
+    "scope": "Separate synthetic demonstrations; not either held-out evaluation set and not accuracy estimates.",
+    "examples": {
+      "single_16qam": {
+        "input_samples": 1000000,
+        "ground_truth_signals": 1,
+        "accepted_detections": 0,
+        "class_agnostic_iou50_matches": 0,
+        "class_and_iou50_matches": 0,
+        "pam_detections": 0,
+        "pam_subtype_predictions": 0,
+        "pam_subtype_labels": [],
+        "cli_seconds_per_segment": 29.652594599989243,
+        "outer_command_wall_seconds": 31.7443601,
+        "evaluation_test_set": false
+      },
+      "mixed_12_signal": {
+        "input_samples": 1000000,
+        "ground_truth_signals": 12,
+        "accepted_detections": 11,
+        "class_agnostic_iou50_matches": 10,
+        "class_and_iou50_matches": 6,
+        "pam_detections": 0,
+        "pam_subtype_predictions": 0,
+        "pam_subtype_labels": [],
+        "cli_seconds_per_segment": 29.89102229999844,
+        "outer_command_wall_seconds": 31.895924,
+        "evaluation_test_set": false
+      }
+    }
+  },
+  "results_title": "Synthetic 12-Class CPU Run Results"
+}
