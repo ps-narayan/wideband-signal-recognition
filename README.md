@@ -1,70 +1,7 @@
 # Wideband Signal Recognition
 
-A self-contained B.Tech major-project prototype for spectrum monitoring. It converts complex I/Q data into time-frequency boxes and modulation labels using a two-stage detector and I/Q classifier. All current training and evaluation data are generated locally with recorded seeds. The former 53.55 GiB DeepSig/Zenodo download requirement has been dropped; external recordings are not downloaded or used. No score from Vagollari et al. is presented as a project result.
+The synthetic-to-CLI pipeline runs end to end, but the reduced CPU YOLOv5n did not learn useful detections. It processes I/Q through detection, PAM classification, and JSON plus annotated-spectrogram output. Latest measured reduced CPU run: YOLOv5n trained for 135 requested epochs; recall 60.42% (recording-bootstrap CI [47.92%, 70.83%]; 4 recordings / 48 signals) and mAP@0.5 at global SNR >= 5 dB 53.63% (CI [43.68%, 69.52%]; 2 recordings / 24 signals; LOW-SUPPORT). The energy geometry baseline had higher held-out recall (62.50% vs 60.42%; CI [54.17%, 70.83%]; 4 recordings / 48 signals), but this is not a matched-precision comparison (energy precision 60.00%; YOLO precision 82.86%). Validation calibration attained the 80% precision target for YOLO: True; energy baseline: True. PAM all-signal accuracy was 37.50% (uniform seven-class chance: 1/7 = 14.29%; CI [29.17%, 45.83%]; 4 recordings / 48 signals). These are reduced CPU measurements and are not comparable to the full-scale targets; full GPU results remain unmeasured. See [DIAGNOSIS.md](DIAGNOSIS.md) for the training-only bug check and [RESULTS.md](RESULTS.md) for complete results.
 
-Reference architecture: Vagollari, Hirschbeck, and Gerstacker, “An End-to-End Deep Learning Framework for Wideband Signal Recognition,” IEEE Access, 2023. This repository uses a smaller synthetic CPU benchmark and does not claim to reproduce the paper's training scale or measured performance.
-
-The active model taxonomy is the paper's 12 detector labels (`AM-DSB`, `AM-SSB`, `FM`, `PAM`, `OFDM`, `2-FSK`, `2-CPFSK`, `4-FSK`, `4-CPFSK`, `OOK`, `GMSK1`, `GMSK2`) and a seven-label I/Q classifier (`2-PSK`, `4-PSK`, `8-PSK`, `16-QAM`, `64-QAM`, `256-QAM`, `Others`). The generator uses controlled synthetic waveforms and wideband AWGN; it is an educational approximation, not a standards-conformance or real-radio validation suite.
-
-**Measured status:** the code runs through dataset generation, YOLO training/evaluation, PAM classification, extraction and SigMF CLI output. The trained CPU detector missed its recall and mAP targets; the energy geometry baseline had higher overall main-test recall (81.39% versus 56.53%). The IoU target was met, while both PAM oracle-box accuracy targets were missed. The calibrated 16-QAM CLI sample returned zero detections, and the mixed sample returned 11 detections with no PAM label or subtype. Full GPU and external-data results are not measured.
-
-<!-- MAJOR_PROJECT_RESULTS_START -->
-**Measured run:** synthetic-only 12-class major project CPU run. Device: cpu. Synthetic data only; no DeepSig or Zenodo recordings were downloaded or used.
-
-| Acceptance target | Threshold | Measured | Recording-level 95% CI | Support | Status |
-|---|---:|---:|---:|---|---|
-| Detector recall, global SNR >= 5 dB | >= 80% | 63.06% | [59.30%, 66.94%] | 30 recordings / 360 signals | missed |
-| Mean IoU, global SNR >= 5 dB | >= 0.75 | 87.89% | [87.18%, 88.68%] | 30 recordings / 360 signals | met |
-| Class mAP@0.5, global SNR >= 5 dB | >= 60% | 41.27% | [40.95%, 45.11%] | 30 recordings / 360 signals | missed |
-| PAM oracle-box accuracy, global SNR >= 10 dB (chance 1/7 = 14.29%) | >= 80% | 46.67% | [30.00%, 63.33%] | 30 recordings / 30 signals | missed |
-| PAM oracle-box accuracy, global SNR [0, 1) dB (chance 1/7 = 14.29%) | > 50% | 36.67% | [20.00%, 53.33%] | 30 recordings / 30 signals | missed |
-| Local processing time per 1M-sample segment | < 5 seconds | 29.891 s | not applicable | Maximum measured CLI internal wall time across two local CPU synthetic SigMF examples; includes input read, spectrogram, YOLO, extraction/classification, and annotated PNG write; excludes JSON serialization. | missed |
-
-Detector training: completed (80 completed / 80 requested epochs). PAM training: completed (42 completed / 60 requested epochs).
-Measured full pipeline runtime: 2477.0320000000065 seconds; data generation: 322.6992998000351 seconds.
-The target statuses use measured point estimates. CIs and recording/signal support are shown for uncertainty; any cell below 30 signals is low-support.
-CLI smoke examples (not acceptance metrics; validation-selected threshold): single_16qam: 0 boxes, 0 PAM boxes, 0 subtype outputs; mixed_12_signal: 11 boxes, 0 PAM boxes, 0 subtype outputs.
-<!-- MAJOR_PROJECT_RESULTS_END -->
-
-## Project overview and reproduction
-
-### Problem statement
-
-Wideband monitoring needs to identify which narrowband transmissions occupy a recording, when they occur, where they sit in frequency, and what modulation family they use. This repository is a self-contained, reproducible synthetic SigMF implementation for studying that task under CPU and disk constraints. It is a scaled academic reproduction, not a reproduction of the paper's reported performance or a substitute for measured over-the-air data.
-
-### Two-stage architecture
-
-1. **Stage 1, detection and family classification.** A YOLOv5n detector receives a normalized spectrogram and predicts time-frequency boxes and one of 12 labels: AM-DSB, AM-SSB, FM, PAM, OFDM, 2-FSK, 2-CPFSK, 4-FSK, 4-CPFSK, OOK, GMSK1, or GMSK2. PSK/QAM/APSK-like signals share the visually ambiguous PAM detector label.
-2. **Stage 2, PAM subtype classification.** For PAM detections, box coordinates define a time/frequency extraction. The pipeline bandpass-filters the input I/Q, cuts the burst, downconverts to baseband, forms 1024-by-2 I/Q frames, and classifies 2-PSK, 4-PSK, 8-PSK, 16-QAM, 64-QAM, 256-QAM, or Others. The CLI reads the supplied SigMF samples; it does not need training seeds.
-
-### Repository map
-
-- configs/: reproducible run profiles.
-- src/wideband_recognition/: signal, spectrogram, detection, extraction, classifier, evaluation, and CLI code.
-- scripts/: dataset generation, training/evaluation orchestration, and result publishing.
-- tests/: physics, mapping, extraction, and pipeline checks.
-- notebooks/: optional Colab workflow.
-- results/: measured metrics, split audit, plots, and diagnostic overlays.
-- examples/: committed CLI JSON and annotated spectrogram outputs.
-- outputs/ and work/: local run products and scratch input; model weights and raw I/Q are excluded from Git.
-
-### Run the CLI
-
-From the repository root, after generating the synthetic SigMF input and creating checkpoints with the documented CPU run, use:
-
-~~~powershell
-$threshold = (Get-Content results/major_project_cpu/metrics.json -Raw | ConvertFrom-Json).validation_calibration.yolo.threshold
-python scripts/generate_synthetic_sigmf.py work/demo_16qam.sigmf-meta --layout pam16qam --seed 2026 --samples 1000000 --global-snr-db 15
-python -m wideband_recognition.cli work/demo_16qam.sigmf-meta --detector-weights outputs/major_project_cpu/checkpoints/yolov5n_best.pt --pam-weights outputs/major_project_cpu/checkpoints/pam_cnn.pt --yolo-dir work/yolov5_pinned --image-size 640 --confidence-threshold $threshold --device cpu --output-dir examples/my_run
-~~~
-
-The output directory receives a JSON detection list and an annotated spectrogram PNG. The existing Run the CLI with a trained checkpoint section below includes the multi-signal example and committed run outputs.
-
-### Measured reduced-CPU results
-
-**Label: reduced run: CPU, small data, not comparable to target.** On the frozen recording-disjoint synthetic evaluation, detector recall at global SNR >= 5 dB was 63.06% (95% recording-bootstrap CI 59.30%-66.94%; 30 recordings / 360 signals), mean IoU was 0.8789 (CI 0.8718-0.8868; same support), and class mAP@0.5 was 41.27% (CI 40.95%-45.11%; same support). PAM oracle-box accuracy was 46.67% at >=10 dB (CI 30.00%-63.33%; 30 recordings / 30 signals) and 36.67% at 0-1 dB (CI 20.00%-53.33%; 30 / 30); chance for seven classes is 14.29%. The maximum of the two measured local CLI segment times was 29.891 seconds per 1M samples. The energy baseline had 81.39% overall main-test recall versus 56.53% for YOLO. These measured results miss the stated recall, mAP, PAM accuracy, and speed targets; the IoU target was met. Full-scale GPU results remain not yet measured.
-
-See [RESULTS.md](RESULTS.md) for the complete per-class and per-SNR results, intervals, support counts, and target status; [DIAGNOSIS.md](DIAGNOSIS.md) for the failure analysis; [machine-readable metrics](results/major_project_cpu/metrics.json); and the committed [16-QAM CLI output](examples/major_project_cpu/16qam/) and [multi-signal CLI output](examples/major_project_cpu/multi/). The automated reduced-CPU publisher uses the exact REDUCED_CPU_RESULTS_START and REDUCED_CPU_RESULTS_END markers in this README.
 ## Architecture
 
 ```mermaid
@@ -151,5 +88,20 @@ Detailed per-class and per-SNR results, confidence intervals, supports, confusio
 
 ## Automated Reduced-CPU Workflow Status
 <!-- REDUCED_CPU_RESULTS_START -->
+
+**Run:** reduced run: CPU, small data, not comparable to target. Performance target status is not comparable due to reduced support. The full GPU run via the optional Colab notebook is still unmeasured.
+
+| Acceptance metric | Target | Reduced CPU measured | 95% recording-bootstrap CI | Support | Status |
+|---|---:|---:|---:|---|---|
+| Detector recall, global SNR >= 5 dB | >= 80% | 66.67% | [58.33%, 75.00%] | 2 recordings / 24 signals; LOW-SUPPORT | not comparable |
+| Mean IoU, global SNR >= 5 dB | >= 75% | 86.17% | [84.65%, 87.34%] | 2 recordings / 24 signals; LOW-SUPPORT | not comparable |
+| Class mAP@0.5, global SNR >= 5 dB | >= 60% | 53.63% | [43.68%, 69.52%] | 2 recordings / 24 signals; LOW-SUPPORT | not comparable |
+| PAM oracle accuracy (chance 1/7 = 14.29%), global SNR >= 10 dB | >= 80% | 50.00% | [0.00%, 100.00%] | 2 recordings / 2 signals; LOW-SUPPORT | not comparable |
+| PAM oracle accuracy (chance 1/7 = 14.29%), global SNR [0, 1) dB | > 50% | 0.00% | [0.00%, 0.00%] | 1 recordings / 1 signals; LOW-SUPPORT | not comparable |
+| Owner's local processing time per 1M samples | < 5 seconds | not measured | not applicable | owner measurement pending | not comparable |
+
+Main test support: 4 recordings / 4 segments; shifted test: 4 recordings / 4 segments.
+
+See [RESULTS.md](RESULTS.md), [the measured metrics JSON](results/reduced_cpu/metrics.json), and [the recording split audit](results/reduced_cpu/split_audit.json) for per-class/per-SNR CIs, support, confusion matrices, split IDs, and plots. Cells under 30 signals are LOW-SUPPORT.
 <!-- REDUCED_CPU_RESULTS_END -->
 
